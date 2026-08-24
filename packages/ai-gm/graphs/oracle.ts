@@ -3,7 +3,7 @@
 // Answers a yes/no question about the fiction using probability shading
 // informed by chaos level and active fronts.
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { buildGraph, invokeGraph } from "./base.ts";
 import type { IInjectOptions } from "../context/injector.ts";
 import { buildInjectedPrompt } from "../context/injector.ts";
@@ -18,7 +18,7 @@ export type OracleProbability =
   | "very-unlikely"
   | "impossible";
 
-export function buildOracleGraph(model: ChatGoogleGenerativeAI) {
+export function buildOracleGraph(model: BaseChatModel) {
   return buildGraph(model);
 }
 

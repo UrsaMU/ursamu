@@ -109,13 +109,17 @@ This is **MUX-style**, not a full TinyMUX 2.12 comsys port:
 - No channel **economy** (no charge, balance, or paid speech)
 - `@clist/full` shows name, flags (H/M/L/A), owner, connected users
 - One join/speak **lock** string, not full MUX multi-lock attrs
+  (same key language as object locks: flags, `admin+`,
+  `|` / `&`, `flag()` / `perm()` / `attr()` — see
+  in-game `+help staff/locks`)
 - No CHAN* softcode attributes on channel objects
 
 Breaking changes after 1.0 will require a major version bump.
 
 ### Help
 
-In-game: `+help channels`, `+help player`, `+help staff`.
+In-game: `+help channels`, `+help player`, `+help staff`,
+`+help staff/locks` (join/speak keys and recipes).
 
 ### Develop
 

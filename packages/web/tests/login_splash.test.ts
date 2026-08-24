@@ -76,6 +76,24 @@ Deno.test("renderSplash: markdown uses play-md classes", OPTS, () => {
   assertStringIncludes(html, "<strong>bold</strong>");
 });
 
+Deno.test("renderSplash: fenced code becomes play-md pre/code", OPTS, () => {
+  const html = renderSplash(
+    "# Login\n\n```bash\nconnect Wizard secret\ncreate Runner pass\n```\n\nGo.",
+  );
+  assertStringIncludes(html, 'class="play-md__pre"');
+  assertStringIncludes(html, 'class="play-md__code"');
+  assertStringIncludes(html, "connect Wizard secret");
+  assertStringIncludes(html, "create Runner pass");
+  assertEquals(html.includes("```"), false);
+  // fence lang tag not echoed as content
+  assertEquals(/bash/.test(html.replace(/play-md__\w+/g, "")), false);
+});
+
+Deno.test("renderSplash: blank lines preserved inside fence", OPTS, () => {
+  const html = renderSplash("```\nline1\n\nline3\n```");
+  assertStringIncludes(html, "line1\n\nline3");
+});
+
 Deno.test(
   "renderSplash: center+md gets play-md--center",
   OPTS,

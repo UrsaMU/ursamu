@@ -84,12 +84,19 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
 
   async create(data: T): Promise<T> {
     const store = await TypeGraphAdapter.getStore();
-    await store.nodes.Document.upsertById(this.docId(data.id), {
+    // Callers sometimes omit id (legacy DBO/KV habit). Typegraph
+    // Document.originalId is required string — mint one if missing.
+    const rawId = (data as { id?: unknown }).id;
+    const id = typeof rawId === "string" && rawId.trim()
+      ? rawId.trim()
+      : crypto.randomUUID();
+    const record = { ...data, id } as T;
+    await store.nodes.Document.upsertById(this.docId(id), {
       namespace: this.namespace,
-      originalId: data.id,
-      content: JSON.stringify(data),
+      originalId: id,
+      content: JSON.stringify(record),
     });
-    return data;
+    return record;
   }
 
   async query(query?: Query<T>): Promise<T[]> {

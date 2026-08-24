@@ -367,16 +367,19 @@
   padding: 0;
 }
 
-/* ── Content images (wiki/md ![alt](url)) — not avatars ───────────── */
-
+/* ── Content images (wiki/md ![alt](url)) — not avatars ─────────────
+ * Full column width. Themes set object-fit / height bands (termv
+ * uses cover + sep rails). Do not cap at 300px or force contain —
+ * that breaks full-bleed stage art.
+ */
 .site-section__body img:not([class*="avatar"]),
 .wiki-body img:not([class*="avatar"]) {
   display: block;
   width: 100%;
   max-width: 100%;
   height: auto;
-  max-height: 300px;
-  object-fit: contain;
+  max-height: none;
+  object-fit: cover;
   margin: 0.75rem 0 1rem;
 }
 
@@ -1195,4 +1198,191 @@
   gap: 0.75rem;
 }
 
+/* ── Media seps (Termv-2) ─────────────────────────────────────────
+ * Hairline TAIL + native bracket CAP. Never stretch sep-*.svg.
+ *
+ *   top:    [======== hairline ========][sep-top ▶]
+ *           left:0 · right:25px open · cap on RIGHT (auto × 15)
+ *   bottom: [◀ sep-bottom][======== hairline ========]
+ *           left:25px open · right:0 · cap on LEFT
+ *
+ * Themes set --site-sep-top / --site-sep-bottom (default none).
+ * Banner / logo (.site-media--banner): seps forced OFF.
+ */
+.site-media,
+.image-wrap,
+.site-section__body .site-media,
+.site-section__body .image-wrap,
+.site-section__body figure,
+.site-section__body p:has(> img:only-child) {
+  --_sep-h: var(--site-sep-h, 15px);
+  --_sep-br: var(--site-sep-bracket-w, 53px);
+  --_sep-line: var(--site-sep-line-color, rgba(255, 255, 255, 0.5));
+  --_sep-in: var(--site-sep-inset-end, 25px);
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  box-sizing: border-box;
+  line-height: 0;
+}
+
+.site-media > img,
+.image-wrap > img,
+.site-section__body .site-media img,
+.site-section__body .image-wrap img,
+.site-section__body figure img,
+.site-section__body p:has(> img:only-child) > img {
+  position: relative;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+  box-sizing: border-box;
+  object-fit: cover;
+}
+
+/* Top — hairline tail + sep-top cap; open 25px on the right */
+.site-media:not(.site-media--banner)::before,
+.image-wrap:not(.site-media--banner)::before,
+.site-section__body figure::before,
+.site-section__body p:has(> img:only-child)::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: var(--_sep-in);
+  top: var(--site-sep-top-offset, -7px);
+  height: var(--_sep-h);
+  pointer-events: none;
+  z-index: var(--site-sep-z, 5);
+  background-image:
+    linear-gradient(var(--_sep-line), var(--_sep-line)),
+    var(--site-sep-top, none);
+  background-repeat: no-repeat;
+  background-size:
+    calc(100% - var(--_sep-br)) 1px,
+    auto var(--_sep-h);
+  background-position:
+    left bottom,
+    right center;
+}
+
+/* Bottom — sep-bottom cap + hairline tail; open 25px on the left */
+.site-media:not(.site-media--banner)::after,
+.image-wrap:not(.site-media--banner)::after,
+.site-section__body figure::after,
+.site-section__body p:has(> img:only-child)::after {
+  content: "";
+  position: absolute;
+  left: var(--_sep-in);
+  right: 0;
+  bottom: var(--site-sep-bottom-offset, -7px);
+  height: calc(
+    var(--_sep-h) + var(--site-sep-bottom-tail-offset, 0px)
+  );
+  pointer-events: none;
+  z-index: var(--site-sep-z, 5);
+  background-image:
+    linear-gradient(var(--_sep-line), var(--_sep-line)),
+    var(--site-sep-bottom, none);
+  background-repeat: no-repeat;
+  background-size:
+    calc(100% - var(--_sep-br)) 1px,
+    auto var(--_sep-h);
+  background-position:
+    right var(--site-sep-bottom-tail-offset, 0px),
+    left bottom;
+}
+
+/* Logo / hero wordmark — full main width, NEVER seps */
+.site-media--banner,
+.site-banner .site-media--banner,
+.site-banner .site-media.site-media--banner {
+  display: block;
+  width: 100%;
+  max-width: min(100%, var(--site-main-max, 720px));
+  margin: 0 auto;
+  padding: 0;
+}
+
+.site-media--banner > img,
+.site-banner .site-media--banner img,
+.site-banner .site-media > .site-banner__img,
+.site-banner .site-media > img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  object-fit: contain;
+}
+
+.site-media--banner::before,
+.site-media--banner::after,
+.site-banner .site-media--banner::before,
+.site-banner .site-media--banner::after,
+.site-banner .site-media.site-media--banner::before,
+.site-banner .site-media.site-media--banner::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+/*
+ * Character portrait — same stretched seps as content media.
+ */
+.site-media--portrait,
+.termv-char__portrait.site-media,
+.termv-char__portrait.image-wrap,
+.site-section__body .termv-char__portrait {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 0.5rem;
+  padding: 0 !important;
+  position: relative;
+  isolation: isolate;
+  display: block;
+  box-sizing: border-box;
+  line-height: 0;
+}
+
+.site-media--portrait > img,
+.termv-char__portrait > img,
+.termv-char__portrait.site-media > img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: var(--site-portrait-ratio, 180 / 240);
+  object-fit: cover;
+  object-position: center top;
+  margin: 0;
+  position: relative;
+  z-index: 0;
+}
+
+/*
+ * Avatars / icons — NEVER seps (nav chip, account menu, circular
+ * profile headshot). Distinct from the character portrait frame.
+ */
+.site-media--avatar::before,
+.site-media--avatar::after,
+.site-profile-avatar.site-media::before,
+.site-profile-avatar.site-media::after,
+.site-profile-avatar .site-media::before,
+.site-profile-avatar .site-media::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+/* Hide legacy bar markup if an older inject left it around */
+.site-sep-bar,
+.site-sep__rail,
+.site-media > .site-sep {
+  display: none !important;
+}
 

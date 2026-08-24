@@ -51,8 +51,10 @@ export function renderInv(
 
 export async function execPlusInv(u: IUrsamuSDK): Promise<void> {
   const ref = u.util.stripSubs(u.cmd.args[0] ?? "").trim();
+  // Bare +inv / +i → own inventory (same as `inventory`)
   if (!ref) {
-    u.send("Usage: +i <player>");
+    const { execInventory } = await import("../home.ts");
+    await execInventory(u);
     return;
   }
 

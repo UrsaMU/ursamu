@@ -2,7 +2,7 @@
 
 import "./commands.ts";
 import { registerPluginRoute } from "@ursamu/mush";
-import { registerHelpDir } from "@ursamu/help-plugin";
+import { registerHelpDir } from "@ursamu/help/register";
 import { getAllBuckets, getBucketStaffIds, jobAccess } from "./db.ts";
 import type { IPlugin } from "@ursamu/mush";
 import { jobsRouteHandler } from "./router.ts";

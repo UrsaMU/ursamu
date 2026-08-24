@@ -1,0 +1,4082 @@
+{
+  "commoner": {
+    "slug": "commoner",
+    "name": "Commoner",
+    "cr": "0",
+    "xp": 10,
+    "hp": 4,
+    "ac": 10,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 10,
+      "constitution": 10,
+      "intelligence": 10,
+      "wisdom": 10,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Club",
+      "damage": "1d4",
+      "damageType": "bludgeoning"
+    },
+    "drops": [
+      {
+        "item": "Copper Coins",
+        "chance": 0.5,
+        "type": "general",
+        "formula": "2d4"
+      }
+    ]
+  },
+  "rat": {
+    "slug": "rat",
+    "name": "Rat",
+    "cr": "0",
+    "xp": 10,
+    "hp": 1,
+    "ac": 10,
+    "abilities": {
+      "strength": 2,
+      "dexterity": 11,
+      "constitution": 9,
+      "intelligence": 2,
+      "wisdom": 10,
+      "charisma": 4
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1",
+      "damageType": "piercing"
+    }
+  },
+  "raven": {
+    "slug": "raven",
+    "name": "Raven",
+    "cr": "0",
+    "xp": 10,
+    "hp": 1,
+    "ac": 12,
+    "abilities": {
+      "strength": 2,
+      "dexterity": 14,
+      "constitution": 8,
+      "intelligence": 2,
+      "wisdom": 12,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Beak",
+      "damage": "1",
+      "damageType": "piercing"
+    }
+  },
+  "bandit": {
+    "slug": "bandit",
+    "name": "Bandit",
+    "cr": "1/8",
+    "xp": 25,
+    "hp": 11,
+    "ac": 12,
+    "abilities": {
+      "strength": 11,
+      "dexterity": 12,
+      "constitution": 12,
+      "intelligence": 10,
+      "wisdom": 10,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Scimitar",
+      "damage": "1d6",
+      "damageType": "slashing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Scimitar",
+        "chance": 0.4,
+        "type": "weapon:1d6:slashing:finesse"
+      },
+      {
+        "item": "Leather Armor",
+        "chance": 0.3,
+        "type": "armor:11:light"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.8,
+        "type": "general",
+        "formula": "2d4"
+      }
+    ]
+  },
+  "cultist": {
+    "slug": "cultist",
+    "name": "Cultist",
+    "cr": "1/8",
+    "xp": 25,
+    "hp": 9,
+    "ac": 12,
+    "abilities": {
+      "strength": 11,
+      "dexterity": 12,
+      "constitution": 10,
+      "intelligence": 10,
+      "wisdom": 11,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Scimitar",
+      "damage": "1d6",
+      "damageType": "slashing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Cult Symbol",
+        "chance": 0.5,
+        "type": "general"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.6,
+        "type": "general",
+        "formula": "1d6"
+      }
+    ]
+  },
+  "flying_snake": {
+    "slug": "flying_snake",
+    "name": "Flying Snake",
+    "cr": "1/8",
+    "xp": 25,
+    "hp": 5,
+    "ac": 14,
+    "abilities": {
+      "strength": 4,
+      "dexterity": 18,
+      "constitution": 11,
+      "intelligence": 2,
+      "wisdom": 12,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1",
+      "damageType": "piercing"
+    }
+  },
+  "kobold": {
+    "slug": "kobold",
+    "name": "Kobold",
+    "cr": "1/8",
+    "xp": 25,
+    "hp": 5,
+    "ac": 12,
+    "abilities": {
+      "strength": 7,
+      "dexterity": 15,
+      "constitution": 9,
+      "intelligence": 8,
+      "wisdom": 7,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Dagger",
+      "damage": "1d4",
+      "damageType": "piercing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Dagger",
+        "chance": 0.5,
+        "type": "weapon:1d4:piercing:finesse,thrown"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.5,
+        "type": "general",
+        "formula": "1d4"
+      }
+    ]
+  },
+  "poisonous_snake": {
+    "slug": "poisonous_snake",
+    "name": "Poisonous Snake",
+    "cr": "1/8",
+    "xp": 25,
+    "hp": 2,
+    "ac": 13,
+    "abilities": {
+      "strength": 2,
+      "dexterity": 16,
+      "constitution": 11,
+      "intelligence": 1,
+      "wisdom": 10,
+      "charisma": 3
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1",
+      "damageType": "piercing"
+    }
+  },
+  "stirge": {
+    "slug": "stirge",
+    "name": "Stirge",
+    "cr": "1/8",
+    "xp": 25,
+    "hp": 2,
+    "ac": 14,
+    "abilities": {
+      "strength": 4,
+      "dexterity": 16,
+      "constitution": 11,
+      "intelligence": 2,
+      "wisdom": 8,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Blood Drain",
+      "damage": "1d4",
+      "damageType": "piercing",
+      "finesse": true
+    }
+  },
+  "twig_blight": {
+    "slug": "twig_blight",
+    "name": "Twig Blight",
+    "cr": "1/8",
+    "xp": 25,
+    "hp": 4,
+    "ac": 13,
+    "abilities": {
+      "strength": 6,
+      "dexterity": 13,
+      "constitution": 12,
+      "intelligence": 4,
+      "wisdom": 8,
+      "charisma": 3
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claws",
+      "damage": "1d4",
+      "damageType": "piercing"
+    }
+  },
+  "acolyte": {
+    "slug": "acolyte",
+    "name": "Acolyte",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 9,
+    "ac": 10,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 10,
+      "constitution": 10,
+      "intelligence": 10,
+      "wisdom": 14,
+      "charisma": 11
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Club",
+      "damage": "1d4",
+      "damageType": "bludgeoning"
+    },
+    "drops": [
+      {
+        "item": "Holy Symbol",
+        "chance": 0.6,
+        "type": "general"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.5,
+        "type": "general",
+        "formula": "2d6"
+      }
+    ],
+    "spells": [
+      "sacred_flame",
+      "cure_wounds"
+    ]
+  },
+  "blink_dog": {
+    "slug": "blink_dog",
+    "name": "Blink Dog",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 22,
+    "ac": 13,
+    "abilities": {
+      "strength": 12,
+      "dexterity": 17,
+      "constitution": 12,
+      "intelligence": 10,
+      "wisdom": 13,
+      "charisma": 11
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d6",
+      "damageType": "piercing"
+    }
+  },
+  "boar": {
+    "slug": "boar",
+    "name": "Boar",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 11,
+    "ac": 11,
+    "abilities": {
+      "strength": 13,
+      "dexterity": 11,
+      "constitution": 12,
+      "intelligence": 2,
+      "wisdom": 9,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Tusk",
+      "damage": "1d6",
+      "damageType": "slashing"
+    }
+  },
+  "constrictor_snake": {
+    "slug": "constrictor_snake",
+    "name": "Constrictor Snake",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 13,
+    "ac": 12,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 14,
+      "constitution": 12,
+      "intelligence": 1,
+      "wisdom": 10,
+      "charisma": 3
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d6",
+      "damageType": "piercing"
+    }
+  },
+  "draft_horse": {
+    "slug": "draft_horse",
+    "name": "Draft Horse",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 19,
+    "ac": 10,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 10,
+      "constitution": 12,
+      "intelligence": 2,
+      "wisdom": 11,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Hooves",
+      "damage": "2d4",
+      "damageType": "bludgeoning"
+    }
+  },
+  "drow": {
+    "slug": "drow",
+    "name": "Drow",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 13,
+    "ac": 15,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 14,
+      "constitution": 10,
+      "intelligence": 11,
+      "wisdom": 11,
+      "charisma": 12
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Shortsword",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Shortsword",
+        "chance": 0.5,
+        "type": "weapon:1d6:piercing:finesse"
+      },
+      {
+        "item": "Hand Crossbow",
+        "chance": 0.3,
+        "type": "weapon:1d6:piercing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "2d6"
+      }
+    ]
+  },
+  "elf_scout": {
+    "slug": "elf_scout",
+    "name": "Elf Scout",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 16,
+    "ac": 13,
+    "abilities": {
+      "strength": 11,
+      "dexterity": 14,
+      "constitution": 12,
+      "intelligence": 11,
+      "wisdom": 13,
+      "charisma": 11
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Shortsword",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Longbow",
+        "chance": 0.4,
+        "type": "weapon:1d8:piercing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.6,
+        "type": "general",
+        "formula": "2d6"
+      }
+    ]
+  },
+  "flying_sword": {
+    "slug": "flying_sword",
+    "name": "Flying Sword",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 17,
+    "ac": 17,
+    "abilities": {
+      "strength": 12,
+      "dexterity": 15,
+      "constitution": 11,
+      "intelligence": 1,
+      "wisdom": 5,
+      "charisma": 1
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Longsword",
+      "damage": "1d8",
+      "damageType": "slashing"
+    }
+  },
+  "giant_frog": {
+    "slug": "giant_frog",
+    "name": "Giant Frog",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 18,
+    "ac": 11,
+    "abilities": {
+      "strength": 12,
+      "dexterity": 13,
+      "constitution": 11,
+      "intelligence": 2,
+      "wisdom": 10,
+      "charisma": 3
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d6",
+      "damageType": "piercing"
+    }
+  },
+  "giant_wolf_spider": {
+    "slug": "giant_wolf_spider",
+    "name": "Giant Wolf Spider",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 11,
+    "ac": 13,
+    "abilities": {
+      "strength": 12,
+      "dexterity": 16,
+      "constitution": 13,
+      "intelligence": 3,
+      "wisdom": 12,
+      "charisma": 4
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "finesse": true
+    }
+  },
+  "goblin": {
+    "slug": "goblin",
+    "name": "Goblin",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 7,
+    "ac": 15,
+    "abilities": {
+      "strength": 8,
+      "dexterity": 14,
+      "constitution": 10,
+      "intelligence": 10,
+      "wisdom": 8,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Scimitar",
+      "damage": "1d6",
+      "damageType": "slashing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Dagger",
+        "chance": 0.5,
+        "type": "weapon:1d4:piercing:finesse,thrown"
+      },
+      {
+        "item": "Gold Ring",
+        "chance": 0.3,
+        "type": "general"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.8,
+        "type": "general",
+        "formula": "2d6"
+      }
+    ]
+  },
+  "grimlock": {
+    "slug": "grimlock",
+    "name": "Grimlock",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 11,
+    "ac": 11,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 12,
+      "constitution": 12,
+      "intelligence": 9,
+      "wisdom": 8,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Spiked Bone Club",
+      "damage": "1d4",
+      "damageType": "bludgeoning"
+    }
+  },
+  "kenku": {
+    "slug": "kenku",
+    "name": "Kenku",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 13,
+    "ac": 13,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 16,
+      "constitution": 10,
+      "intelligence": 11,
+      "wisdom": 10,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Shortsword",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Gold Coins",
+        "chance": 0.5,
+        "type": "general",
+        "formula": "2d4"
+      }
+    ]
+  },
+  "pseudodragon": {
+    "slug": "pseudodragon",
+    "name": "Pseudodragon",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 7,
+    "ac": 13,
+    "abilities": {
+      "strength": 6,
+      "dexterity": 15,
+      "constitution": 13,
+      "intelligence": 10,
+      "wisdom": 12,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Sting",
+      "damage": "1d4",
+      "damageType": "piercing",
+      "finesse": true
+    }
+  },
+  "pteranodon": {
+    "slug": "pteranodon",
+    "name": "Pteranodon",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 13,
+    "ac": 13,
+    "abilities": {
+      "strength": 12,
+      "dexterity": 15,
+      "constitution": 10,
+      "intelligence": 2,
+      "wisdom": 9,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d4",
+      "damageType": "piercing"
+    }
+  },
+  "riding_horse": {
+    "slug": "riding_horse",
+    "name": "Riding Horse",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 13,
+    "ac": 10,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 10,
+      "constitution": 12,
+      "intelligence": 2,
+      "wisdom": 11,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Hooves",
+      "damage": "2d4",
+      "damageType": "bludgeoning"
+    }
+  },
+  "skeleton": {
+    "slug": "skeleton",
+    "name": "Skeleton",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 13,
+    "ac": 13,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 14,
+      "constitution": 15,
+      "intelligence": 6,
+      "wisdom": 8,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Shortsword",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Shortsword",
+        "chance": 0.4,
+        "type": "weapon:1d6:piercing:finesse"
+      },
+      {
+        "item": "Shortbow",
+        "chance": 0.3,
+        "type": "weapon:1d6:piercing"
+      }
+    ]
+  },
+  "sprite": {
+    "slug": "sprite",
+    "name": "Sprite",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 2,
+    "ac": 15,
+    "abilities": {
+      "strength": 3,
+      "dexterity": 18,
+      "constitution": 10,
+      "intelligence": 14,
+      "wisdom": 13,
+      "charisma": 11
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Longsword",
+      "damage": "1d1",
+      "damageType": "slashing",
+      "finesse": true
+    }
+  },
+  "steam_mephit": {
+    "slug": "steam_mephit",
+    "name": "Steam Mephit",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 21,
+    "ac": 10,
+    "abilities": {
+      "strength": 5,
+      "dexterity": 11,
+      "constitution": 10,
+      "intelligence": 11,
+      "wisdom": 10,
+      "charisma": 12
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claws",
+      "damage": "1d4",
+      "damageType": "slashing",
+      "finesse": true
+    }
+  },
+  "wolf": {
+    "slug": "wolf",
+    "name": "Wolf",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 11,
+    "ac": 13,
+    "abilities": {
+      "strength": 12,
+      "dexterity": 15,
+      "constitution": 12,
+      "intelligence": 3,
+      "wisdom": 12,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d4",
+      "damageType": "piercing"
+    }
+  },
+  "zombie": {
+    "slug": "zombie",
+    "name": "Zombie",
+    "cr": "1/4",
+    "xp": 50,
+    "hp": 22,
+    "ac": 8,
+    "abilities": {
+      "strength": 13,
+      "dexterity": 6,
+      "constitution": 16,
+      "intelligence": 3,
+      "wisdom": 6,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Slam",
+      "damage": "1d6",
+      "damageType": "bludgeoning"
+    },
+    "drops": [
+      {
+        "item": "Tattered Clothes",
+        "chance": 0.2,
+        "type": "general"
+      }
+    ]
+  },
+  "black_bear": {
+    "slug": "black_bear",
+    "name": "Black Bear",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 19,
+    "ac": 11,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 10,
+      "constitution": 14,
+      "intelligence": 2,
+      "wisdom": 12,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d6",
+      "damageType": "piercing"
+    }
+  },
+  "crocodile": {
+    "slug": "crocodile",
+    "name": "Crocodile",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 19,
+    "ac": 12,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 10,
+      "constitution": 13,
+      "intelligence": 2,
+      "wisdom": 10,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d10",
+      "damageType": "piercing"
+    }
+  },
+  "giant_goat": {
+    "slug": "giant_goat",
+    "name": "Giant Goat",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 19,
+    "ac": 11,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 11,
+      "constitution": 12,
+      "intelligence": 3,
+      "wisdom": 12,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Ram",
+      "damage": "2d4",
+      "damageType": "bludgeoning"
+    }
+  },
+  "giant_wasp": {
+    "slug": "giant_wasp",
+    "name": "Giant Wasp",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 13,
+    "ac": 12,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 14,
+      "constitution": 10,
+      "intelligence": 1,
+      "wisdom": 10,
+      "charisma": 3
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Sting",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "finesse": true
+    }
+  },
+  "gnoll": {
+    "slug": "gnoll",
+    "name": "Gnoll",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 22,
+    "ac": 15,
+    "abilities": {
+      "strength": 14,
+      "dexterity": 12,
+      "constitution": 11,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Spear",
+      "damage": "1d6",
+      "damageType": "piercing"
+    },
+    "drops": [
+      {
+        "item": "Spear",
+        "chance": 0.5,
+        "type": "weapon:1d6:piercing"
+      },
+      {
+        "item": "Hide Armor",
+        "chance": 0.3,
+        "type": "armor:12:medium"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "2d6"
+      }
+    ]
+  },
+  "hobgoblin": {
+    "slug": "hobgoblin",
+    "name": "Hobgoblin",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 11,
+    "ac": 18,
+    "abilities": {
+      "strength": 13,
+      "dexterity": 12,
+      "constitution": 12,
+      "intelligence": 10,
+      "wisdom": 10,
+      "charisma": 9
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Longsword",
+      "damage": "1d8",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Longsword",
+        "chance": 0.5,
+        "type": "weapon:1d8:slashing"
+      },
+      {
+        "item": "Longbow",
+        "chance": 0.4,
+        "type": "weapon:1d8:piercing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "2d8"
+      }
+    ]
+  },
+  "lizardfolk": {
+    "slug": "lizardfolk",
+    "name": "Lizardfolk",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 22,
+    "ac": 15,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 10,
+      "constitution": 13,
+      "intelligence": 7,
+      "wisdom": 12,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Heavy Club",
+      "damage": "1d6",
+      "damageType": "bludgeoning"
+    },
+    "drops": [
+      {
+        "item": "Spiked Shield",
+        "chance": 0.3,
+        "type": "shield:2"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.5,
+        "type": "general",
+        "formula": "2d4"
+      }
+    ]
+  },
+  "magmin": {
+    "slug": "magmin",
+    "name": "Magmin",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 9,
+    "ac": 14,
+    "abilities": {
+      "strength": 7,
+      "dexterity": 15,
+      "constitution": 12,
+      "intelligence": 8,
+      "wisdom": 11,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Touch",
+      "damage": "1d6",
+      "damageType": "fire"
+    }
+  },
+  "orc": {
+    "slug": "orc",
+    "name": "Orc",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 15,
+    "ac": 13,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 12,
+      "constitution": 16,
+      "intelligence": 7,
+      "wisdom": 11,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Greataxe",
+      "damage": "1d12",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Greataxe",
+        "chance": 0.6,
+        "type": "weapon:1d12:slashing"
+      },
+      {
+        "item": "Hide Armor",
+        "chance": 0.4,
+        "type": "armor:12:medium"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.8,
+        "type": "general",
+        "formula": "3d6"
+      }
+    ]
+  },
+  "reef_shark": {
+    "slug": "reef_shark",
+    "name": "Reef Shark",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 22,
+    "ac": 12,
+    "abilities": {
+      "strength": 14,
+      "dexterity": 13,
+      "constitution": 13,
+      "intelligence": 1,
+      "wisdom": 10,
+      "charisma": 4
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d8",
+      "damageType": "piercing"
+    }
+  },
+  "satyr": {
+    "slug": "satyr",
+    "name": "Satyr",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 31,
+    "ac": 14,
+    "abilities": {
+      "strength": 12,
+      "dexterity": 16,
+      "constitution": 11,
+      "intelligence": 12,
+      "wisdom": 10,
+      "charisma": 14
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Shortsword",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Pan Pipes",
+        "chance": 0.4,
+        "type": "general"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.5,
+        "type": "general",
+        "formula": "2d6"
+      }
+    ]
+  },
+  "scout": {
+    "slug": "scout",
+    "name": "Scout",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 16,
+    "ac": 13,
+    "abilities": {
+      "strength": 11,
+      "dexterity": 14,
+      "constitution": 12,
+      "intelligence": 11,
+      "wisdom": 13,
+      "charisma": 11
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Shortsword",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Longbow",
+        "chance": 0.5,
+        "type": "weapon:1d8:piercing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "2d6"
+      }
+    ]
+  },
+  "shadow": {
+    "slug": "shadow",
+    "name": "Shadow",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 16,
+    "ac": 12,
+    "abilities": {
+      "strength": 6,
+      "dexterity": 14,
+      "constitution": 13,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Strength Drain",
+      "damage": "2d6",
+      "damageType": "necrotic",
+      "finesse": true
+    }
+  },
+  "worg": {
+    "slug": "worg",
+    "name": "Worg",
+    "cr": "1/2",
+    "xp": 100,
+    "hp": 26,
+    "ac": 13,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 13,
+      "constitution": 13,
+      "intelligence": 7,
+      "wisdom": 11,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d6",
+      "damageType": "piercing"
+    }
+  },
+  "animated_armor": {
+    "slug": "animated_armor",
+    "name": "Animated Armor",
+    "cr": "1",
+    "xp": 200,
+    "hp": 33,
+    "ac": 18,
+    "abilities": {
+      "strength": 14,
+      "dexterity": 11,
+      "constitution": 13,
+      "intelligence": 1,
+      "wisdom": 3,
+      "charisma": 1
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Slam",
+      "damage": "1d6",
+      "damageType": "bludgeoning"
+    }
+  },
+  "brass_dragon_wyrmling": {
+    "slug": "brass_dragon_wyrmling",
+    "name": "Brass Dragon Wyrmling",
+    "cr": "1",
+    "xp": 200,
+    "hp": 16,
+    "ac": 16,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 10,
+      "constitution": 13,
+      "intelligence": 10,
+      "wisdom": 11,
+      "charisma": 13
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d10",
+      "damageType": "piercing"
+    }
+  },
+  "brown_bear": {
+    "slug": "brown_bear",
+    "name": "Brown Bear",
+    "cr": "1",
+    "xp": 200,
+    "hp": 34,
+    "ac": 11,
+    "abilities": {
+      "strength": 19,
+      "dexterity": 10,
+      "constitution": 16,
+      "intelligence": 2,
+      "wisdom": 13,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d8",
+      "damageType": "piercing"
+    }
+  },
+  "bugbear": {
+    "slug": "bugbear",
+    "name": "Bugbear",
+    "cr": "1",
+    "xp": 200,
+    "hp": 27,
+    "ac": 16,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 14,
+      "constitution": 13,
+      "intelligence": 8,
+      "wisdom": 11,
+      "charisma": 9
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Morningstar",
+      "damage": "2d8",
+      "damageType": "piercing"
+    },
+    "drops": [
+      {
+        "item": "Morningstar",
+        "chance": 0.5,
+        "type": "weapon:1d8:piercing"
+      },
+      {
+        "item": "Javelin",
+        "chance": 0.4,
+        "type": "weapon:1d6:piercing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "3d6"
+      }
+    ]
+  },
+  "death_dog": {
+    "slug": "death_dog",
+    "name": "Death Dog",
+    "cr": "1",
+    "xp": 200,
+    "hp": 39,
+    "ac": 12,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 14,
+      "constitution": 14,
+      "intelligence": 3,
+      "wisdom": 13,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d6",
+      "damageType": "piercing"
+    }
+  },
+  "dire_wolf": {
+    "slug": "dire_wolf",
+    "name": "Dire Wolf",
+    "cr": "1",
+    "xp": 200,
+    "hp": 37,
+    "ac": 14,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 15,
+      "constitution": 15,
+      "intelligence": 3,
+      "wisdom": 12,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d6",
+      "damageType": "piercing"
+    }
+  },
+  "dryad": {
+    "slug": "dryad",
+    "name": "Dryad",
+    "cr": "1",
+    "xp": 200,
+    "hp": 22,
+    "ac": 11,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 12,
+      "constitution": 11,
+      "intelligence": 14,
+      "wisdom": 15,
+      "charisma": 18
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Club",
+      "damage": "1d4",
+      "damageType": "bludgeoning"
+    },
+    "spells": [
+      "entangle",
+      "goodberry"
+    ]
+  },
+  "ghoul": {
+    "slug": "ghoul",
+    "name": "Ghoul",
+    "cr": "1",
+    "xp": 200,
+    "hp": 22,
+    "ac": 12,
+    "abilities": {
+      "strength": 13,
+      "dexterity": 15,
+      "constitution": 10,
+      "intelligence": 7,
+      "wisdom": 10,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d6",
+      "damageType": "piercing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Gold Coins",
+        "chance": 0.3,
+        "type": "general",
+        "formula": "1d6"
+      }
+    ]
+  },
+  "giant_eagle": {
+    "slug": "giant_eagle",
+    "name": "Giant Eagle",
+    "cr": "1",
+    "xp": 200,
+    "hp": 26,
+    "ac": 13,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 17,
+      "constitution": 13,
+      "intelligence": 8,
+      "wisdom": 14,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Beak",
+      "damage": "1d6",
+      "damageType": "piercing"
+    }
+  },
+  "giant_hyena": {
+    "slug": "giant_hyena",
+    "name": "Giant Hyena",
+    "cr": "1",
+    "xp": 200,
+    "hp": 45,
+    "ac": 12,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 14,
+      "constitution": 14,
+      "intelligence": 2,
+      "wisdom": 12,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d6",
+      "damageType": "piercing"
+    }
+  },
+  "giant_octopus": {
+    "slug": "giant_octopus",
+    "name": "Giant Octopus",
+    "cr": "1",
+    "xp": 200,
+    "hp": 52,
+    "ac": 11,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 13,
+      "constitution": 13,
+      "intelligence": 4,
+      "wisdom": 10,
+      "charisma": 4
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Tentacles",
+      "damage": "2d6",
+      "damageType": "bludgeoning"
+    }
+  },
+  "giant_spider": {
+    "slug": "giant_spider",
+    "name": "Giant Spider",
+    "cr": "1",
+    "xp": 200,
+    "hp": 26,
+    "ac": 14,
+    "abilities": {
+      "strength": 14,
+      "dexterity": 16,
+      "constitution": 12,
+      "intelligence": 2,
+      "wisdom": 11,
+      "charisma": 4
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d8",
+      "damageType": "piercing",
+      "finesse": true
+    }
+  },
+  "giant_toad": {
+    "slug": "giant_toad",
+    "name": "Giant Toad",
+    "cr": "1",
+    "xp": 200,
+    "hp": 39,
+    "ac": 11,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 13,
+      "constitution": 13,
+      "intelligence": 2,
+      "wisdom": 10,
+      "charisma": 3
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d10",
+      "damageType": "piercing"
+    }
+  },
+  "giant_vulture": {
+    "slug": "giant_vulture",
+    "name": "Giant Vulture",
+    "cr": "1",
+    "xp": 200,
+    "hp": 22,
+    "ac": 10,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 10,
+      "constitution": 15,
+      "intelligence": 6,
+      "wisdom": 12,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Beak",
+      "damage": "2d4",
+      "damageType": "piercing"
+    }
+  },
+  "harpy": {
+    "slug": "harpy",
+    "name": "Harpy",
+    "cr": "1",
+    "xp": 200,
+    "hp": 38,
+    "ac": 11,
+    "abilities": {
+      "strength": 12,
+      "dexterity": 13,
+      "constitution": 12,
+      "intelligence": 7,
+      "wisdom": 10,
+      "charisma": 13
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claws",
+      "damage": "2d4",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Gold Coins",
+        "chance": 0.5,
+        "type": "general",
+        "formula": "2d8"
+      }
+    ]
+  },
+  "hippogriff": {
+    "slug": "hippogriff",
+    "name": "Hippogriff",
+    "cr": "1",
+    "xp": 200,
+    "hp": 19,
+    "ac": 11,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 13,
+      "constitution": 13,
+      "intelligence": 2,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Beak",
+      "damage": "1d10",
+      "damageType": "piercing"
+    }
+  },
+  "imp": {
+    "slug": "imp",
+    "name": "Imp",
+    "cr": "1",
+    "xp": 200,
+    "hp": 10,
+    "ac": 13,
+    "abilities": {
+      "strength": 6,
+      "dexterity": 17,
+      "constitution": 13,
+      "intelligence": 11,
+      "wisdom": 12,
+      "charisma": 14
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Sting",
+      "damage": "1d4",
+      "damageType": "piercing",
+      "finesse": true
+    }
+  },
+  "lion": {
+    "slug": "lion",
+    "name": "Lion",
+    "cr": "1",
+    "xp": 200,
+    "hp": 26,
+    "ac": 12,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 15,
+      "constitution": 13,
+      "intelligence": 3,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d8",
+      "damageType": "piercing"
+    }
+  },
+  "quasit": {
+    "slug": "quasit",
+    "name": "Quasit",
+    "cr": "1",
+    "xp": 200,
+    "hp": 7,
+    "ac": 13,
+    "abilities": {
+      "strength": 5,
+      "dexterity": 17,
+      "constitution": 10,
+      "intelligence": 7,
+      "wisdom": 10,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claws",
+      "damage": "1d4",
+      "damageType": "slashing",
+      "finesse": true
+    }
+  },
+  "specter": {
+    "slug": "specter",
+    "name": "Specter",
+    "cr": "1",
+    "xp": 200,
+    "hp": 22,
+    "ac": 12,
+    "abilities": {
+      "strength": 1,
+      "dexterity": 14,
+      "constitution": 11,
+      "intelligence": 10,
+      "wisdom": 10,
+      "charisma": 11
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Life Drain",
+      "damage": "3d6",
+      "damageType": "necrotic"
+    }
+  },
+  "spy": {
+    "slug": "spy",
+    "name": "Spy",
+    "cr": "1",
+    "xp": 200,
+    "hp": 27,
+    "ac": 12,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 15,
+      "constitution": 10,
+      "intelligence": 12,
+      "wisdom": 14,
+      "charisma": 16
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Shortsword",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Hand Crossbow",
+        "chance": 0.4,
+        "type": "weapon:1d6:piercing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.8,
+        "type": "general",
+        "formula": "3d6"
+      },
+      {
+        "item": "Thieves' Tools",
+        "chance": 0.3,
+        "type": "general"
+      }
+    ]
+  },
+  "tiger": {
+    "slug": "tiger",
+    "name": "Tiger",
+    "cr": "1",
+    "xp": 200,
+    "hp": 37,
+    "ac": 12,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 15,
+      "constitution": 14,
+      "intelligence": 3,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d10",
+      "damageType": "piercing"
+    }
+  },
+  "ankheg": {
+    "slug": "ankheg",
+    "name": "Ankheg",
+    "cr": "2",
+    "xp": 450,
+    "hp": 39,
+    "ac": 14,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 11,
+      "constitution": 13,
+      "intelligence": 1,
+      "wisdom": 13,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d6",
+      "damageType": "slashing"
+    }
+  },
+  "azer": {
+    "slug": "azer",
+    "name": "Azer",
+    "cr": "2",
+    "xp": 450,
+    "hp": 39,
+    "ac": 17,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 12,
+      "constitution": 15,
+      "intelligence": 12,
+      "wisdom": 13,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Warhammer",
+      "damage": "1d8",
+      "damageType": "bludgeoning"
+    },
+    "drops": [
+      {
+        "item": "Warhammer",
+        "chance": 0.4,
+        "type": "weapon:1d8:bludgeoning"
+      }
+    ]
+  },
+  "bandit_captain": {
+    "slug": "bandit_captain",
+    "name": "Bandit Captain",
+    "cr": "2",
+    "xp": 450,
+    "hp": 65,
+    "ac": 15,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 16,
+      "constitution": 14,
+      "intelligence": 14,
+      "wisdom": 11,
+      "charisma": 14
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Scimitar",
+      "damage": "1d6",
+      "damageType": "slashing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Scimitar",
+        "chance": 0.6,
+        "type": "weapon:1d6:slashing:finesse"
+      },
+      {
+        "item": "Dagger",
+        "chance": 0.5,
+        "type": "weapon:1d4:piercing:finesse"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.9,
+        "type": "general",
+        "formula": "4d6"
+      }
+    ]
+  },
+  "berserker": {
+    "slug": "berserker",
+    "name": "Berserker",
+    "cr": "2",
+    "xp": 450,
+    "hp": 67,
+    "ac": 13,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 12,
+      "constitution": 17,
+      "intelligence": 9,
+      "wisdom": 11,
+      "charisma": 9
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Greataxe",
+      "damage": "1d12",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Greataxe",
+        "chance": 0.5,
+        "type": "weapon:1d12:slashing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "3d6"
+      }
+    ]
+  },
+  "centaur": {
+    "slug": "centaur",
+    "name": "Centaur",
+    "cr": "2",
+    "xp": 450,
+    "hp": 45,
+    "ac": 12,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 14,
+      "constitution": 14,
+      "intelligence": 9,
+      "wisdom": 13,
+      "charisma": 11
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Pike",
+      "damage": "1d10",
+      "damageType": "piercing"
+    },
+    "drops": [
+      {
+        "item": "Longbow",
+        "chance": 0.4,
+        "type": "weapon:1d8:piercing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.5,
+        "type": "general",
+        "formula": "2d8"
+      }
+    ]
+  },
+  "cult_fanatic": {
+    "slug": "cult_fanatic",
+    "name": "Cult Fanatic",
+    "cr": "2",
+    "xp": 450,
+    "hp": 33,
+    "ac": 13,
+    "abilities": {
+      "strength": 11,
+      "dexterity": 14,
+      "constitution": 12,
+      "intelligence": 10,
+      "wisdom": 13,
+      "charisma": 14
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Dagger",
+      "damage": "1d4",
+      "damageType": "piercing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Holy Symbol",
+        "chance": 0.5,
+        "type": "general"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "3d6"
+      }
+    ],
+    "spells": [
+      "sacred_flame",
+      "command",
+      "hold_person"
+    ]
+  },
+  "druid": {
+    "slug": "druid",
+    "name": "Druid",
+    "cr": "2",
+    "xp": 450,
+    "hp": 27,
+    "ac": 11,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 12,
+      "constitution": 13,
+      "intelligence": 12,
+      "wisdom": 15,
+      "charisma": 11
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Quarterstaff",
+      "damage": "1d6",
+      "damageType": "bludgeoning"
+    },
+    "drops": [
+      {
+        "item": "Quarterstaff",
+        "chance": 0.4,
+        "type": "weapon:1d6:bludgeoning"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.5,
+        "type": "general",
+        "formula": "2d6"
+      }
+    ],
+    "spells": [
+      "produce_flame",
+      "entangle",
+      "thunderwave",
+      "moonbeam"
+    ]
+  },
+  "ettercap": {
+    "slug": "ettercap",
+    "name": "Ettercap",
+    "cr": "2",
+    "xp": 450,
+    "hp": 44,
+    "ac": 13,
+    "abilities": {
+      "strength": 14,
+      "dexterity": 15,
+      "constitution": 13,
+      "intelligence": 7,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d8",
+      "damageType": "piercing",
+      "finesse": true
+    }
+  },
+  "gargoyle": {
+    "slug": "gargoyle",
+    "name": "Gargoyle",
+    "cr": "2",
+    "xp": 450,
+    "hp": 52,
+    "ac": 15,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 11,
+      "constitution": 16,
+      "intelligence": 6,
+      "wisdom": 11,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d6",
+      "damageType": "piercing"
+    }
+  },
+  "gelatinous_cube": {
+    "slug": "gelatinous_cube",
+    "name": "Gelatinous Cube",
+    "cr": "2",
+    "xp": 450,
+    "hp": 84,
+    "ac": 6,
+    "abilities": {
+      "strength": 14,
+      "dexterity": 3,
+      "constitution": 20,
+      "intelligence": 1,
+      "wisdom": 6,
+      "charisma": 1
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Pseudopod",
+      "damage": "3d6",
+      "damageType": "acid"
+    }
+  },
+  "ghast": {
+    "slug": "ghast",
+    "name": "Ghast",
+    "cr": "2",
+    "xp": 450,
+    "hp": 36,
+    "ac": 13,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 17,
+      "constitution": 10,
+      "intelligence": 11,
+      "wisdom": 10,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d8",
+      "damageType": "piercing"
+    }
+  },
+  "giant_boar": {
+    "slug": "giant_boar",
+    "name": "Giant Boar",
+    "cr": "2",
+    "xp": 450,
+    "hp": 42,
+    "ac": 12,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 10,
+      "constitution": 16,
+      "intelligence": 2,
+      "wisdom": 7,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Tusk",
+      "damage": "2d6",
+      "damageType": "slashing"
+    }
+  },
+  "giant_constrictor_snake": {
+    "slug": "giant_constrictor_snake",
+    "name": "Giant Constrictor Snake",
+    "cr": "2",
+    "xp": 450,
+    "hp": 60,
+    "ac": 12,
+    "abilities": {
+      "strength": 19,
+      "dexterity": 14,
+      "constitution": 12,
+      "intelligence": 1,
+      "wisdom": 10,
+      "charisma": 3
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d6",
+      "damageType": "piercing"
+    }
+  },
+  "giant_elk": {
+    "slug": "giant_elk",
+    "name": "Giant Elk",
+    "cr": "2",
+    "xp": 450,
+    "hp": 42,
+    "ac": 14,
+    "abilities": {
+      "strength": 19,
+      "dexterity": 16,
+      "constitution": 14,
+      "intelligence": 7,
+      "wisdom": 14,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Ram",
+      "damage": "2d6",
+      "damageType": "bludgeoning"
+    }
+  },
+  "gibbering_mouther": {
+    "slug": "gibbering_mouther",
+    "name": "Gibbering Mouther",
+    "cr": "2",
+    "xp": 450,
+    "hp": 67,
+    "ac": 9,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 8,
+      "constitution": 16,
+      "intelligence": 3,
+      "wisdom": 10,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bites",
+      "damage": "5d6",
+      "damageType": "piercing"
+    }
+  },
+  "githzerai_monk": {
+    "slug": "githzerai_monk",
+    "name": "Githzerai Monk",
+    "cr": "2",
+    "xp": 450,
+    "hp": 38,
+    "ac": 14,
+    "abilities": {
+      "strength": 12,
+      "dexterity": 15,
+      "constitution": 12,
+      "intelligence": 13,
+      "wisdom": 14,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Unarmed Strike",
+      "damage": "1d8",
+      "damageType": "bludgeoning",
+      "finesse": true
+    }
+  },
+  "grick": {
+    "slug": "grick",
+    "name": "Grick",
+    "cr": "2",
+    "xp": 450,
+    "hp": 27,
+    "ac": 14,
+    "abilities": {
+      "strength": 14,
+      "dexterity": 14,
+      "constitution": 11,
+      "intelligence": 3,
+      "wisdom": 14,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Tentacles",
+      "damage": "2d6",
+      "damageType": "slashing"
+    }
+  },
+  "griffon": {
+    "slug": "griffon",
+    "name": "Griffon",
+    "cr": "2",
+    "xp": 450,
+    "hp": 59,
+    "ac": 12,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 15,
+      "constitution": 16,
+      "intelligence": 2,
+      "wisdom": 13,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Beak",
+      "damage": "1d8",
+      "damageType": "piercing"
+    }
+  },
+  "hunter_shark": {
+    "slug": "hunter_shark",
+    "name": "Hunter Shark",
+    "cr": "2",
+    "xp": 450,
+    "hp": 45,
+    "ac": 12,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 13,
+      "constitution": 15,
+      "intelligence": 1,
+      "wisdom": 10,
+      "charisma": 4
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d8",
+      "damageType": "piercing"
+    }
+  },
+  "mimic": {
+    "slug": "mimic",
+    "name": "Mimic",
+    "cr": "2",
+    "xp": 450,
+    "hp": 58,
+    "ac": 12,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 12,
+      "constitution": 15,
+      "intelligence": 5,
+      "wisdom": 13,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d8",
+      "damageType": "piercing"
+    }
+  },
+  "minotaur_skeleton": {
+    "slug": "minotaur_skeleton",
+    "name": "Minotaur Skeleton",
+    "cr": "2",
+    "xp": 450,
+    "hp": 67,
+    "ac": 12,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 11,
+      "constitution": 15,
+      "intelligence": 6,
+      "wisdom": 8,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Greataxe",
+      "damage": "2d12",
+      "damageType": "slashing"
+    }
+  },
+  "ogre": {
+    "slug": "ogre",
+    "name": "Ogre",
+    "cr": "2",
+    "xp": 450,
+    "hp": 59,
+    "ac": 11,
+    "abilities": {
+      "strength": 19,
+      "dexterity": 8,
+      "constitution": 16,
+      "intelligence": 5,
+      "wisdom": 7,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Greatclub",
+      "damage": "2d8",
+      "damageType": "bludgeoning"
+    },
+    "drops": [
+      {
+        "item": "Greatclub",
+        "chance": 0.5,
+        "type": "weapon:1d8:bludgeoning"
+      },
+      {
+        "item": "Javelin",
+        "chance": 0.4,
+        "type": "weapon:1d6:piercing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.8,
+        "type": "general",
+        "formula": "3d8"
+      }
+    ]
+  },
+  "pegasus": {
+    "slug": "pegasus",
+    "name": "Pegasus",
+    "cr": "2",
+    "xp": 450,
+    "hp": 59,
+    "ac": 12,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 15,
+      "constitution": 16,
+      "intelligence": 10,
+      "wisdom": 15,
+      "charisma": 13
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Hooves",
+      "damage": "2d6",
+      "damageType": "bludgeoning"
+    }
+  },
+  "peryton": {
+    "slug": "peryton",
+    "name": "Peryton",
+    "cr": "2",
+    "xp": 450,
+    "hp": 33,
+    "ac": 13,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 12,
+      "constitution": 13,
+      "intelligence": 9,
+      "wisdom": 12,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Gore",
+      "damage": "1d8",
+      "damageType": "piercing"
+    }
+  },
+  "plesiosaurus": {
+    "slug": "plesiosaurus",
+    "name": "Plesiosaurus",
+    "cr": "2",
+    "xp": 450,
+    "hp": 68,
+    "ac": 13,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 15,
+      "constitution": 16,
+      "intelligence": 2,
+      "wisdom": 12,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "3d6",
+      "damageType": "piercing"
+    }
+  },
+  "polar_bear": {
+    "slug": "polar_bear",
+    "name": "Polar Bear",
+    "cr": "2",
+    "xp": 450,
+    "hp": 42,
+    "ac": 12,
+    "abilities": {
+      "strength": 20,
+      "dexterity": 10,
+      "constitution": 16,
+      "intelligence": 2,
+      "wisdom": 13,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d8",
+      "damageType": "piercing"
+    }
+  },
+  "priest": {
+    "slug": "priest",
+    "name": "Priest",
+    "cr": "2",
+    "xp": 450,
+    "hp": 27,
+    "ac": 13,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 10,
+      "constitution": 12,
+      "intelligence": 13,
+      "wisdom": 16,
+      "charisma": 13
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Mace",
+      "damage": "1d6",
+      "damageType": "bludgeoning"
+    },
+    "drops": [
+      {
+        "item": "Mace",
+        "chance": 0.4,
+        "type": "weapon:1d6:bludgeoning"
+      },
+      {
+        "item": "Holy Symbol",
+        "chance": 0.6,
+        "type": "general"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "3d6"
+      }
+    ],
+    "spells": [
+      "sacred_flame",
+      "guiding_bolt",
+      "cure_wounds",
+      "spirit_guardians"
+    ]
+  },
+  "quaggoth": {
+    "slug": "quaggoth",
+    "name": "Quaggoth",
+    "cr": "2",
+    "xp": 450,
+    "hp": 45,
+    "ac": 13,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 12,
+      "constitution": 16,
+      "intelligence": 6,
+      "wisdom": 12,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claws",
+      "damage": "1d6",
+      "damageType": "slashing"
+    }
+  },
+  "rhinoceros": {
+    "slug": "rhinoceros",
+    "name": "Rhinoceros",
+    "cr": "2",
+    "xp": 450,
+    "hp": 45,
+    "ac": 11,
+    "abilities": {
+      "strength": 21,
+      "dexterity": 8,
+      "constitution": 15,
+      "intelligence": 2,
+      "wisdom": 12,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Gore",
+      "damage": "2d8",
+      "damageType": "bludgeoning"
+    }
+  },
+  "rug_of_smothering": {
+    "slug": "rug_of_smothering",
+    "name": "Rug of Smothering",
+    "cr": "2",
+    "xp": 450,
+    "hp": 33,
+    "ac": 12,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 14,
+      "constitution": 10,
+      "intelligence": 1,
+      "wisdom": 3,
+      "charisma": 1
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Smother",
+      "damage": "2d6",
+      "damageType": "bludgeoning"
+    }
+  },
+  "saber_toothed_tiger": {
+    "slug": "saber_toothed_tiger",
+    "name": "Saber-Toothed Tiger",
+    "cr": "2",
+    "xp": 450,
+    "hp": 52,
+    "ac": 12,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 14,
+      "constitution": 15,
+      "intelligence": 3,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d10",
+      "damageType": "piercing"
+    }
+  },
+  "sea_hag": {
+    "slug": "sea_hag",
+    "name": "Sea Hag",
+    "cr": "2",
+    "xp": 450,
+    "hp": 52,
+    "ac": 14,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 13,
+      "constitution": 16,
+      "intelligence": 12,
+      "wisdom": 12,
+      "charisma": 13
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claws",
+      "damage": "2d6",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Gold Coins",
+        "chance": 0.6,
+        "type": "general",
+        "formula": "3d6"
+      }
+    ]
+  },
+  "silver_dragon_wyrmling": {
+    "slug": "silver_dragon_wyrmling",
+    "name": "Silver Dragon Wyrmling",
+    "cr": "2",
+    "xp": 450,
+    "hp": 45,
+    "ac": 17,
+    "abilities": {
+      "strength": 19,
+      "dexterity": 10,
+      "constitution": 17,
+      "intelligence": 12,
+      "wisdom": 11,
+      "charisma": 15
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d10",
+      "damageType": "piercing"
+    }
+  },
+  "swarm_of_poisonous_snakes": {
+    "slug": "swarm_of_poisonous_snakes",
+    "name": "Swarm of Poisonous Snakes",
+    "cr": "2",
+    "xp": 450,
+    "hp": 36,
+    "ac": 14,
+    "abilities": {
+      "strength": 8,
+      "dexterity": 18,
+      "constitution": 11,
+      "intelligence": 1,
+      "wisdom": 10,
+      "charisma": 3
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bites",
+      "damage": "2d6",
+      "damageType": "piercing"
+    }
+  },
+  "worg_alpha": {
+    "slug": "worg_alpha",
+    "name": "Worg Alpha",
+    "cr": "2",
+    "xp": 450,
+    "hp": 45,
+    "ac": 14,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 14,
+      "constitution": 14,
+      "intelligence": 7,
+      "wisdom": 12,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d8",
+      "damageType": "piercing"
+    }
+  },
+  "will_o_wisp": {
+    "slug": "will_o_wisp",
+    "name": "Will-o'-Wisp",
+    "cr": "2",
+    "xp": 450,
+    "hp": 22,
+    "ac": 19,
+    "abilities": {
+      "strength": 1,
+      "dexterity": 28,
+      "constitution": 10,
+      "intelligence": 13,
+      "wisdom": 14,
+      "charisma": 11
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Shock",
+      "damage": "2d8",
+      "damageType": "lightning"
+    }
+  },
+  "basilisk": {
+    "slug": "basilisk",
+    "name": "Basilisk",
+    "cr": "3",
+    "xp": 700,
+    "hp": 52,
+    "ac": 15,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 8,
+      "constitution": 15,
+      "intelligence": 2,
+      "wisdom": 8,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d6",
+      "damageType": "piercing"
+    }
+  },
+  "bearded_devil": {
+    "slug": "bearded_devil",
+    "name": "Bearded Devil",
+    "cr": "3",
+    "xp": 700,
+    "hp": 52,
+    "ac": 13,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 15,
+      "constitution": 15,
+      "intelligence": 9,
+      "wisdom": 11,
+      "charisma": 11
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Glaive",
+      "damage": "1d10",
+      "damageType": "slashing"
+    }
+  },
+  "blue_dragon_wyrmling": {
+    "slug": "blue_dragon_wyrmling",
+    "name": "Blue Dragon Wyrmling",
+    "cr": "3",
+    "xp": 700,
+    "hp": 52,
+    "ac": 17,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 10,
+      "constitution": 15,
+      "intelligence": 12,
+      "wisdom": 11,
+      "charisma": 15
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d10",
+      "damageType": "piercing"
+    }
+  },
+  "doppelganger": {
+    "slug": "doppelganger",
+    "name": "Doppelganger",
+    "cr": "3",
+    "xp": 700,
+    "hp": 52,
+    "ac": 14,
+    "abilities": {
+      "strength": 11,
+      "dexterity": 18,
+      "constitution": 14,
+      "intelligence": 11,
+      "wisdom": 12,
+      "charisma": 14
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Slam",
+      "damage": "1d6",
+      "damageType": "bludgeoning"
+    },
+    "drops": [
+      {
+        "item": "Gold Coins",
+        "chance": 0.6,
+        "type": "general",
+        "formula": "3d8"
+      }
+    ]
+  },
+  "giant_scorpion": {
+    "slug": "giant_scorpion",
+    "name": "Giant Scorpion",
+    "cr": "3",
+    "xp": 700,
+    "hp": 52,
+    "ac": 15,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 13,
+      "constitution": 15,
+      "intelligence": 1,
+      "wisdom": 9,
+      "charisma": 3
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claw",
+      "damage": "1d8",
+      "damageType": "bludgeoning"
+    }
+  },
+  "green_hag": {
+    "slug": "green_hag",
+    "name": "Green Hag",
+    "cr": "3",
+    "xp": 700,
+    "hp": 82,
+    "ac": 17,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 12,
+      "constitution": 16,
+      "intelligence": 13,
+      "wisdom": 14,
+      "charisma": 14
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claws",
+      "damage": "2d8",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "4d6"
+      }
+    ]
+  },
+  "hell_hound": {
+    "slug": "hell_hound",
+    "name": "Hell Hound",
+    "cr": "3",
+    "xp": 700,
+    "hp": 45,
+    "ac": 15,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 12,
+      "constitution": 14,
+      "intelligence": 6,
+      "wisdom": 13,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d8",
+      "damageType": "piercing"
+    }
+  },
+  "killer_whale": {
+    "slug": "killer_whale",
+    "name": "Killer Whale",
+    "cr": "3",
+    "xp": 700,
+    "hp": 90,
+    "ac": 12,
+    "abilities": {
+      "strength": 19,
+      "dexterity": 10,
+      "constitution": 13,
+      "intelligence": 3,
+      "wisdom": 12,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "5d6",
+      "damageType": "piercing"
+    }
+  },
+  "knight": {
+    "slug": "knight",
+    "name": "Knight",
+    "cr": "3",
+    "xp": 700,
+    "hp": 52,
+    "ac": 18,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 11,
+      "constitution": 14,
+      "intelligence": 11,
+      "wisdom": 11,
+      "charisma": 15
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Greatsword",
+      "damage": "2d6",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Greatsword",
+        "chance": 0.5,
+        "type": "weapon:2d6:slashing"
+      },
+      {
+        "item": "Heavy Crossbow",
+        "chance": 0.3,
+        "type": "weapon:1d10:piercing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.8,
+        "type": "general",
+        "formula": "4d6"
+      }
+    ]
+  },
+  "manticore": {
+    "slug": "manticore",
+    "name": "Manticore",
+    "cr": "3",
+    "xp": 700,
+    "hp": 68,
+    "ac": 14,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 16,
+      "constitution": 17,
+      "intelligence": 7,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d8",
+      "damageType": "piercing"
+    }
+  },
+  "minotaur": {
+    "slug": "minotaur",
+    "name": "Minotaur",
+    "cr": "3",
+    "xp": 700,
+    "hp": 76,
+    "ac": 14,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 11,
+      "constitution": 16,
+      "intelligence": 6,
+      "wisdom": 16,
+      "charisma": 9
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Greataxe",
+      "damage": "2d12",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Greataxe",
+        "chance": 0.5,
+        "type": "weapon:2d12:slashing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "3d8"
+      }
+    ]
+  },
+  "mummy": {
+    "slug": "mummy",
+    "name": "Mummy",
+    "cr": "3",
+    "xp": 700,
+    "hp": 58,
+    "ac": 11,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 8,
+      "constitution": 15,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 12
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Rotting Fist",
+      "damage": "2d6",
+      "damageType": "bludgeoning"
+    }
+  },
+  "nightmare": {
+    "slug": "nightmare",
+    "name": "Nightmare",
+    "cr": "3",
+    "xp": 700,
+    "hp": 68,
+    "ac": 13,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 15,
+      "constitution": 16,
+      "intelligence": 10,
+      "wisdom": 13,
+      "charisma": 15
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Hooves",
+      "damage": "2d8",
+      "damageType": "bludgeoning"
+    }
+  },
+  "owlbear": {
+    "slug": "owlbear",
+    "name": "Owlbear",
+    "cr": "3",
+    "xp": 700,
+    "hp": 59,
+    "ac": 13,
+    "abilities": {
+      "strength": 20,
+      "dexterity": 12,
+      "constitution": 17,
+      "intelligence": 3,
+      "wisdom": 12,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Beak",
+      "damage": "1d10",
+      "damageType": "piercing"
+    }
+  },
+  "phase_spider": {
+    "slug": "phase_spider",
+    "name": "Phase Spider",
+    "cr": "3",
+    "xp": 700,
+    "hp": 32,
+    "ac": 13,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 15,
+      "constitution": 12,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d10",
+      "damageType": "piercing",
+      "finesse": true
+    }
+  },
+  "veteran": {
+    "slug": "veteran",
+    "name": "Veteran",
+    "cr": "3",
+    "xp": 700,
+    "hp": 58,
+    "ac": 17,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 13,
+      "constitution": 14,
+      "intelligence": 10,
+      "wisdom": 11,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Longsword",
+      "damage": "1d8",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Longsword",
+        "chance": 0.5,
+        "type": "weapon:1d8:slashing"
+      },
+      {
+        "item": "Shortsword",
+        "chance": 0.4,
+        "type": "weapon:1d6:piercing:finesse"
+      },
+      {
+        "item": "Heavy Crossbow",
+        "chance": 0.3,
+        "type": "weapon:1d10:piercing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.9,
+        "type": "general",
+        "formula": "4d8"
+      }
+    ]
+  },
+  "werewolf": {
+    "slug": "werewolf",
+    "name": "Werewolf",
+    "cr": "3",
+    "xp": 700,
+    "hp": 58,
+    "ac": 12,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 13,
+      "constitution": 14,
+      "intelligence": 10,
+      "wisdom": 11,
+      "charisma": 10
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d8",
+      "damageType": "piercing"
+    },
+    "drops": [
+      {
+        "item": "Gold Coins",
+        "chance": 0.5,
+        "type": "general",
+        "formula": "2d8"
+      }
+    ]
+  },
+  "wight": {
+    "slug": "wight",
+    "name": "Wight",
+    "cr": "3",
+    "xp": 700,
+    "hp": 45,
+    "ac": 14,
+    "abilities": {
+      "strength": 15,
+      "dexterity": 14,
+      "constitution": 16,
+      "intelligence": 10,
+      "wisdom": 13,
+      "charisma": 15
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Longsword",
+      "damage": "1d8",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Longsword",
+        "chance": 0.4,
+        "type": "weapon:1d8:slashing"
+      },
+      {
+        "item": "Longbow",
+        "chance": 0.3,
+        "type": "weapon:1d8:piercing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.6,
+        "type": "general",
+        "formula": "3d6"
+      }
+    ]
+  },
+  "winter_wolf": {
+    "slug": "winter_wolf",
+    "name": "Winter Wolf",
+    "cr": "3",
+    "xp": 700,
+    "hp": 75,
+    "ac": 13,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 13,
+      "constitution": 14,
+      "intelligence": 7,
+      "wisdom": 12,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d6",
+      "damageType": "piercing"
+    }
+  },
+  "yetis": {
+    "slug": "yetis",
+    "name": "Yeti",
+    "cr": "3",
+    "xp": 700,
+    "hp": 51,
+    "ac": 12,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 13,
+      "constitution": 16,
+      "intelligence": 8,
+      "wisdom": 12,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claw",
+      "damage": "1d6",
+      "damageType": "slashing"
+    }
+  },
+  "black_pudding": {
+    "slug": "black_pudding",
+    "name": "Black Pudding",
+    "cr": "4",
+    "xp": 1100,
+    "hp": 85,
+    "ac": 7,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 5,
+      "constitution": 16,
+      "intelligence": 1,
+      "wisdom": 6,
+      "charisma": 1
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Pseudopod",
+      "damage": "1d6",
+      "damageType": "bludgeoning"
+    }
+  },
+  "chuul": {
+    "slug": "chuul",
+    "name": "Chuul",
+    "cr": "4",
+    "xp": 1100,
+    "hp": 93,
+    "ac": 16,
+    "abilities": {
+      "strength": 19,
+      "dexterity": 10,
+      "constitution": 16,
+      "intelligence": 5,
+      "wisdom": 11,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Pincer",
+      "damage": "2d6",
+      "damageType": "bludgeoning"
+    }
+  },
+  "couatl": {
+    "slug": "couatl",
+    "name": "Couatl",
+    "cr": "4",
+    "xp": 1100,
+    "hp": 97,
+    "ac": 19,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 20,
+      "constitution": 17,
+      "intelligence": 18,
+      "wisdom": 20,
+      "charisma": 18
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "finesse": true
+    },
+    "spells": [
+      "detect_magic",
+      "bless",
+      "cure_wounds"
+    ]
+  },
+  "elephant": {
+    "slug": "elephant",
+    "name": "Elephant",
+    "cr": "4",
+    "xp": 1100,
+    "hp": 76,
+    "ac": 12,
+    "abilities": {
+      "strength": 22,
+      "dexterity": 9,
+      "constitution": 17,
+      "intelligence": 3,
+      "wisdom": 11,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Gore",
+      "damage": "3d8",
+      "damageType": "piercing"
+    }
+  },
+  "ettin": {
+    "slug": "ettin",
+    "name": "Ettin",
+    "cr": "4",
+    "xp": 1100,
+    "hp": 85,
+    "ac": 12,
+    "abilities": {
+      "strength": 21,
+      "dexterity": 8,
+      "constitution": 17,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Battleaxe",
+      "damage": "2d8",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Battleaxe",
+        "chance": 0.5,
+        "type": "weapon:1d8:slashing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "4d6"
+      }
+    ]
+  },
+  "ghost": {
+    "slug": "ghost",
+    "name": "Ghost",
+    "cr": "4",
+    "xp": 1100,
+    "hp": 45,
+    "ac": 11,
+    "abilities": {
+      "strength": 7,
+      "dexterity": 13,
+      "constitution": 10,
+      "intelligence": 10,
+      "wisdom": 12,
+      "charisma": 17
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Withering Touch",
+      "damage": "4d6",
+      "damageType": "necrotic"
+    }
+  },
+  "lamia": {
+    "slug": "lamia",
+    "name": "Lamia",
+    "cr": "4",
+    "xp": 1100,
+    "hp": 97,
+    "ac": 13,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 13,
+      "constitution": 15,
+      "intelligence": 14,
+      "wisdom": 15,
+      "charisma": 16
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claws",
+      "damage": "2d4",
+      "damageType": "slashing"
+    },
+    "spells": [
+      "charm_person",
+      "suggestion",
+      "mirror_image"
+    ]
+  },
+  "red_dragon_wyrmling": {
+    "slug": "red_dragon_wyrmling",
+    "name": "Red Dragon Wyrmling",
+    "cr": "4",
+    "xp": 1100,
+    "hp": 75,
+    "ac": 17,
+    "abilities": {
+      "strength": 19,
+      "dexterity": 10,
+      "constitution": 17,
+      "intelligence": 12,
+      "wisdom": 11,
+      "charisma": 15
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d10",
+      "damageType": "piercing"
+    }
+  },
+  "succubus": {
+    "slug": "succubus",
+    "name": "Succubus",
+    "cr": "4",
+    "xp": 1100,
+    "hp": 66,
+    "ac": 15,
+    "abilities": {
+      "strength": 8,
+      "dexterity": 17,
+      "constitution": 13,
+      "intelligence": 15,
+      "wisdom": 12,
+      "charisma": 20
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claw",
+      "damage": "1d6",
+      "damageType": "slashing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Gold Coins",
+        "chance": 0.6,
+        "type": "general",
+        "formula": "4d6"
+      }
+    ]
+  },
+  "wereboar": {
+    "slug": "wereboar",
+    "name": "Wereboar",
+    "cr": "4",
+    "xp": 1100,
+    "hp": 78,
+    "ac": 11,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 10,
+      "constitution": 15,
+      "intelligence": 10,
+      "wisdom": 11,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Maul",
+      "damage": "2d6",
+      "damageType": "bludgeoning"
+    }
+  },
+  "air_elemental": {
+    "slug": "air_elemental",
+    "name": "Air Elemental",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 90,
+    "ac": 15,
+    "abilities": {
+      "strength": 14,
+      "dexterity": 20,
+      "constitution": 14,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Slam",
+      "damage": "2d8",
+      "damageType": "bludgeoning"
+    }
+  },
+  "barbed_devil": {
+    "slug": "barbed_devil",
+    "name": "Barbed Devil",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 110,
+    "ac": 15,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 17,
+      "constitution": 18,
+      "intelligence": 12,
+      "wisdom": 14,
+      "charisma": 14
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claw",
+      "damage": "1d6",
+      "damageType": "piercing"
+    }
+  },
+  "bulette": {
+    "slug": "bulette",
+    "name": "Bulette",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 94,
+    "ac": 17,
+    "abilities": {
+      "strength": 19,
+      "dexterity": 11,
+      "constitution": 21,
+      "intelligence": 2,
+      "wisdom": 10,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "4d12",
+      "damageType": "piercing"
+    }
+  },
+  "earth_elemental": {
+    "slug": "earth_elemental",
+    "name": "Earth Elemental",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 126,
+    "ac": 17,
+    "abilities": {
+      "strength": 20,
+      "dexterity": 8,
+      "constitution": 20,
+      "intelligence": 5,
+      "wisdom": 10,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Slam",
+      "damage": "2d8",
+      "damageType": "bludgeoning"
+    }
+  },
+  "fire_elemental": {
+    "slug": "fire_elemental",
+    "name": "Fire Elemental",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 102,
+    "ac": 13,
+    "abilities": {
+      "strength": 10,
+      "dexterity": 17,
+      "constitution": 16,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Touch",
+      "damage": "2d6",
+      "damageType": "fire"
+    }
+  },
+  "flesh_golem": {
+    "slug": "flesh_golem",
+    "name": "Flesh Golem",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 93,
+    "ac": 9,
+    "abilities": {
+      "strength": 19,
+      "dexterity": 9,
+      "constitution": 18,
+      "intelligence": 6,
+      "wisdom": 10,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Slam",
+      "damage": "2d8",
+      "damageType": "bludgeoning"
+    }
+  },
+  "giant_crocodile": {
+    "slug": "giant_crocodile",
+    "name": "Giant Crocodile",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 85,
+    "ac": 14,
+    "abilities": {
+      "strength": 21,
+      "dexterity": 9,
+      "constitution": 17,
+      "intelligence": 2,
+      "wisdom": 10,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "3d10",
+      "damageType": "piercing"
+    }
+  },
+  "giant_shark": {
+    "slug": "giant_shark",
+    "name": "Giant Shark",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 126,
+    "ac": 13,
+    "abilities": {
+      "strength": 23,
+      "dexterity": 11,
+      "constitution": 21,
+      "intelligence": 1,
+      "wisdom": 10,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "3d10",
+      "damageType": "piercing"
+    }
+  },
+  "half_red_dragon_veteran": {
+    "slug": "half_red_dragon_veteran",
+    "name": "Half-Red Dragon Veteran",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 65,
+    "ac": 18,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 13,
+      "constitution": 14,
+      "intelligence": 10,
+      "wisdom": 11,
+      "charisma": 13
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Longsword",
+      "damage": "1d8",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Longsword",
+        "chance": 0.5,
+        "type": "weapon:1d8:slashing"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.9,
+        "type": "general",
+        "formula": "5d6"
+      }
+    ]
+  },
+  "hill_giant": {
+    "slug": "hill_giant",
+    "name": "Hill Giant",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 105,
+    "ac": 13,
+    "abilities": {
+      "strength": 21,
+      "dexterity": 8,
+      "constitution": 19,
+      "intelligence": 5,
+      "wisdom": 9,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Greatclub",
+      "damage": "3d8",
+      "damageType": "bludgeoning"
+    },
+    "drops": [
+      {
+        "item": "Greatclub",
+        "chance": 0.4,
+        "type": "weapon:1d8:bludgeoning"
+      },
+      {
+        "item": "Gold Coins",
+        "chance": 0.8,
+        "type": "general",
+        "formula": "5d8"
+      }
+    ]
+  },
+  "night_hag": {
+    "slug": "night_hag",
+    "name": "Night Hag",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 112,
+    "ac": 17,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 15,
+      "constitution": 16,
+      "intelligence": 16,
+      "wisdom": 14,
+      "charisma": 16
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claws",
+      "damage": "2d8",
+      "damageType": "slashing"
+    },
+    "drops": [
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "5d6"
+      }
+    ],
+    "spells": [
+      "magic_missile",
+      "hold_person"
+    ]
+  },
+  "otyugh": {
+    "slug": "otyugh",
+    "name": "Otyugh",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 114,
+    "ac": 14,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 11,
+      "constitution": 19,
+      "intelligence": 6,
+      "wisdom": 13,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "2d8",
+      "damageType": "piercing"
+    }
+  },
+  "roper": {
+    "slug": "roper",
+    "name": "Roper",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 93,
+    "ac": 20,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 8,
+      "constitution": 17,
+      "intelligence": 7,
+      "wisdom": 16,
+      "charisma": 6
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "4d8",
+      "damageType": "piercing"
+    }
+  },
+  "salamander": {
+    "slug": "salamander",
+    "name": "Salamander",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 90,
+    "ac": 15,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 14,
+      "constitution": 15,
+      "intelligence": 11,
+      "wisdom": 10,
+      "charisma": 12
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Spear",
+      "damage": "2d8",
+      "damageType": "piercing"
+    }
+  },
+  "shambling_mound": {
+    "slug": "shambling_mound",
+    "name": "Shambling Mound",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 136,
+    "ac": 15,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 8,
+      "constitution": 16,
+      "intelligence": 5,
+      "wisdom": 10,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Slam",
+      "damage": "2d8",
+      "damageType": "bludgeoning"
+    }
+  },
+  "triceratops": {
+    "slug": "triceratops",
+    "name": "Triceratops",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 95,
+    "ac": 13,
+    "abilities": {
+      "strength": 22,
+      "dexterity": 9,
+      "constitution": 17,
+      "intelligence": 2,
+      "wisdom": 11,
+      "charisma": 5
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Gore",
+      "damage": "4d8",
+      "damageType": "piercing"
+    }
+  },
+  "troll": {
+    "slug": "troll",
+    "name": "Troll",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 84,
+    "ac": 15,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 13,
+      "constitution": 20,
+      "intelligence": 7,
+      "wisdom": 9,
+      "charisma": 7
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "1d6",
+      "damageType": "piercing"
+    },
+    "drops": [
+      {
+        "item": "Gold Coins",
+        "chance": 0.6,
+        "type": "general",
+        "formula": "4d6"
+      }
+    ]
+  },
+  "unicorn": {
+    "slug": "unicorn",
+    "name": "Unicorn",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 67,
+    "ac": 12,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 14,
+      "constitution": 15,
+      "intelligence": 11,
+      "wisdom": 17,
+      "charisma": 16
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Horn",
+      "damage": "1d8",
+      "damageType": "piercing"
+    },
+    "spells": [
+      "cure_wounds",
+      "entangle",
+      "pass_without_trace"
+    ]
+  },
+  "vampire_spawn": {
+    "slug": "vampire_spawn",
+    "name": "Vampire Spawn",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 82,
+    "ac": 15,
+    "abilities": {
+      "strength": 16,
+      "dexterity": 16,
+      "constitution": 16,
+      "intelligence": 11,
+      "wisdom": 10,
+      "charisma": 12
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Claws",
+      "damage": "2d4",
+      "damageType": "slashing",
+      "finesse": true
+    },
+    "drops": [
+      {
+        "item": "Gold Coins",
+        "chance": 0.7,
+        "type": "general",
+        "formula": "4d8"
+      }
+    ]
+  },
+  "water_elemental": {
+    "slug": "water_elemental",
+    "name": "Water Elemental",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 114,
+    "ac": 14,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 14,
+      "constitution": 18,
+      "intelligence": 5,
+      "wisdom": 10,
+      "charisma": 8
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Slam",
+      "damage": "2d8",
+      "damageType": "bludgeoning"
+    }
+  },
+  "wraith": {
+    "slug": "wraith",
+    "name": "Wraith",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 67,
+    "ac": 13,
+    "abilities": {
+      "strength": 6,
+      "dexterity": 16,
+      "constitution": 16,
+      "intelligence": 12,
+      "wisdom": 14,
+      "charisma": 15
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Life Drain",
+      "damage": "4d8",
+      "damageType": "necrotic"
+    }
+  },
+  "xorn": {
+    "slug": "xorn",
+    "name": "Xorn",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 73,
+    "ac": 19,
+    "abilities": {
+      "strength": 17,
+      "dexterity": 10,
+      "constitution": 22,
+      "intelligence": 11,
+      "wisdom": 10,
+      "charisma": 11
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "3d6",
+      "damageType": "piercing"
+    }
+  },
+  "young_remorhaz": {
+    "slug": "young_remorhaz",
+    "name": "Young Remorhaz",
+    "cr": "5",
+    "xp": 1800,
+    "hp": 93,
+    "ac": 14,
+    "abilities": {
+      "strength": 18,
+      "dexterity": 13,
+      "constitution": 17,
+      "intelligence": 3,
+      "wisdom": 10,
+      "charisma": 4
+    },
+    "book": "SRD 5.2",
+    "weapon": {
+      "name": "Bite",
+      "damage": "3d10",
+      "damageType": "piercing"
+    }
+  }
+}

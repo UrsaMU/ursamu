@@ -97,8 +97,30 @@ export interface DndSheet {
   spellSlotsCurrent: Record<number, number>; // 1 to 9
   feats: string[];
   spells: string[];
+  /** Display / vendor total in gp-equivalent (synced from money). */
   gold: number;
+  /**
+   * Actual purse coins. Shops spend this via spendCoins.
+   * If missing but gold > 0, migrate seeds money.gp from gold.
+   */
+  money?: {
+    cp: number;
+    sp: number;
+    ep: number;
+    gp: number;
+    pp: number;
+  };
   xp: number;
+  /** Death saves + spirit/corpse travel (player death). */
+  death?: {
+    successes: number;
+    failures: number;
+    stable: boolean;
+    dead: boolean;
+    spirit?: boolean;
+    corpseId?: string;
+    deathRoomId?: string;
+  };
 }
 
 export function getAbilityMod(score: number): number {
@@ -162,6 +184,7 @@ export function defaultSheet(): DndSheet {
     feats: [],
     spells: [],
     gold: 100,
+    money: { cp: 0, sp: 0, ep: 0, gp: 100, pp: 0 },
     xp: 0
   };
 }
@@ -177,20 +200,52 @@ export function migrateSheet(sheet: any): DndSheet {
     current: sheet?.level || defaults.level || 1
   };
   const hitDice = sheet?.hitDice || defaultHitDice;
+  const gold = typeof sheet?.gold === "number"
+    ? sheet.gold
+    : defaults.gold;
+  const moneyIn = sheet?.money;
+  const moneyEmpty = !moneyIn ||
+    (
+      !(moneyIn.cp || moneyIn.sp || moneyIn.ep ||
+        moneyIn.gp || moneyIn.pp)
+    );
+  // Legacy sheets often set gold:100 with no money purse —
+  // seed gp so shops can spend it.
+  const money = moneyEmpty && gold > 0
+    ? { cp: 0, sp: 0, ep: 0, gp: gold, pp: 0 }
+    : {
+      cp: Number(moneyIn?.cp) || 0,
+      sp: Number(moneyIn?.sp) || 0,
+      ep: Number(moneyIn?.ep) || 0,
+      gp: Number(moneyIn?.gp) || 0,
+      pp: Number(moneyIn?.pp) || 0,
+    };
   return {
     ...defaults,
     ...sheet,
     classes,
     hitDice,
     abilities: { ...defaults.abilities, ...(sheet?.abilities || {}) },
-    skillProficiency: { ...defaults.skillProficiency, ...(sheet?.skillProficiency || {}) },
-    savingThrowProficiency: Array.isArray(sheet?.savingThrowProficiency) ? sheet.savingThrowProficiency : [],
+    skillProficiency: {
+      ...defaults.skillProficiency,
+      ...(sheet?.skillProficiency || {}),
+    },
+    savingThrowProficiency: Array.isArray(sheet?.savingThrowProficiency)
+      ? sheet.savingThrowProficiency
+      : [],
     hp: { ...defaults.hp, ...(sheet?.hp || {}) },
-    spellSlotsMax: { ...defaults.spellSlotsMax, ...(sheet?.spellSlotsMax || {}) },
-    spellSlotsCurrent: { ...defaults.spellSlotsCurrent, ...(sheet?.spellSlotsCurrent || {}) },
+    spellSlotsMax: {
+      ...defaults.spellSlotsMax,
+      ...(sheet?.spellSlotsMax || {}),
+    },
+    spellSlotsCurrent: {
+      ...defaults.spellSlotsCurrent,
+      ...(sheet?.spellSlotsCurrent || {}),
+    },
     feats: Array.isArray(sheet?.feats) ? sheet.feats : defaults.feats,
     spells: Array.isArray(sheet?.spells) ? sheet.spells : defaults.spells,
-    gold: typeof sheet?.gold === "number" ? sheet.gold : defaults.gold,
-    xp: typeof sheet?.xp === "number" ? sheet.xp : defaults.xp
+    gold,
+    money,
+    xp: typeof sheet?.xp === "number" ? sheet.xp : defaults.xp,
   };
 }

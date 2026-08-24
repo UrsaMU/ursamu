@@ -25,3 +25,22 @@ export interface ISrSystemRegisterEvent {
   // deno-lint-ignore no-explicit-any
   system: Record<string, any>;
 }
+
+/** Payload from @ursamu/utopia utopia:roll / feed:ticked. */
+export interface IUtopiaGMPayload {
+  roomId: string;
+  playerId: string;
+  playerName: string;
+  summary: string;
+  autoWatch?: boolean;
+}
+
+/** Payload from @ursamu/utopia utopia:week:ready. */
+export interface IUtopiaWeekReadyEvent {
+  roomId: string;
+  week: number;
+  city: string;
+  summary: string;
+  plans?: { playerId: string; playerName: string; plan: string }[];
+  autoWatch?: boolean;
+}

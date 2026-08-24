@@ -1,0 +1,148 @@
+{
+  "key": "cpr-social",
+  "label": "Cyberpunk RED — Social: Reputation, Roles & Humanity",
+  "vars": { "player": "Johnny" },
+  "setup": {
+    "targets": {
+      "Ganger Boss": {
+        "stats": { "int": 4, "ref": 6, "dex": 5, "tech": 3, "cool": 6, "will": 6, "luck": 3, "move": 6, "body": 6, "emp": 4, "empBase": 4 },
+        "hp": { "max": 35, "current": 35 },
+        "swThreshold": 18, "deathSave": 6, "deathSavePenalty": 0,
+        "role": "solo", "roleRank": 2, "roleData": {},
+        "skills": { "athletics": 3, "brawling": 4, "handgun": 4, "evasion": 3, "perception": 3, "intimidation": 4 },
+        "luckRemaining": 3, "woundState": "healthy", "criticalInjuries": [],
+        "armorBody": { "name": "Kevlar", "sp": 7, "currentSp": 7, "penalty": 0 }, "armorHead": null,
+        "cyberware": [], "humanityLoss": 0, "bodysculpt": [], "activeEffects": [],
+        "reputation": 2, "reputationDeeds": [], "eurodollars": 500,
+        "lifestyle": null, "lifepath": {},
+        "chargenComplete": true, "chargenStage": "complete", "chargenMethod": "streetrat",
+        "restTimer": null, "humanityGainedAt": null, "locationEffects": []
+      }
+    },
+    "character": {
+      "stats": { "int": 7, "ref": 7, "dex": 6, "tech": 5, "cool": 8, "will": 7, "luck": 6, "move": 6, "body": 6, "emp": 7, "empBase": 8 },
+      "hp": { "max": 45, "current": 45 },
+      "swThreshold": 23,
+      "deathSave": 6,
+      "deathSavePenalty": 0,
+      "role": "rockerboy",
+      "roleRank": 4,
+      "roleData": {},
+      "skills": { "athletics": 4, "brawling": 3, "concentration": 4, "conversation": 6, "education": 4, "evasion": 4, "handgun": 4, "human_perception": 6, "interrogation": 3, "local_expert": 4, "perception": 5, "performance": 6, "persuasion": 7, "stealth": 3, "streetwise": 5 },
+      "luckRemaining": 6,
+      "woundState": "healthy",
+      "criticalInjuries": [],
+      "armorBody": { "name": "Leather jacket", "sp": 4, "currentSp": 4, "penalty": 0 },
+      "armorHead": null,
+      "cyberware": [
+        { "id": "cw1", "name": "neural_link", "category": "neuralware", "hl": 7, "installType": "clinic", "installedAt": 0 }
+      ],
+      "humanityLoss": 7,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 7,
+      "reputationDeeds": ["Rallied 10,000 fans against Arasaka", "Organized the Night City Uprising"],
+      "eurodollars": 4000,
+      "lifestyle": { "tier": "medium", "nextDueDate": 0 },
+      "lifepath": { "culturalOrigin": "North American", "language": "English", "personality": "Charismatic rebel", "clothingStyle": "Rock star" },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": []
+    }
+  },
+  "steps": [
+    {
+      "sub": "Reputation"
+    },
+    {
+      "note": "Reputation ranges 0–10. Higher rep unlocks social advantages: better prices, rumors, NPC reactions. Deeds are the public record of notable acts."
+    },
+    {
+      "cmd": "+rep",
+      "label": "view your reputation score, tier, and notable deeds"
+    },
+    {
+      "cmd": "+rep/deed Took down Militech's data vault single-handed",
+      "label": "record a notable deed to your rep sheet"
+    },
+    {
+      "cmd": "+rep/view Johnny",
+      "label": "view another player's reputation"
+    },
+    {
+      "sub": "Facedowns"
+    },
+    {
+      "note": "A Facedown is a social combat showdown. Both sides roll COOL + Reputation + 1d10. Tied totals re-roll once; a second tie is a stalemate. The loser is 'impressed' for the scene (~5 min) and takes -2 to any attack against the winner."
+    },
+    {
+      "cmd": "+facedown",
+      "label": "uncontested — display your facedown total"
+    },
+    {
+      "cmd": "+facedown Ganger Boss",
+      "label": "contested facedown — winner imposes 'impressed' on the loser"
+    },
+    {
+      "cmd": "+facedown/clear",
+      "label": "clear an impressed condition on yourself"
+    },
+    {
+      "sub": "Role Abilities"
+    },
+    {
+      "note": "Each role has a unique ability that scales with role rank (1–10, starting at rank 4)."
+    },
+    {
+      "cmd": "+role/info",
+      "label": "view your role, rank, and ability description"
+    },
+    {
+      "cmd": "+role/ability",
+      "label": "activate your role ability"
+    },
+    {
+      "note": "Role-specific example: Rockerboy uses Charismatic Impact to sway crowds. Fixer uses Operator to source goods. Solo uses Combat Sense for initiative bonuses."
+    },
+    {
+      "cmd": "+role/rank",
+      "label": "view rank tier benefits"
+    },
+    {
+      "sub": "Humanity & Cyberpsychosis"
+    },
+    {
+      "note": "Each cyberware piece costs Humanity Loss (HL). EMP = empBase - floor(HL/10). At EMP 0 the character goes cyberpsycho."
+    },
+    {
+      "cmd": "+humanity/status",
+      "label": "view current HL, EMP, and cyberpsychosis risk"
+    },
+    {
+      "cmd": "+humanity/gain connection",
+      "label": "gain humanity from a meaningful connection — 2d6 HL recovery (24h cooldown per type)"
+    },
+    {
+      "note": "Other gain types: achievement (1d6+2), kindness (1d6), memory (1d3). Each has a 24h cooldown."
+    },
+    {
+      "sub": "Therapy (Medtech)"
+    },
+    {
+      "note": "Therapy sessions help characters recover HL over time. Crisis intervention handles emergency cyberpsychosis. Both require Medtech role or Admin."
+    },
+    {
+      "cmd": "+therapy/status",
+      "label": "view HL, EMP, and therapy history"
+    },
+    {
+      "note": "+therapy/session <target> — Medtech conducts HL recovery session (EMP+psychiatry vs DV). +therapy/crisis <target> — emergency cyberpsychosis intervention. Both require Medtech role."
+    },
+    {
+      "reset": true
+    }
+  ]
+}

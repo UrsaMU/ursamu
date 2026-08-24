@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CYBER d6 theme preview</title>
+    <style>
+      body {
+        font-family: "Courier New", Courier, monospace;
+        max-width: 36rem;
+        margin: 3rem auto;
+        padding: 0 1rem;
+        line-height: 1.35;
+        color: #c9fffa;
+        background: #04090a;
+      }
+      code, pre { background: #08191a; }
+      code { padding: 0.1em 0.35em; }
+      pre {
+        padding: 0.75rem 1rem;
+        overflow: auto;
+        border: 1px solid #14514c;
+      }
+      a { color: #31ded2; }
+    </style>
+  </head>
+  <body>
+    <h1>CYBER d6 — standalone preview</h1>
+    <p>From this folder (Deno required):</p>
+    <pre>deno task preview:open
+deno task studio
+deno task pack</pre>
+    <p>
+      First run may download the <code>@ursamu/site</code> shell into
+      <code>.preview-shell/</code>. Studio may cache into
+      <code>.theme-studio/</code>.
+    </p>
+  </body>
+</html>

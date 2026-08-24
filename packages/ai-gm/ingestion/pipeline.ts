@@ -3,7 +3,7 @@
 // Wires together extractor → analyzer → synthesizer → reviewer.
 // Called by the watcher (on file change) or +gm/ingest (manually).
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { extractBooks } from "./extractor.ts";
 import { analyzeChunks } from "./analyzer.ts";
 import { synthesize } from "./synthesizer.ts";
@@ -13,7 +13,7 @@ import type { IIngestionJob } from "./schema.ts";
 import { nanoid } from "./util.ts";
 
 export interface IPipelineContext {
-  model: ChatGoogleGenerativeAI;
+  model: BaseChatModel;
   booksDir: string;
   adminIds: string[];
   /** Called to page admins + post to AI-GM board */

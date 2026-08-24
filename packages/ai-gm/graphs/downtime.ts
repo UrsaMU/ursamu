@@ -3,7 +3,7 @@
 // Resolves all open downtime actions for players between sessions.
 // Calls resolve_downtime_action for each and returns a summary narration.
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { buildGraph, invokeGraph } from "./base.ts";
 import type { IInjectOptions } from "../context/injector.ts";
 import { buildInjectedPrompt } from "../context/injector.ts";
@@ -19,7 +19,7 @@ interface IDowntimeActionFull {
   [key: string]: unknown;
 }
 
-export function buildDowntimeGraph(model: ChatGoogleGenerativeAI) {
+export function buildDowntimeGraph(model: BaseChatModel) {
   return buildGraph(model);
 }
 

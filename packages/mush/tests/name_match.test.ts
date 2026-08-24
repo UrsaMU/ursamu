@@ -6,6 +6,8 @@ import {
   nameMatches,
   nameMatchesExact,
   pickNameMatch,
+  parseNameOrdinal,
+  listNameMatches,
 } from "../src/world/name-match.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
@@ -19,7 +21,9 @@ Deno.test("nameMatches: exit semicolon alias exact", OPTS, () => {
   assertEquals(nameMatches(exit, "SL"), true);
   assertEquals(nameMatches(exit, "staff lounge"), true);
   assertEquals(nameMatches(exit, "staff"), true);
-  assertEquals(nameMatches(exit, "lounge"), false);
+  // Substring partial: "lounge" hits "Staff Lounge"
+  assertEquals(nameMatches(exit, "lounge"), true);
+  assertEquals(nameMatches(exit, "xyz"), false);
   assertEquals(nameMatchesExact(exit, "sl"), true);
   assertEquals(nameMatchesExact(exit, "staff"), false);
 });
@@ -49,4 +53,25 @@ Deno.test("nameMatches: dbref and moniker", OPTS, () => {
   assertEquals(nameMatches(p, "#2"), true);
   assertEquals(nameMatches(p, "dia"), true);
   assertEquals(nameMatches(p, "Diab"), true);
+});
+
+Deno.test("nameMatches: substring partial", OPTS, () => {
+  const g = { id: "9", state: { name: "Goblin Sneak" } };
+  assertEquals(nameMatches(g, "gob"), true);
+  assertEquals(nameMatches(g, "sneak"), true);
+  assertEquals(nameMatches(g, "blin"), true);
+});
+
+Deno.test("parseNameOrdinal + pick 2nd of two", OPTS, () => {
+  assertEquals(parseNameOrdinal("2.goblin"), {
+    ordinal: 2,
+    name: "goblin",
+  });
+  assertEquals(parseNameOrdinal("goblin.2").ordinal, 2);
+  const a = { id: "1", state: { name: "Goblin Sneak" } };
+  const b = { id: "2", state: { name: "Goblin Sneak" } };
+  const hits = listNameMatches([a, b], "goblin");
+  assertEquals(hits.length, 2);
+  assertEquals(pickNameMatch([a, b], "2.goblin")?.id, "2");
+  assertEquals(pickNameMatch([a, b], "1.gob")?.id, "1");
 });

@@ -87,6 +87,8 @@ export {
   addParticipant,
   advanceTurn,
   allNpcsDown,
+  allPcsDown,
+  shouldResolveEncounter,
   createEncounter,
   currentParticipant,
   encounterDb,

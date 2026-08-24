@@ -1,0 +1,50 @@
+{
+  "haven-mill": {
+    "slug": "haven-mill",
+    "name": "Whisperwood Road",
+    "fromTown": "havenbrook-v1",
+    "toTown": "millhaven-v1",
+    "fromRoom": "gate",
+    "toRoom": "road",
+    "fromExit": "East;E;Millhaven;Road",
+    "toExit": "West;W;Havenbrook;Road",
+    "legs": [
+      {
+        "key": "crossroads",
+        "name": "Whisperwood Crossroads",
+        "description": "Two ruts meet under a leaning mile-post. Crows watch from bare oaks. North the trees thicken; east the river road."
+      },
+      {
+        "key": "ford",
+        "name": "Shallow Ford",
+        "description": "Cold water over smooth stones. Wagon tracks climb the far bank toward mill smoke on the horizon."
+      }
+    ],
+    "encounter": "whisperwood",
+    "book": "SRD 5.2"
+  },
+  "haven-ash": {
+    "slug": "haven-ash",
+    "name": "Hill Road",
+    "fromTown": "havenbrook-v1",
+    "toTown": "ashford-v1",
+    "fromRoom": "gate",
+    "toRoom": "road",
+    "fromExit": "Northwest;NW;Ashford;Hills",
+    "toExit": "Southeast;SE;Havenbrook;Down",
+    "legs": [
+      {
+        "key": "switchback",
+        "name": "Chalk Switchbacks",
+        "description": "The road climbs in tight turns. Loose stones skitter downhill. Wind smells of ore and pine."
+      },
+      {
+        "key": "overlook",
+        "name": "Ridge Overlook",
+        "description": "Havenbrook's lantern fountain is a pinprick south. North, mine smoke stains the sky."
+      }
+    ],
+    "encounter": "hills",
+    "book": "SRD 5.2"
+  }
+}

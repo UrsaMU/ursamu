@@ -24,6 +24,9 @@ const body = ref("");
 const draft = ref(false);
 const featured = ref(false);
 const bgImage = ref(false);
+const home = ref(false);
+const heading = ref(true);
+const rule = ref(true);
 const readLock = ref("connected");
 const tags = ref<string[]>([]);
 const loading = ref(true);
@@ -39,6 +42,9 @@ const currentPayload = computed<WikiPagePayload>(() => ({
   draft: draft.value,
   featured: featured.value,
   bgImage: bgImage.value,
+  home: home.value,
+  heading: heading.value,
+  rule: rule.value,
   readLock: readLock.value,
   tags: tags.value,
 }));
@@ -61,6 +67,9 @@ async function load(): Promise<void> {
     draft?: boolean;
     featured?: boolean;
     bgImage?: boolean;
+    home?: boolean;
+    heading?: boolean;
+    rule?: boolean;
     readLock?: string;
     tags?: string[];
     error?: string;
@@ -89,6 +98,9 @@ async function load(): Promise<void> {
   draft.value = data.draft === true;
   featured.value = data.featured === true;
   bgImage.value = data.bgImage === true;
+  home.value = data.home === true;
+  heading.value = data.heading !== false;
+  rule.value = data.rule !== false;
   readLock.value = String(data.readLock ?? "connected");
   tags.value = Array.isArray(data.tags)
     ? data.tags.map((t) => String(t).toLowerCase())
@@ -130,6 +142,13 @@ function onFeaturedChange(): void {
   }
 }
 
+/** Home is public-site chrome too, and only one page may hold it. */
+function onHomeChange(): void {
+  if (home.value && draft.value) {
+    draft.value = false;
+  }
+}
+
 onMounted(() => {
   void load();
   document.addEventListener("keydown", onKey);
@@ -160,12 +179,18 @@ async function save(): Promise<void> {
     if (featured.value && draft.value) {
       draft.value = false;
     }
+    if (home.value && draft.value) {
+      draft.value = false;
+    }
     const payload: Record<string, unknown> = {
       title: t,
       body: body.value,
       draft: draft.value,
       featured: featured.value,
       bgImage: bgImage.value,
+      home: home.value,
+      heading: heading.value,
+      rule: rule.value,
       readLock: readLock.value || "connected",
       tags: [...tags.value],
     };
@@ -204,6 +229,7 @@ async function save(): Promise<void> {
       draft: draft.value,
       featured: featured.value,
       bgImage: bgImage.value,
+      home: home.value,
       readLock: readLock.value,
       tags: [...tags.value],
       chars: body.value.length,
@@ -425,6 +451,37 @@ onBeforeRouteLeave(() => confirmLeave());
           <span>
             Background image (home-height layout on public site)
           </span>
+        </label>
+        <label class="chk-row">
+          <input
+            v-model="home"
+            type="checkbox"
+            class="chk"
+            @change="onHomeChange"
+          >
+          <span>
+            Home page (shown at "/" — checking this unsets it on any
+            other page)
+          </span>
+        </label>
+        <label class="chk-row">
+          <input
+            v-model="heading"
+            type="checkbox"
+            class="chk"
+          >
+          <span>
+            Show page title (auto H1 on public site)
+          </span>
+        </label>
+        <label class="chk-row">
+          <input
+            v-model="rule"
+            type="checkbox"
+            class="chk"
+            :disabled="!heading"
+          >
+          <span>Divider under page title</span>
         </label>
         <label for="edit-lock">
           Who can read

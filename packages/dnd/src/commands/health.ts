@@ -1,5 +1,8 @@
 import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
 import { getAbilityMod, migrateSheet } from "../stats/dnd_sheet.ts";
+import { applyDamage, applyHeal } from "../stats/vitality.ts";
+import { maybeProcessPlayerDeath } from
+  "../stats/player-death.ts";
 import { CLASS_METADATA } from "./cg.ts";
 
 export async function dndHpExec(u: IUrsamuSDK) {
@@ -48,7 +51,7 @@ export async function dndHpExec(u: IUrsamuSDK) {
 
   if (!sw) {
     // Just view HP
-    u.send(`%ch%ccHP>>%cn ${u.util.displayName(target, u.me)}'s Hit Points: %ch${s.hp.current}%cn / %ch${s.hp.max}%cn (Temp: %ch${s.hp.temp}%cn)`);
+    u.send(`${u.util.displayName(target, u.me)}'s hit points: %ch${s.hp.current}%cn / %ch${s.hp.max}%cn (temp %ch${s.hp.temp}%cn)`);
     return;
   }
 
@@ -66,36 +69,47 @@ export async function dndHpExec(u: IUrsamuSDK) {
   const name = u.util.displayName(target, u.me);
 
   if (sw === "damage" || sw === "dmg") {
-    let damageLeft = amount;
     const initialTemp = s.hp.temp;
     const initialCurrent = s.hp.current;
-
-    if (s.hp.temp > 0) {
-      const tempAbsorb = Math.min(s.hp.temp, damageLeft);
-      s.hp.temp -= tempAbsorb;
-      damageLeft -= tempAbsorb;
+    const dmg = applyDamage(s, amount);
+    let next = dmg.sheet;
+    await u.db.modify(target.id, "$set", { "data.dnd": next });
+    // deno-lint-ignore no-explicit-any
+    if (target.state) (target.state as any).dnd = next;
+    u.send(
+      `%ch${name}%cn takes %ch%cr${amount}%cn damage! ` +
+        `(temp ${initialTemp}→${next.hp.temp}, ` +
+        `HP ${initialCurrent}→${next.hp.current})`,
+    );
+    for (const ln of dmg.lines) {
+      u.send(ln);
     }
-
-    if (damageLeft > 0) {
-      s.hp.current = Math.max(0, s.hp.current - damageLeft);
-    }
-
-    await u.db.modify(target.id, "$set", { "data.dnd": s });
-    u.send(`%ch%crHP>>%cn ${name} takes %ch${amount}%cn damage! (Temp HP: ${initialTemp} -> ${s.hp.temp}, Current HP: ${initialCurrent} -> ${s.hp.current})`);
-    if (s.hp.current === 0) {
-      u.send(`%ch%crHP>>%cn ${name} has fallen unconscious (0 HP)!`);
+    if (next.death?.dead && target.flags?.has?.("player")) {
+      const death = await maybeProcessPlayerDeath(
+        u,
+        target,
+        next,
+      );
+      next = death.sheet;
     }
   } else if (sw === "heal") {
-    const initialCurrent = s.hp.current;
-    s.hp.current = Math.min(s.hp.max, s.hp.current + amount);
-    await u.db.modify(target.id, "$set", { "data.dnd": s });
-    u.send(`%ch%cgHP>>%cn ${name} is healed for %ch${amount}%cn HP. (Current HP: ${initialCurrent} -> ${s.hp.current})`);
+    const h = applyHeal(s, amount);
+    await u.db.modify(target.id, "$set", { "data.dnd": h.sheet });
+    // deno-lint-ignore no-explicit-any
+    if (target.state) (target.state as any).dnd = h.sheet;
+    u.send(
+      `%ch${name}%cn is healed for %ch%cg${h.healed}%cn HP. ` +
+        `(${h.sheet.hp.current}/${h.sheet.hp.max})`,
+    );
+    for (const ln of h.lines) {
+      u.send(ln);
+    }
   } else if (sw === "temp") {
     // Temporary hit points do not stack. If you receive new ones, you choose which to keep (usually the highest)
     const initialTemp = s.hp.temp;
     s.hp.temp = Math.max(s.hp.temp, amount);
     await u.db.modify(target.id, "$set", { "data.dnd": s });
-    u.send(`%ch%ccHP>>%cn ${name} gains %ch${amount}%cn temporary HP. (Temp HP: ${initialTemp} -> ${s.hp.temp})`);
+    u.send(`%ch${name}%cn gains %ch${amount}%cn temporary HP (temp ${initialTemp} → ${s.hp.temp}).`);
   } else {
     u.send(`Error: Unknown switch '/${sw}'. Valid: /damage, /heal, /temp.`);
   }
@@ -189,9 +203,9 @@ Examples:
 
       const rollsStr = rolls.map((r) => `d${hitDie}(${r})`).join(" + ");
       u.send(
-        `%ch%cgREST>>%cn You take a short rest, spending ${diceToSpend} ` +
+        `You take a %chshort rest%cn, spending ${diceToSpend} ` +
           `Hit Dice. Rolls: ${rollsStr} + Con(${conMod * diceToSpend}) = ` +
-          `${totalHeal} HP. Healed ${actualHealed} HP (Current: ` +
+          `${totalHeal} HP. Healed %ch${actualHealed}%cn HP (now ` +
           `${sheet.hp.current}/${sheet.hp.max}, Hit Dice: ` +
           `${sheet.hitDice.current}/${sheet.hitDice.max}).`
       );
@@ -214,9 +228,9 @@ Examples:
       await u.db.modify(target.id, "$set", { "data.dnd": sheet });
 
       u.send(
-        `%ch%cgREST>>%cn You take a long rest. Hit Points fully restored ` +
-          `(${initialHP} -> ${sheet.hp.current}), spell slots restored, ` +
-          `and Hit Dice regained (${initialHD} -> ${sheet.hitDice.current}/` +
+        `You take a %chlong rest%cn. Hit points fully restored ` +
+          `(${initialHP} → ${sheet.hp.current}), spell slots restored, ` +
+          `and Hit Dice regained (${initialHD} → ${sheet.hitDice.current}/` +
           `${sheet.hitDice.max}).`
       );
     } else {

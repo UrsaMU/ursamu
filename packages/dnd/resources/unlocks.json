@@ -1,0 +1,59 @@
+{
+  "havenbrook": [
+    {
+      "at": 5,
+      "title": "Known Face",
+      "summary": "Locals nod when you pass."
+    },
+    {
+      "at": 10,
+      "title": "Trusted Blade",
+      "summary": "Hirelings cost 10% less in this region.",
+      "hireDiscount": 0.1
+    },
+    {
+      "at": 25,
+      "title": "Town Hero",
+      "summary": "Best shop rates; militia salutes.",
+      "hireDiscount": 0.2
+    }
+  ],
+  "millhaven": [
+    {
+      "at": 5,
+      "title": "River Friend",
+      "summary": "Dock hands share rumors."
+    },
+    {
+      "at": 10,
+      "title": "Mill Patron",
+      "summary": "Cheaper hires near the river.",
+      "hireDiscount": 0.1
+    },
+    {
+      "at": 25,
+      "title": "River Warden",
+      "summary": "Caravan masters prefer you.",
+      "hireDiscount": 0.15
+    }
+  ],
+  "ashford": [
+    {
+      "at": 5,
+      "title": "Dusty Guest",
+      "summary": "Miners stop eyeing your purse."
+    },
+    {
+      "at": 10,
+      "title": "Guild Ally",
+      "summary": "Ore hauls pay a little extra respect.",
+      "hireDiscount": 0.1
+    },
+    {
+      "at": 25,
+      "title": "Seam Champion",
+      "summary": "Guild halls open special work.",
+      "hireDiscount": 0.2
+    }
+  ]
+}

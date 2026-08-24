@@ -4,15 +4,56 @@ All notable changes to UrsaMU are documented here.
 
 ## [Unreleased]
 
+## [3.1.0] — 2026-08-24
+
+First tagged 3.x release. A game is a small project you
+scaffold from JSR and pin to `@ursamu/mush`. The engine
+repo is the monorepo that publishes those packages.
+
 ### New
 
-- **`game.layout` mushcode templates** — set `game.layout.header`,
-  `.divider`, and `.footer` in `config/config.json` to theme
-  `header()` / `divider()` / `footer()`, sandbox `u.util.*`, and
-  softcode `[header()]` with TinyMUX-style templates
-  (e.g. `"[center(%ch%cy%0%cn,%1,%cg=%cn)]"`). Args: `%0` title,
-  `%1` width, `%2` filler. Config templates override plugin
+- **JSR create path** — scaffold with
+  `deno run -A jsr:@ursamu/cli@0.1.4/create my-game`.
+  Default plugins include help, channels, builder, bbs,
+  mail, wiki, staff web, and the public site (`/play`).
+  `--local` still links a monorepo checkout.
+- **`@ursamu/cyberpunk-plugin` 1.0.0** — CPR chargen,
+  combat ports, vendor/jobs hooks, REST `/api/v1/cpr/*`.
+- **`@ursamu/sprawl-plugin` 1.0.0** — Sprawl Goons 2d6
+  (chargen, combat, net, chrome, city). Do not load
+  beside the CPR plugin (shared command names).
+- **`@ursamu/utopia` 0.1.1** — week/feed/sphere crew
+  play; optional AI-GM city narration; pinned `/play`
+  deck theme.
+- **`@ursamu/events` 0.2.0** — shared service layer,
+  staff `/admin/events` UI, Discord/scene bridges.
+- **`@ursamu/help` 1.3.0** — multi-column clickable
+  help on `/play`. Telnet output is unchanged.
+- **`@ursamu/site` 0.1.96** — mobile `/play` polish,
+  Utopia deck layouts, D&D chargen assets.
+- **D&D house-game combat** — walker auto-start,
+  TPK/death-saves, corpse + Grey Veil res, open/use
+  chests and altars.
+- **`game.layout` mushcode templates** — set
+  `game.layout.header`, `.divider`, and `.footer` in
+  `config/config.json` to theme `header()` /
+  `divider()` / `footer()`, sandbox `u.util.*`, and
+  softcode `[header()]`. Args: `%0` title, `%1` width,
+  `%2` filler. Config templates override plugin
   `registerHeader` / etc. for that slot.
+- **Channels staff locks help** — join/speak keys,
+  rank ladder, and recipes.
+
+### Improved
+
+- Root README rewritten around the create-from-JSR
+  path. CLI 0.1.4 ships daemon/status/stop/restart
+  scripts in the scaffold.
+- `@ursamu/mush` 1.0.34 — `sendListLayout` /
+  `sendCmdLayout` for `/play` chips with telnet
+  text fallback.
+- `@ursamu/channels` 1.2.4 — web hub, chat bubbles,
+  court delivery (dual room join).
 
 ## [2.7.0] — 2026-05-23
 

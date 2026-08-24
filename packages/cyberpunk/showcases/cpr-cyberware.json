@@ -1,0 +1,112 @@
+{
+  "key": "cpr-cyberware",
+  "label": "Cyberpunk RED — Cyberware, Armor & Bodysculpt",
+  "vars": { "player": "Adam" },
+  "setup": {
+    "character": {
+      "stats": { "int": 6, "ref": 7, "dex": 6, "tech": 7, "cool": 6, "will": 6, "luck": 5, "move": 6, "body": 8, "emp": 4, "empBase": 8 },
+      "hp": { "max": 50, "current": 50 },
+      "swThreshold": 25,
+      "deathSave": 8,
+      "deathSavePenalty": 0,
+      "role": "solo",
+      "roleRank": 4,
+      "roleData": {},
+      "skills": { "athletics": 5, "brawling": 5, "concentration": 3, "conversation": 2, "education": 2, "evasion": 5, "handgun": 5, "human_perception": 2, "interrogation": 3, "local_expert": 2, "perception": 5, "persuasion": 2, "shoulder_arms": 5, "stealth": 3, "streetwise": 4, "tactics": 4, "tracking": 2 },
+      "luckRemaining": 5,
+      "woundState": "healthy",
+      "criticalInjuries": [],
+      "armorBody": { "name": "Medium Armorjack", "sp": 12, "currentSp": 12, "penalty": -2 },
+      "armorHead": { "name": "Helmet", "sp": 9, "currentSp": 9, "penalty": 0 },
+      "cyberware": [
+        { "id": "cw1", "name": "neural_link", "category": "neuralware", "hl": 7, "installType": "clinic", "installedAt": 0 },
+        { "id": "cw2", "name": "interface_plugs", "category": "neuralware", "hl": 3, "installType": "clinic", "installedAt": 0 },
+        { "id": "cw3", "name": "cybereye", "category": "cyberoptics", "hl": 7, "installType": "clinic", "installedAt": 0 },
+        { "id": "cw4", "name": "image_enhance", "category": "cyberoptics", "hl": 3, "installType": "clinic", "installedAt": 0 },
+        { "id": "cw5", "name": "grafted_muscle", "category": "internal", "hl": 4, "installType": "clinic", "installedAt": 0 }
+      ],
+      "humanityLoss": 24,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 5,
+      "reputationDeeds": ["Full chrome conversion survivor"],
+      "eurodollars": 5000,
+      "lifestyle": { "tier": "medium", "nextDueDate": 0 },
+      "lifepath": { "culturalOrigin": "Eastern European", "language": "Polish" },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": []
+    }
+  },
+  "steps": [
+    {
+      "sub": "Cyberware"
+    },
+    {
+      "note": "Cyberware is installed by Medtechs via +chopshop. Each piece has a Humanity Loss (HL) cost and install tier (mall/clinic/hospital)."
+    },
+    {
+      "cmd": "+cyber/list",
+      "label": "view all available cyberware by category"
+    },
+    {
+      "cmd": "+cyber",
+      "label": "view your currently installed cyberware and total HL"
+    },
+    {
+      "cmd": "+cyber/list neuralware",
+      "label": "browse neuralware items in the catalog"
+    },
+    {
+      "note": "Categories: fashionware, neuralware, cyberoptics, cyberaudio, internal, external, cyberlimb, chipware."
+    },
+    {
+      "note": "+cyber/install <name> and +cyber/remove <name> require the Medtech role or admin. Medtechs use +chopshop/install and +chopshop/harvest for surgery on others."
+    },
+    {
+      "sub": "Armor"
+    },
+    {
+      "note": "Armor has two slots: body and head. SP (Stopping Power) ablates on hit. Repair with TECH+basic_tech vs DV13."
+    },
+    {
+      "cmd": "+armor",
+      "label": "view equipped armor and current SP"
+    },
+    {
+      "cmd": "+armor/list",
+      "label": "browse the full armor catalog"
+    },
+    {
+      "cmd": "+armor/remove body",
+      "label": "unequip body armor"
+    },
+    {
+      "cmd": "+armor/repair head",
+      "label": "repair worn head armor — TECH+basic_tech vs DV13"
+    },
+    {
+      "sub": "Bodysculpting"
+    },
+    {
+      "note": "Bodysculpt mods are cosmetic or exotic body modifications. Applied by Medtechs or Admins. HL applies on install."
+    },
+    {
+      "cmd": "+bodysculpt/list",
+      "label": "browse modification catalog (cosmetic to exotic)"
+    },
+    {
+      "cmd": "+bodysculpt",
+      "label": "view your current bodysculpt modifications"
+    },
+    {
+      "note": "+bodysculpt/get <mod> applies the modification to yourself. Requires Medtech role or Admin. +bodysculpt/remove <mod> removes it (Admin only)."
+    },
+    {
+      "reset": true
+    }
+  ]
+}

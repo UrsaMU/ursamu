@@ -1,0 +1,97 @@
+/**
+ * Preview-only chrome (not part of the theme contract).
+ */
+
+.tp-has-bar body {
+  /* room for fixed bar */
+  padding-bottom: 3.25rem;
+}
+
+.tp-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.45rem 0.75rem;
+  background: #1a1a1a;
+  color: #f0f0f0;
+  border-top: 1px solid #444;
+  font: 600 12px/1.2 system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
+}
+
+.tp-bar__brand {
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #aaa;
+  margin-right: 0.25rem;
+}
+
+.tp-bar__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tp-bar__group--end {
+  margin-left: auto;
+}
+
+.tp-bar__meta {
+  font-weight: 500;
+  color: #888;
+  margin-right: 0.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.tp-bar__btn {
+  appearance: none;
+  margin: 0;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid #666;
+  border-radius: 0;
+  background: #2a2a2a;
+  color: #f5f5f5;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tp-bar__btn:hover {
+  border-color: #aaa;
+  background: #3a3a3a;
+}
+
+.tp-bar__btn:focus-visible {
+  outline: 2px solid #ccc;
+  outline-offset: 1px;
+}
+
+/* Optional phone-width frame for hamburger / drawer checks */
+html.tp-narrow {
+  background: #333;
+}
+
+html.tp-narrow body {
+  max-width: 390px;
+  margin: 0 auto;
+  box-shadow: 0 0 0 1px #000;
+  min-height: 100vh;
+  background: inherit;
+}
+
+@media (max-width: 640px) {
+  .tp-bar__brand {
+    width: 100%;
+  }
+
+  .tp-bar__group--end {
+    margin-left: 0;
+  }
+}

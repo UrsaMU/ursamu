@@ -48,6 +48,14 @@ export { findCaretMatches, fireCaretPatterns, registerCaretExecutor } from "./sr
 export type { CaretMatch } from "./src/world/caret-patterns.ts";
 export { findDollarPattern, matchGlob }      from "./src/world/dollar-patterns.ts";
 export type { DollarMatch }                  from "./src/world/dollar-patterns.ts";
+export {
+  nameMatches,
+  nameMatchesExact,
+  nameParts,
+  parseNameOrdinal,
+  listNameMatches,
+  pickNameMatch,
+} from "./src/world/name-match.ts";
 export type { Intent, InterceptorCandidate } from "./src/world/interceptor-service.ts";
 export type {
   SayEvent, PoseEvent, OocEvent, PageEvent, MoveEvent, SessionEvent,
@@ -168,6 +176,8 @@ export {
   execDrop,
   execGive,
   execUse,
+  execOpen,
+  execClose,
   execCreateObject,
 } from "./src/verbs/manipulation.ts";
 export { execLook, defaultConformatHandler }                       from "./src/verbs/look.ts";

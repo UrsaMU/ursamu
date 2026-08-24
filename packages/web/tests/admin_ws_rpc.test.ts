@@ -33,6 +33,13 @@ Deno.test("pathAllowed — staff API surfaces", () => {
   );
   assertEquals(pathAllowed("/api/v1/help"), true);
   assertEquals(pathAllowed("/api/v1/help/mail/send"), true);
+  assertEquals(pathAllowed("/api/v1/events"), true);
+  assertEquals(pathAllowed("/api/v1/events/upcoming"), true);
+  assertEquals(pathAllowed("/api/v1/events/3/rsvp"), true);
+  assertEquals(pathAllowed("/api/v1/cpr/approve"), true);
+  assertEquals(pathAllowed("/api/v1/cpr/sheet"), true);
+  assertEquals(pathAllowed("/api/v1/cofd/approve"), true);
+  assertEquals(pathAllowed("/api/v1/dnd/approve"), true);
   assertEquals(
     pathAllowed("/api/v1/map/realm/default/render"),
     true,

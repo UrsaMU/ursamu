@@ -47,8 +47,8 @@
     "@ursamu/mush": "jsr:@ursamu/mush@^1.0.0",
     "@ursamu/combat": "jsr:@ursamu/combat@^0.8.0",
     "@ursamu/core": "jsr:@ursamu/core@^1.0.0",
-    "@ursamu/help-plugin": "jsr:@ursamu/help@^1.0.0",
-    "@ursamu/help": "jsr:@ursamu/help@^1.0.0",
+    "@ursamu/help-plugin": "../help/mod.ts",
+    "@ursamu/help": "../help/mod.ts",
     "@ursamu/jobs-plugin": "jsr:@ursamu/jobs@^1.0.0",
     "@ursamu/jobs": "jsr:@ursamu/jobs@^1.0.0",
     "@ursamu/mail": "jsr:@ursamu/mail@^2.5.0",
@@ -73,6 +73,7 @@
     "@std/flags": "jsr:@std/flags@^0.224.0",
     "@std/semver": "jsr:@std/semver@^1.0.0",
     "@std/fmt": "jsr:@std/fmt@^0.224.0",
-    "@std/fmt/": "jsr:@std/fmt@^0.224.0/"
+    "@std/fmt/": "jsr:@std/fmt@^0.224.0/",
+    "@ursamu/help/register": "../help/register.ts"
   }
 }

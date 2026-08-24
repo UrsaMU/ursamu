@@ -1,7 +1,7 @@
 {
   "name": "@ursamu/dnd-plugin",
   "version": "1.0.0",
-  "description": "D&D 5e/2024 (SRD 5.2) system plugin for UrsaMU — character sheets, rolling with advantage/disadvantage, health/resource tracking, and guided chargen.",
+  "description": "D&D 5e/2024 (SRD 5.2) system plugin for UrsaMU \u2014 character sheets, rolling with advantage/disadvantage, health/resource tracking, and guided chargen.",
   "exports": "./index.ts",
   "tasks": {
     "test": "deno test -A --unstable-kv",
@@ -16,16 +16,19 @@
       "src",
       "help",
       "resources",
-      "templates",
       "index.ts",
       "commands.ts",
       "routes.ts",
       "deno.json",
       "ursamu.plugin.json",
-      "README.md"
+      "README.md",
+      "FIRST-HOUR.md"
     ],
     "exclude": [
-      "tests"
+      "tests",
+      "tools",
+      "showcases",
+      "data"
     ]
   },
   "imports": {
@@ -33,8 +36,17 @@
     "@ursamu/ursamu": "../mush/mod.ts",
     "@ursamu/mush": "../mush/mod.ts",
     "@ursamu/combat": "../combat/mod.ts",
-    "@ursamu/help-plugin": "jsr:@ursamu/help@^0.1.2",
-    "@ursamu/help": "jsr:@ursamu/help@^0.1.2",
+    "@ursamu/jobs": "../jobs/mod.ts",
+    "@ursamu/jobs-plugin": "../jobs/mod.ts",
+    "@ursamu/vendor-plugin": "../vendor/index.ts",
+    "@ursamu/vendor": "../vendor/mod.ts",
+    "@ursamu/help-plugin": "../help/mod.ts",
+    "@ursamu/help": "../help/mod.ts",
+    "@ursamu/map-plugin": "../map/index.ts",
+    "@ursamu/map": "../map/index.ts",
+    "@ursamu/mail": "../mail/mod.ts",
+    "@ursamu/mail-plugin": "../mail/mod.ts",
+    "@ursamu/site": "../site/src/index.ts",
     "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.7.0",
     "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.7.0/eval",
     "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.7.0/parse",
@@ -53,6 +65,7 @@
     "@std/flags": "jsr:@std/flags@^0.224.0",
     "@std/semver": "jsr:@std/semver@^1.0.0",
     "@std/fmt": "jsr:@std/fmt@^0.224.0",
-    "@std/fmt/": "jsr:@std/fmt@^0.224.0/"
+    "@std/fmt/": "jsr:@std/fmt@^0.224.0/",
+    "@ursamu/help/register": "../help/register.ts"
   }
 }

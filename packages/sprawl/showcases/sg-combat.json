@@ -1,0 +1,253 @@
+{
+  "key": "sg-combat",
+  "label": "Sprawl Goons \u2014 Combat, Damage & Tactics",
+  "vars": {
+    "player": "Neon"
+  },
+  "setup": {
+    "character": {
+      "version": 1,
+      "chargenStatus": "approved",
+      "chargenComplete": true,
+      "name": "Neon",
+      "stats": {
+        "morphology": 1,
+        "equilibrium": 1,
+        "reaction": 2,
+        "cognition": 0,
+        "affinity": 0
+      },
+      "resilience": 12,
+      "resilienceMax": 12,
+      "loadoutMax": 10,
+      "bityuan": 400,
+      "background": "zone-wars-veteran",
+      "backgroundName": "Zone Wars Veteran",
+      "edge": "zone-wars-veteran-edge",
+      "edgeName": "Situational Awareness",
+      "affectations": [],
+      "quirks": [],
+      "loadout": [],
+      "augs": [],
+      "shards": [],
+      "software": [],
+      "ap": 0,
+      "level": 0,
+      "notes": ""
+    },
+    "targets": {
+      "Razor": {
+        "flags": [
+          "player",
+          "connected"
+        ],
+        "state": {
+          "version": 1,
+          "chargenStatus": "approved",
+          "chargenComplete": true,
+          "name": "Razor",
+          "stats": {
+            "morphology": 2,
+            "equilibrium": 0,
+            "reaction": 1,
+            "cognition": 0,
+            "affinity": 1
+          },
+          "resilience": 10,
+          "resilienceMax": 12,
+          "loadoutMax": 10,
+          "bityuan": 100,
+          "background": "syndicate-enforcer",
+          "backgroundName": "Syndicate Enforcer",
+          "edge": "syndicate-enforcer-edge",
+          "edgeName": "Intimidate",
+          "affectations": [],
+          "quirks": [],
+          "loadout": [],
+          "augs": [],
+          "shards": [],
+          "software": [],
+          "ap": 0,
+          "level": 0,
+          "notes": ""
+        }
+      }
+    },
+    "items": [
+      {
+        "slug": "kr-16",
+        "name": "KR-16 Assault Rifle",
+        "kind": "firearm",
+        "category": "rifle",
+        "load": 2,
+        "bonus": 1,
+        "mods": [
+          {
+            "slug": "targeting-scope",
+            "name": "Targeting scope",
+            "bonus": 1,
+            "tags": ["aim"]
+          },
+          {
+            "slug": "custom-grips",
+            "name": "Custom grips",
+            "bonus": 1,
+            "tags": ["shot"]
+          },
+          {
+            "slug": "gyro-stabilisation",
+            "name": "Gyro-stabilisation",
+            "bonus": 1,
+            "tags": ["burst"]
+          },
+          {
+            "slug": "smart-targeting",
+            "name": "Smart targeting",
+            "bonus": 0,
+            "tags": ["upgrade-shot"]
+          }
+        ]
+      },
+      {
+        "slug": "monoknife",
+        "name": "Monoknife",
+        "kind": "melee",
+        "load": 1,
+        "bonus": 1,
+        "mods": [
+          {
+            "slug": "custom-grips",
+            "name": "Custom grips",
+            "bonus": 1,
+            "tags": ["shot"]
+          }
+        ]
+      }
+    ]
+  },
+  "steps": [
+    { "sub": "Loadout with nested mods" },
+    { "cmd": "inv", "label": "rifle + nested mods" },
+    { "expect": "Targeting scope" },
+    { "expect": "mag" },
+    { "cmd": "+gear/mod kr-16", "label": "list rifle mods" },
+    { "expect": "smart-targeting" },
+    { "cmd": "+gear/wield kr-16", "label": "wield rifle" },
+
+    { "sub": "Open fire (mods + mag spend)" },
+    { "cmd": "+flavor", "label": "flavor status" },
+    { "expect": "ON" },
+    { "cmd": "+attack 10", "label": "standard shot + grips" },
+    { "expect": "grips+1" },
+    { "expect": "Mag" },
+    { "expect": "Lucky chrome" },
+    { "cmd": "+flavor off", "label": "disable flavor" },
+    { "expect": "off" },
+    { "cmd": "+flavor on", "label": "re-enable flavor" },
+    { "expect": "on" },
+    { "cmd": "+attack/aim 10", "label": "aim + scope" },
+    { "expect": "scope+1" },
+    { "cmd": "+attack/burst 10", "label": "burst + gyro" },
+    { "expect": "gyro+1" },
+    { "cmd": "+reload", "label": "top off before auto" },
+    { "expect": "Reloaded" },
+    { "cmd": "+attack/auto 10", "label": "full auto empties mag" },
+    { "expect": "auto+4" },
+    { "expect": "EMPTY" },
+    { "cmd": "+attack 10", "label": "dry fire blocked" },
+    { "expect": "Magazine empty" },
+    { "cmd": "+reload", "label": "reload after auto" },
+    { "expect": "30/30" },
+    { "cmd": "+attack/pb 8", "label": "point blank + grips" },
+    { "expect": "pb+3" },
+
+    { "sub": "Specialty (shotgun / mono / DoT)" },
+    { "cmd": "+gear/buy street-12g", "label": "buy pump shotgun" },
+    { "cmd": "+gear/wield street-12g", "label": "wield shotgun" },
+    { "expect": "wielded" },
+    { "cmd": "+attack/sg-pb 10,12,14", "label": "shotgun PB bunched" },
+    { "expect": "sg-pb" },
+    { "expect": "BUNCHED" },
+    { "cmd": "+gear/wield monoknife", "label": "wield mono" },
+    { "cmd": "+attack/melee 10", "label": "mono vs bare" },
+    { "expect": "mono" },
+    { "expect": "monoknife" },
+    { "cmd": "+gear/wield kr-16", "label": "rifle again" },
+    { "cmd": "+gear/load kr-16=hellfires", "label": "load HE ammo" },
+    { "expect": "Loaded" },
+    { "cmd": "+reload", "label": "full mag for HE" },
+    { "cmd": "+attack 8", "label": "hellfire vs DS (NPC burn)" },
+    { "expect": "FIRE/ACID" },
+    { "expect": "burns" },
+    { "cmd": "+attack Razor", "label": "hellfire vs PC auto-ignite" },
+    { "expect": "FIRE/ACID" },
+    { "expect": "Razor" },
+    { "cmd": "+dot", "as": "Razor", "label": "Razor still on fire" },
+    { "expect": "fire" },
+    { "cmd": "+dot/apply fire 2", "label": "Neon lights self" },
+    { "expect": "DoT" },
+    { "cmd": "+attack 10", "label": "attack while burning" },
+    { "expect": "YOUR DoT" },
+    { "cmd": "+dot", "label": "Neon DoT list" },
+    { "expect": "fire" },
+    { "cmd": "+dot/clear", "label": "Neon clear" },
+    { "cmd": "+dot/clear Razor", "as": "admin", "label": "staff clear Razor" },
+
+    { "sub": "Range, scene, hordes" },
+    { "cmd": "+range/guide", "label": "range table" },
+    { "expect": "50" },
+    { "cmd": "+range 1", "label": "set PB range" },
+    { "expect": "1m" },
+    { "cmd": "+gear/wield kr-16", "label": "rifle at PB" },
+    { "cmd": "+reload", "label": "mag" },
+    { "cmd": "+attack 10", "label": "auto PB from range" },
+    { "expect": "pb+3" },
+    { "cmd": "+range 500", "label": "long shot" },
+    { "cmd": "+attack 10", "label": "OOR glitch" },
+    { "expect": "OOR" },
+    { "cmd": "+range/clear", "label": "clear range" },
+    { "cmd": "+scene", "label": "scene edge reset" },
+    { "expect": "edge" },
+    { "cmd": "+horde/spawn 6 alley rats", "label": "spawn mob" },
+    { "expect": "Horde" },
+    { "cmd": "+reload", "label": "mag for horde" },
+    { "cmd": "+attack horde", "label": "riddle the mob" },
+    { "expect": "HORDE" },
+    { "cmd": "+horde", "label": "remaining punks" },
+    { "cmd": "+horde/clear", "label": "clear mob" },
+
+    { "sub": "Hazards & suppress" },
+    { "cmd": "+fall 10", "label": "fall 10m" },
+    { "expect": "Fell" },
+    { "cmd": "+explode 2d6", "label": "planted charge" },
+    { "expect": "Charge" },
+    { "cmd": "+gear/wield kr-16", "label": "rifle for suppress" },
+    { "cmd": "+reload", "label": "mag for suppress" },
+    { "cmd": "+suppress 2 10,12", "label": "suppress 2m zone" },
+    { "expect": "EMPTY" },
+    { "cmd": "+grenade open", "label": "grenade open ground" },
+    { "cmd": "+reload", "label": "reload mag" },
+    { "expect": "Reloaded" },
+
+    { "sub": "Damage & heal" },
+    { "cmd": "+damage 3", "label": "take 3 Res" },
+    { "expect": "Res" },
+    { "cmd": "+sheet/combat", "label": "wounds panel" },
+    { "cmd": "+heal", "label": "first aid self" },
+    { "cmd": "+damage Razor=4", "label": "hit Razor for 4" },
+    { "cmd": "+heal Razor", "label": "aid Razor" },
+
+    { "sub": "Critical tables" },
+    { "cmd": "+critical/limb", "label": "cyberlimb fault" },
+    { "expect": "CYBERLIMB" },
+    { "cmd": "+critical/vehicle", "label": "vehicle crit table" },
+    { "expect": "VEHICLE CRIT" },
+    { "cmd": "+critical/shell", "label": "cybershell table" },
+    { "cmd": "+critical/clear", "as": "admin", "label": "staff clear crit" },
+
+    { "sub": "Edge & rest" },
+    { "cmd": "+edge", "label": "edge status" },
+    { "cmd": "+heal/rest", "label": "full rest" },
+    { "cmd": "+sheet", "label": "post-rest sheet" }
+  ]
+}

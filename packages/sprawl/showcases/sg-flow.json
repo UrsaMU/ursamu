@@ -1,0 +1,183 @@
+{
+  "key": "sg-flow",
+  "label": "Sprawl Goons \u2014 The Flow, Corps & Street Life",
+  "vars": {
+    "player": "Neon"
+  },
+  "setup": {
+    "character": {
+      "version": 1,
+      "chargenStatus": "approved",
+      "chargenComplete": true,
+      "name": "Neon",
+      "stats": {
+        "morphology": 1,
+        "equilibrium": 1,
+        "reaction": 1,
+        "cognition": 1,
+        "affinity": 0
+      },
+      "resilience": 12,
+      "resilienceMax": 12,
+      "loadoutMax": 10,
+      "bityuan": 1200,
+      "background": "zone-wars-veteran",
+      "backgroundName": "Zone Wars Veteran",
+      "edge": "zone-wars-veteran-edge",
+      "edgeName": "Situational Awareness",
+      "affectations": [
+        "Neonpunk"
+      ],
+      "quirks": [],
+      "loadout": [],
+      "augs": [],
+      "shards": [],
+      "software": [],
+      "ap": 80,
+      "level": 0,
+      "notes": ""
+    },
+    "items": [
+      {
+        "slug": "pkd-45",
+        "name": "Charon PKD-45",
+        "kind": "firearm",
+        "load": 1,
+        "bonus": 1
+      }
+    ]
+  },
+  "steps": [
+    {
+      "sub": "The Flow atlas"
+    },
+    {
+      "cmd": "+flow",
+      "label": "district roster"
+    },
+    {
+      "expect": "DISTRICTS"
+    },
+    {
+      "cmd": "+flow apex",
+      "label": "Apex Nuevo"
+    },
+    {
+      "cmd": "+flow 1",
+      "label": "location #1"
+    },
+    {
+      "cmd": "+flow H3",
+      "label": "grid H3"
+    },
+    {
+      "sub": "Corps & NPCs"
+    },
+    {
+      "cmd": "+corp",
+      "label": "transnational roster"
+    },
+    {
+      "cmd": "+corp genexus",
+      "label": "Genexus dossier"
+    },
+    {
+      "cmd": "+npc",
+      "label": "antagonist list"
+    },
+    {
+      "cmd": "+npc gang-member",
+      "label": "gang goon sheet"
+    },
+    {
+      "sub": "Wheels"
+    },
+    {
+      "cmd": "+vehicle",
+      "label": "chassis DS"
+    },
+    {
+      "cmd": "+vehicle/showroom",
+      "label": "Metal Express"
+    },
+    {
+      "cmd": "+vehicle/design",
+      "label": "design rules"
+    },
+    {
+      "cmd": "+drive tight-turn",
+      "label": "maneuver roll"
+    },
+    {
+      "sub": "Street chem"
+    },
+    {
+      "cmd": "+drug/catalog",
+      "label": "narcotics"
+    },
+    {
+      "cmd": "+drug/use stim",
+      "label": "dose stim"
+    },
+    {
+      "sub": "Lexicon & rules"
+    },
+    {
+      "cmd": "+lexicon",
+      "label": "slang index"
+    },
+    {
+      "cmd": "+lexicon bityuan",
+      "label": "b\u00a5 entry"
+    },
+    {
+      "expect": "bityuan"
+    },
+    {
+      "cmd": "+rules",
+      "label": "rules index"
+    },
+    {
+      "cmd": "+rules combat",
+      "label": "combat rules"
+    },
+    {
+      "cmd": "+rules ds",
+      "label": "difficulty scores"
+    },
+    {
+      "sub": "Advancement"
+    },
+    {
+      "cmd": "+ap",
+      "label": "AP track"
+    },
+    {
+      "cmd": "+ap/add 25",
+      "label": "gain 25 AP"
+    },
+    {
+      "cmd": "+advance",
+      "label": "advance menu"
+    },
+    {
+      "cmd": "+edge",
+      "label": "edge status"
+    },
+    {
+      "sub": "Glyph mode"
+    },
+    {
+      "cmd": "+utf8",
+      "label": "toggle utf8 chrome"
+    },
+    {
+      "cmd": "+sheet",
+      "label": "utf8 sheet preview"
+    },
+    {
+      "cmd": "+utf8",
+      "label": "toggle back to ascii"
+    }
+  ]
+}

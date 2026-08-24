@@ -1,0 +1,176 @@
+{
+  "key": "cpr-look",
+  "label": "Cyberpunk RED — Look (Room & Player)",
+  "vars": { "player": "V" },
+  "setup": {
+    "room": {
+      "name": "Afterlife Bar",
+      "desc": "The Afterlife is Night City's most notorious watering hole, tucked under a burnt-out overpass in Watson. Neon strips flicker along the bar, casting everything in sickly blue light. The smell of synth-tobacco, spilled beer, and old blood never really goes away. Rogue holds court at the back. Fixers, solos, and edgerunners lean in over drinks, cutting deals or drowning regrets.",
+      "zone": "Watson"
+    },
+    "character": {
+      "_state": {
+        "shortdesc": "A quiet figure in a worn leather jacket, eyes scanning the room.",
+        "desc": "V stands at medium height, with the kind of lean build that comes from surviving on the street rather than a gym. A faded Samurai patch clings to one sleeve. Chrome gleams faintly at the temples — obvious neural interface ports. Eyes dark, alert, never quite at rest."
+      },
+      "stats": { "int": 7, "ref": 8, "dex": 7, "tech": 5, "cool": 8, "will": 6, "luck": 7, "move": 6, "body": 7, "emp": 5, "empBase": 8 },
+      "hp": { "max": 45, "current": 38 },
+      "swThreshold": 23,
+      "deathSave": 7,
+      "deathSavePenalty": 0,
+      "role": "solo",
+      "roleRank": 4,
+      "roleData": {},
+      "skills": { "athletics": 6, "brawling": 5, "handgun": 8, "evasion": 6, "perception": 6, "stealth": 5, "streetwise": 5, "shoulder_arms": 6 },
+      "luckRemaining": 7,
+      "woundState": "lightly",
+      "criticalInjuries": [],
+      "armorBody": { "name": "Light Armorjack", "sp": 11, "currentSp": 9, "penalty": 0 },
+      "armorHead": null,
+      "cyberware": [
+        { "id": "cw1", "name": "Neural Link", "category": "neuralware", "location": "skull", "hl": 2, "slots": 5, "installType": "clinic", "installedAt": 0 },
+        { "id": "cw1a", "name": "Interface Plugs", "category": "neuralware", "hl": 2, "installedIn": "cw1", "slotCost": 1, "installType": "clinic", "installedAt": 0 },
+        { "id": "cw3", "name": "Subdermal Grip", "category": "internal", "hl": 1, "installedIn": "cw1", "slotCost": 1, "installType": "mall", "installedAt": 0 },
+        { "id": "cw2", "name": "Kiroshi Optics Mk.2", "category": "cyberoptics", "location": "right eye", "hl": 3, "slots": 3, "installType": "clinic", "installedAt": 0 },
+        { "id": "cw2a", "name": "Image Enhance", "category": "cyberoptics", "hl": 1, "installedIn": "cw2", "slotCost": 1, "installType": "clinic", "installedAt": 0 }
+      ],
+      "humanityLoss": 18,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 5,
+      "reputationDeeds": [],
+      "eurodollars": 4200,
+      "lifestyle": { "tier": "low", "nextDueDate": 0 },
+      "lifepath": { "culturalOrigin": "North American", "language": "English" },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": [],
+      "gear": [
+        { "id": "g1", "name": "Lexington 10mm", "type": "weapon", "slot": "wielded", "concealed": false },
+        { "id": "g2", "name": "Trauma Team card", "type": "gear", "slot": "carried", "concealed": true },
+        { "id": "g3", "name": "Speed (drug)", "type": "drug", "slot": "carried", "concealed": true }
+      ]
+    },
+    "targets": {
+      "Rogue": {
+        "_state": {
+          "shortdesc": "Legendary fixer. Chrome hand. Don't stare.",
+          "desc": "Rogue Amendiares has been running the Afterlife longer than most edgerunners have been alive. Silver hair pulled back sharp, chrome hand resting on the bar like a statement. She moves like someone who has already won every fight in this room."
+        },
+        "stats": { "int": 9, "ref": 9, "dex": 8, "tech": 6, "cool": 10, "will": 9, "luck": 8, "move": 7, "body": 7, "emp": 6, "empBase": 9 },
+        "hp": { "max": 50, "current": 50 },
+        "swThreshold": 25,
+        "deathSave": 7,
+        "deathSavePenalty": 0,
+        "role": "fixer",
+        "roleRank": 8,
+        "roleData": {},
+        "skills": { "athletics": 6, "brawling": 6, "handgun": 10, "evasion": 8, "perception": 8, "streetwise": 10, "persuasion": 8 },
+        "luckRemaining": 8,
+        "woundState": "healthy",
+        "criticalInjuries": [],
+        "armorBody": { "name": "Medium Armorjack", "sp": 13, "currentSp": 13, "penalty": 0 },
+        "armorHead": null,
+        "cyberware": [
+          { "id": "cw10", "name": "Cyberarm", "category": "cyberlimb", "location": "right arm", "hl": 4, "slots": 4, "installType": "hospital", "installedAt": 0 },
+          { "id": "rg_cw10a", "name": "Popup Melee Weapon", "category": "cyberlimb", "hl": 2, "installedIn": "cw10", "slotCost": 2, "installType": "hospital", "installedAt": 0 },
+          { "id": "cw11", "name": "Neural Link", "category": "neuralware", "location": "skull", "hl": 2, "slots": 5, "installType": "clinic", "installedAt": 0 },
+          { "id": "rg_cw1a", "name": "Braindance Recorder", "category": "neuralware", "hl": 2, "installedIn": "cw11", "slotCost": 1, "installType": "clinic", "installedAt": 0 }
+        ],
+        "humanityLoss": 22,
+        "bodysculpt": [],
+        "activeEffects": [],
+        "reputation": 10,
+        "reputationDeeds": [],
+        "eurodollars": 85000,
+        "lifestyle": { "tier": "luxury", "nextDueDate": 0 },
+        "lifepath": {},
+        "chargenComplete": true,
+        "chargenStage": "complete",
+        "chargenMethod": "complete",
+        "restTimer": null,
+        "humanityGainedAt": null,
+        "locationEffects": [],
+        "gear": [
+          { "id": "rg1", "name": "Federated Arms X-9mm", "type": "weapon", "slot": "wielded", "concealed": false },
+          { "id": "rg2", "name": "Disposable Phone", "type": "gear", "slot": "carried", "concealed": false }
+        ]
+      },
+      "Jackie": {
+        "_state": {
+          "shortdesc": "Big guy. Bigger smile. Maelstrom tats, but friendly.",
+          "desc": "Jackie Welles fills the room just by existing — broad-shouldered, tattooed neck to wrist, a grin that makes you forget he could probably crush your skull. He is nursing a beer and watching the door."
+        },
+        "stats": { "int": 6, "ref": 7, "dex": 7, "tech": 4, "cool": 7, "will": 7, "luck": 6, "move": 7, "body": 9, "emp": 7, "empBase": 7 },
+        "hp": { "max": 55, "current": 55 },
+        "swThreshold": 28,
+        "deathSave": 9,
+        "deathSavePenalty": 0,
+        "role": "solo",
+        "roleRank": 3,
+        "roleData": {},
+        "skills": { "athletics": 7, "brawling": 8, "handgun": 7, "evasion": 5, "perception": 5, "streetwise": 6 },
+        "luckRemaining": 6,
+        "woundState": "healthy",
+        "criticalInjuries": [],
+        "armorBody": { "name": "Kevlar", "sp": 7, "currentSp": 7, "penalty": 0 },
+        "armorHead": null,
+        "cyberware": [],
+        "humanityLoss": 0,
+        "bodysculpt": [],
+        "activeEffects": [],
+        "reputation": 3,
+        "reputationDeeds": [],
+        "eurodollars": 800,
+        "lifestyle": { "tier": "low", "nextDueDate": 0 },
+        "lifepath": {},
+        "chargenComplete": true,
+        "chargenStage": "complete",
+        "chargenMethod": "complete",
+        "restTimer": null,
+        "humanityGainedAt": null,
+        "locationEffects": []
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Room Look"
+    },
+    {
+      "note": "look with no argument renders the current room — name, zone tag, description, and occupant list with idle times and short descs."
+    },
+    {
+      "cmd": "look",
+      "label": "look at the current room"
+    },
+    {
+      "sub": "Player Look"
+    },
+    {
+      "note": "look <player> renders that player's description, role, wound state, and installed cyberware."
+    },
+    {
+      "cmd": "look Rogue",
+      "label": "look at Rogue — fixer, healthy, cyberlimb visible"
+    },
+    {
+      "cmd": "look Jackie",
+      "label": "look at Jackie — solo, no cyberware"
+    },
+    {
+      "cmd": "look V",
+      "label": "look at yourself — lightly wounded, Kiroshi optics visible"
+    },
+    {
+      "sub": "Not Found"
+    },
+    {
+      "cmd": "look Silverhand",
+      "label": "look at someone not present"
+    }
+  ]
+}

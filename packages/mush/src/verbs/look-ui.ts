@@ -503,9 +503,25 @@ export async function buildSingleLookLayout(
       });
     }
     if (things.length > 0) {
-      const items: UIEntityItem[] = [];
+      // Stack identical names (Dagger ×2) — one row per stack
+      const stacks = new Map<
+        string,
+        { rep: typeof things[0]; n: number; label: string }
+      >();
       for (const o of things) {
-        items.push(await entityItem(u, actor, o, theme));
+        const label = lookLabel(o, u, actor);
+        const key = label.toLowerCase();
+        const hit = stacks.get(key);
+        if (hit) hit.n++;
+        else stacks.set(key, { rep: o, n: 1, label });
+      }
+      const items: UIEntityItem[] = [];
+      for (const s of stacks.values()) {
+        const row = await entityItem(u, actor, s.rep, theme);
+        if (s.n > 1) {
+          row.label = `${s.label} ×${s.n}`;
+        }
+        items.push(row);
       }
       components.push({
         type: "entity-list",

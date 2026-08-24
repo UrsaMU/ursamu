@@ -1,0 +1,16 @@
+{
+  "tasks": {
+    "start": "deno run -A server.ts",
+    "dev": "deno run -A server.ts --open",
+    "studio": "deno run -A server.ts --open",
+    "check": "deno check server.ts src/*.ts",
+    "test": "deno test tests/ --allow-read --allow-net --no-check"
+  },
+  "imports": {
+    "@std/path": "jsr:@std/path@^1.0.0",
+    "@std/fs": "jsr:@std/fs@^1.0.0",
+    "@std/cli": "jsr:@std/cli@^1.0.0",
+    "@std/assert": "jsr:@std/assert@^1.0.0",
+    "fflate": "npm:fflate@0.8.2"
+  }
+}

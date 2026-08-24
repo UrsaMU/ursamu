@@ -197,6 +197,25 @@
   var helpIndex = null;
   var helpIndexPromise = null;
 
+  // Apply mode classes immediately (script is defer — still before
+  // content inject). Prevents layout thrash when SSR omitted mode.
+  if (shell) {
+    shell.classList.toggle("is-mode-login", MODE === "login");
+    shell.classList.toggle("is-mode-profile", MODE === "profile");
+    shell.classList.toggle("is-mode-chargen", MODE === "chargen");
+    shell.classList.toggle("is-mode-play", MODE === "play");
+    shell.classList.toggle("is-mode-help", MODE === "help");
+    shell.classList.toggle("is-mode-wiki", MODE === "wiki");
+    if (
+      MODE === "login" || MODE === "profile" || MODE === "wiki" ||
+      MODE === "help" || MODE === "chargen" || MODE === "play"
+    ) {
+      shell.classList.add("is-compact");
+      shell.classList.add("is-mode-no-hero");
+      shell.classList.add("is-plain");
+    }
+  }
+
   // ── Config helpers ─────────────────────────────────────────────────────────
 
   var siteConfig = {};
@@ -244,7 +263,16 @@
 
   function setSkinHref(href) {
     if (!skinLink || !href) return;
-    if (skinLink.getAttribute("href") === href) return;
+    var cur = skinLink.getAttribute("href") || "";
+    if (cur === href) return;
+    // Same stylesheet path, different ?v= / ?g= only — keep the
+    // already-loaded skin. Swapping the href unloads CSS and flashes
+    // default UrsaMU tokens under a custom theme.
+    try {
+      var a = new URL(cur, window.location.origin);
+      var b = new URL(href, window.location.origin);
+      if (a.pathname === b.pathname && a.origin === b.origin) return;
+    } catch (_) { /* fall through */ }
     skinLink.setAttribute("href", href);
   }
 
@@ -275,6 +303,10 @@
   function applyConfig(cfg) {
     if (!cfg || typeof cfg !== "object") return;
     siteConfig = cfg;
+    // play.js reads playPreview / ws port from here
+    try {
+      globalThis.__SITE_CFG__ = cfg;
+    } catch (_) { /* ignore */ }
 
     var heroTitle = String(cfg.title || "").trim();
     var brandTitle = heroTitle || "UrsaMU";
@@ -327,6 +359,19 @@
         bannerImg.src = bannerSrc;
         bannerImg.hidden = false;
         bannerImg.removeAttribute("hidden");
+        // Frame wrapper for sep-top / sep-bottom theme ornaments
+        if (
+          bannerImg.parentElement &&
+          !bannerImg.parentElement.classList.contains("site-media")
+        ) {
+          var mediaWrap = document.createElement("div");
+          mediaWrap.className = "site-media site-media--banner image-wrap";
+          bannerImg.parentNode.insertBefore(mediaWrap, bannerImg);
+          mediaWrap.appendChild(bannerImg);
+        }
+        ensureMediaSeps(
+          bannerImg.closest(".site-media") || bannerImg.parentElement,
+        );
         if (banner) {
           banner.classList.add("has-image");
           // Repair dual class= from older SSR (keep site-banner)
@@ -425,6 +470,64 @@
    * Also: _assets/crest.png  ./crest.png
    * Absolute /http(s) left as-is.
    */
+  /**
+   * Termv media frame: .site-media hosts sep-top + sep-bottom via
+   * CSS ::before/::after. Strip legacy injected nodes. Banner: class only.
+   */
+  function ensureMediaSeps(wrap) {
+    if (!wrap || !wrap.classList) return wrap;
+    if (
+      !wrap.classList.contains("site-media") &&
+      !wrap.classList.contains("image-wrap")
+    ) {
+      return wrap;
+    }
+    var legacy = wrap.querySelectorAll(
+      ":scope > .site-sep-bar, :scope > .site-sep, :scope > .site-sep__rail",
+    );
+    for (var i = 0; i < legacy.length; i++) {
+      legacy[i].parentNode.removeChild(legacy[i]);
+    }
+    return wrap;
+  }
+
+  /**
+   * Wrap a bare <img> for Termv media seps.
+   * Portrait headshot: frameMediaImg(img, "site-media--portrait")
+   *   or class "termv-char__portrait site-media image-wrap".
+   * Do NOT use for nav/account avatars — those stay unframed chips.
+   */
+  function frameMediaImg(img, extraClass) {
+    if (!img || img.tagName !== "IMG") return null;
+    // Never frame nav / account avatars
+    if (
+      img.classList.contains("site-nav-avatar") ||
+      img.closest(".site-profile-avatar, .site-nav-account")
+    ) {
+      return null;
+    }
+    if (img.closest(".site-media, .image-wrap")) {
+      var existing = img.closest(".site-media, .image-wrap");
+      if (
+        extraClass &&
+        extraClass.indexOf("portrait") >= 0
+      ) {
+        existing.classList.add("site-media--portrait");
+      }
+      return ensureMediaSeps(existing);
+    }
+    var wrap = document.createElement(
+      extraClass && extraClass.indexOf("portrait") >= 0
+        ? "figure"
+        : "span",
+    );
+    wrap.className = "site-media image-wrap" +
+      (extraClass ? " " + extraClass : "");
+    img.parentNode.insertBefore(wrap, img);
+    wrap.appendChild(img);
+    return ensureMediaSeps(wrap);
+  }
+
   function resolveImageSrc(src, pagePath) {
     var raw = String(src || "").trim();
     if (!raw) return null;
@@ -477,15 +580,19 @@
         );
       },
     );
-    // Images ![alt](url)
+    // Images ![alt](url) — wrap so skins can frame with sep ornaments
+    // (.site-media). Bare <img> cannot host ::before/::after.
+    // Sep children stretch long tails to the media box width.
     text = text.replace(
       /!\[([^\]]*)\]\(([^)]+)\)/g,
       function (_, alt, url) {
         var src = resolveImageSrc(url, pg);
         if (!src) return hold(esc(alt || ""));
         return hold(
+          '<span class="site-media image-wrap">' +
           '<img src="' + esc(src) + '" alt="' +
-            esc(alt || "") + '" loading="lazy">',
+            esc(alt || "") + '" loading="lazy">' +
+          "</span>",
         );
       },
     );
@@ -711,10 +818,13 @@
     var pagePath = String(page.path || WIKI_PATH || "").trim();
     // Home content is wiki path "home"
     if (!pagePath && MODE === "home") pagePath = "home";
-    var bodyHtml = renderMarkdown(
-      String(page.body || ""),
-      pagePath,
-    );
+    // Trusted HTML bodies (theme fixtures / curated pages) skip markdown
+    var bodyHtml = page.html
+      ? String(page.body || "")
+      : renderMarkdown(
+        String(page.body || ""),
+        pagePath,
+      );
     var title = String(page.title || page.path || "").trim();
     if (!bodyHtml.trim() && !title) return;
     // Wiki stays compact (no hero logo). Re-apply chrome after nav.
@@ -728,9 +838,21 @@
     }
     setDocumentTitle(title);
     var inner = "<section class=\"site-section\">";
-    if (title) {
+    /*
+     * Built-in page chrome (optional):
+     *   heading: false  — no auto H1 (.site-section__title)
+     *   rule: false     — no sep underline under that H1
+     * Title string still sets the browser tab via setDocumentTitle.
+     * Put your own markdown heading in the body when heading is off.
+     */
+    var showHeading = page.heading !== false && !!title;
+    if (showHeading) {
+      var showRule = page.rule !== false;
       inner += "<h2 class=\"site-section__title\">" + esc(title) + "</h2>" +
-        "<div class=\"site-rule site-rule--image\" role=\"presentation\"></div>";
+        (showRule
+          ? "<div class=\"site-rule site-rule--image\" " +
+            "role=\"presentation\"></div>"
+          : "");
     }
     inner += "<div class=\"site-section__body\">" +
       (bodyHtml.trim() || "<p><em>No content.</em></p>") +
@@ -1089,9 +1211,30 @@
       return;
     }
 
-    // Character (/chargen): left rail filled by chargen.js
-    // (Sheet | Reference | Rules | +cg help). Placeholder until boot.
+    // Character (/chargen): plugin owns left rail when booted.
+    // CPR approved → section links; else Sheet/Reference placeholder.
     if (MODE === "chargen") {
+      if (
+        globalThis.SiteCprChargen &&
+        typeof globalThis.SiteCprChargen.paintLeft === "function"
+      ) {
+        globalThis.SiteCprChargen.paintLeft();
+        return;
+      }
+      if (
+        globalThis.SiteChargen &&
+        typeof globalThis.SiteChargen.paintCharNav === "function"
+      ) {
+        globalThis.SiteChargen.paintCharNav();
+        return;
+      }
+      if (
+        globalThis.SiteDndChargen &&
+        typeof globalThis.SiteDndChargen.paintLeft === "function"
+      ) {
+        globalThis.SiteDndChargen.paintLeft();
+        return;
+      }
       if (leftPanels) {
         leftPanels.innerHTML =
           "<section class=\"site-menu menu\">" +
@@ -1314,23 +1457,40 @@
     window.location.href = pubPath("");
   }
 
+  /** True when path is the public login route (any mount). */
+  function isLoginPath(path) {
+    var p = normalizeNavPath(path || "");
+    return (
+      p === "/login" ||
+      p === "/site/login" ||
+      p === "/site/login.html"
+    );
+  }
+
   function safeNextPath(raw) {
     var n = String(raw || "").trim();
+    // Strip query/hash for route checks; keep path only for redirect target
+    var pathOnly = n.split("?")[0].split("#")[0];
     if (!n || n.charAt(0) !== "/" || n.indexOf("//") === 0) {
       return pubPath("");
     }
+    // Never bounce back to login (avoids ?next=/login?next=/login… loops)
+    if (isLoginPath(pathOnly)) return pubPath("");
     // Allow public SPA routes + admin after login
     var ok =
-      n === "/" ||
-      n.indexOf("/site") === 0 ||
-      n.indexOf("/admin") === 0 ||
-      n.indexOf("/chargen") === 0 ||
-      n.indexOf("/play") === 0 ||
-      n.indexOf("/wiki") === 0 ||
-      n.indexOf("/help") === 0 ||
-      n.indexOf("/login") === 0;
+      pathOnly === "/" ||
+      pathOnly.indexOf("/site") === 0 ||
+      pathOnly.indexOf("/admin") === 0 ||
+      pathOnly.indexOf("/chargen") === 0 ||
+      pathOnly.indexOf("/play") === 0 ||
+      pathOnly.indexOf("/wiki") === 0 ||
+      pathOnly.indexOf("/help") === 0;
     if (!ok) return pubPath("");
-    return n;
+    // Drop nested next= junk; keep clean path (+ optional hash)
+    var hash = "";
+    var hashIdx = n.indexOf("#");
+    if (hashIdx >= 0) hash = n.slice(hashIdx);
+    return pathOnly + hash;
   }
 
   function isDemoQuery() {
@@ -1348,6 +1508,8 @@
    */
   function requireForPath(path) {
     var p = normalizeNavPath(path);
+    // Login is public — ignore nav items that incorrectly target /login
+    if (isLoginPath(p)) return "";
     var nav = (siteConfig && siteConfig.nav) || [];
     var best = "";
     var bestLen = -1;
@@ -1388,11 +1550,14 @@
   }
 
   function redirectToLogin() {
-    var next = encodeURIComponent(
-      window.location.pathname +
-        window.location.search +
-        window.location.hash,
-    );
+    // Already on login — do not re-enter with ?next=login (infinite loop)
+    if (MODE === "login" || isLoginPath(pathname)) return;
+    var dest = window.location.pathname + window.location.hash;
+    // Ignore existing search (may already contain a poisoned next=)
+    if (isLoginPath(dest.split("?")[0])) {
+      dest = pubPath("");
+    }
+    var next = encodeURIComponent(dest);
     window.location.replace(
       pubPath("login") + "?next=" + next,
     );
@@ -1401,6 +1566,9 @@
   /** Enforce nav.require for the current route. */
   function guardRouteAccess(user) {
     if (isDemoQuery()) return true;
+    // Login page is always public — even if a nav item mis-points
+    // require:connected at /login (preview Play stub did this).
+    if (MODE === "login" || isLoginPath(pathname)) return true;
     var req = requireForPath(pathname);
     if (navRequireMet(req, user)) return true;
     if (!user) {
@@ -1675,6 +1843,17 @@
     if (MODE === "chargen") return;
 
     var html = "";
+
+    /*
+     * Theme right-rail block (e.g. Termv QUICK_STATS_) — signed-in only,
+     * rendered above "On this page". Guests get TOC alone.
+     */
+    var rightHtml = siteConfig && siteConfig.rightHtml
+      ? String(siteConfig.rightHtml)
+      : "";
+    if (rightHtml.trim() && user) {
+      html += rightHtml;
+    }
 
     // TOC (wiki + help topics)
     var toc = buildToc();
@@ -2469,34 +2648,54 @@
     });
   }
 
-  /** /chargen — D&D first (meta probe), else CoFD chargen.js. */
+  /** /chargen — probe dnd → cpr → cofd meta endpoints. */
   var chargenScriptPromise = null;
-  var chargenSystem = null; // "dnd" | "cofd" | null
-  function probeChargenSystem() {
-    if (chargenSystem) {
-      return Promise.resolve(chargenSystem);
-    }
-    return fetch("/api/v1/dnd/meta", { credentials: "same-origin" })
+  var chargenSystem = null; // "dnd" | "cpr" | "cofd" | null
+  function probeMeta(url, sysId) {
+    return fetch(url, { credentials: "same-origin" })
       .then(function (r) {
         return r.ok ? r.json() : null;
       })
       .then(function (j) {
-        if (j && (j.system === "dnd" || j.chargenApi)) {
-          chargenSystem = "dnd";
-          return "dnd";
+        if (!j) return null;
+        if (j.system === sysId || j.chargenApi) return sysId;
+        // CPR/D&D meta always set system
+        if (sysId === "dnd" && j.system === "dnd") return "dnd";
+        if (sysId === "cpr" && j.system === "cpr") return "cpr";
+        if (sysId === "cofd" && (j.system === "cofd" || j.lines)) {
+          return "cofd";
         }
-        chargenSystem = "cofd";
-        return "cofd";
+        return null;
       })
       .catch(function () {
-        chargenSystem = "cofd";
-        return "cofd";
+        return null;
+      });
+  }
+  function probeChargenSystem() {
+    if (chargenSystem) {
+      return Promise.resolve(chargenSystem);
+    }
+    return probeMeta("/api/v1/dnd/meta", "dnd")
+      .then(function (s) {
+        if (s) return s;
+        return probeMeta("/api/v1/cpr/meta", "cpr");
+      })
+      .then(function (s) {
+        if (s) return s;
+        return probeMeta("/api/v1/cofd/meta", "cofd");
+      })
+      .then(function (s) {
+        chargenSystem = s || "cofd";
+        return chargenSystem;
       });
   }
   function loadChargenScript(sys) {
-    var src = sys === "dnd"
-      ? "/site/js/dnd-chargen.js?v=20260809playmob"
-      : "/site/js/chargen.js?v=20260809playmob";
+    var src = "/site/js/chargen.js?v=20260810sys";
+    if (sys === "dnd") {
+      src = "/site/js/dnd-chargen.js?v=20260810sys";
+    } else if (sys === "cpr") {
+      src = "/site/js/cpr-chargen.js?v=20260811sr";
+    }
     return new Promise(function (resolve, reject) {
       var s = document.createElement("script");
       s.src = src;
@@ -2518,12 +2717,23 @@
       ) {
         return globalThis.SiteDndChargen.boot();
       }
+      if (
+        chargenSystem === "cpr" &&
+        globalThis.SiteCprChargen &&
+        globalThis.SiteCprChargen.boot
+      ) {
+        return globalThis.SiteCprChargen.boot();
+      }
       if (globalThis.SiteChargen && globalThis.SiteChargen.boot) {
         return globalThis.SiteChargen.boot();
       }
       return Promise.resolve(null);
     }
-    if (globalThis.SiteDndChargen || globalThis.SiteChargen) {
+    if (
+      globalThis.SiteDndChargen ||
+      globalThis.SiteCprChargen ||
+      globalThis.SiteChargen
+    ) {
       return boot();
     }
     if (!chargenScriptPromise) {
@@ -2551,7 +2761,7 @@
       var link = document.createElement("link");
       link.id = "site-play-css";
       link.rel = "stylesheet";
-      link.href = "/site/css/play.css?v=20260809playmob";
+      link.href = "/site/css/play.css?v=20260811oocbadge";
       document.head.appendChild(link);
     }
     // Separate file: CSP blocks inline style=; classes live here.
@@ -2559,7 +2769,7 @@
       var pal = document.createElement("link");
       pal.id = "site-play-palette-css";
       pal.rel = "stylesheet";
-      pal.href = "/site/css/play-palette.css?v=20260809playmob";
+      pal.href = "/site/css/play-palette.css?v=20260809name500eq";
       document.head.appendChild(pal);
     }
     // +sheet HTML uses .dnd-sheet from chargen stylesheet
@@ -2567,8 +2777,16 @@
       var sh = document.createElement("link");
       sh.id = "site-dnd-sheet-css";
       sh.rel = "stylesheet";
-      sh.href = "/site/css/dnd-chargen.css?v=20260809playmob";
+      sh.href = "/site/css/dnd-chargen.css?v=20260809name500eq";
       document.head.appendChild(sh);
+    }
+    // CPR +sheet vitals / live sheet chrome
+    if (!document.getElementById("site-cpr-sheet-css")) {
+      var cpr = document.createElement("link");
+      cpr.id = "site-cpr-sheet-css";
+      cpr.rel = "stylesheet";
+      cpr.href = "/site/css/cpr-sheet.css?v=20260811theme";
+      document.head.appendChild(cpr);
     }
   }
   function loadPlayRoute() {
@@ -2601,14 +2819,21 @@
     }
     if (!playScriptPromise) {
       playScriptPromise = new Promise(function (resolve, reject) {
-        var s = document.createElement("script");
-        s.src = "/site/js/play.js?v=20260809playmob";
-        s.async = true;
-        s.onload = function () { resolve(true); };
-        s.onerror = function () {
-          reject(new Error("play.js failed to load"));
-        };
-        document.head.appendChild(s);
+        function load(src, next) {
+          var s = document.createElement("script");
+          s.src = src;
+          s.async = true;
+          s.onload = next;
+          s.onerror = function () {
+            reject(new Error(src + " failed to load"));
+          };
+          document.head.appendChild(s);
+        }
+        load("/site/js/play-deck.js?v=20260819deck", function () {
+          load("/site/js/play.js?v=20260819deck", function () {
+            resolve(true);
+          });
+        });
       });
     }
     return playScriptPromise.then(boot).catch(function (err) {
@@ -2643,6 +2868,16 @@
       }
     }
     if (MODE === "chargen") {
+      // Preload chargen CSS before FE boots so method/path buttons
+      // are full-width on first paint (no refresh FOUC).
+      if (!document.getElementById("site-chargen-css")) {
+        var cgPre = document.createElement("link");
+        cgPre.id = "site-chargen-css";
+        cgPre.rel = "stylesheet";
+        cgPre.href = "/site/css/chargen.css?v=20260811hub2";
+        document.head.appendChild(cgPre);
+      }
+      if (shell) shell.classList.add("is-mode-chargen");
       // Auth gate before loading chargen FE (nav.require + default)
       articlePromise = authPromise.then(function (user) {
         currentUser = user;
@@ -2661,7 +2896,8 @@
         return loadPlayRoute().then(function (ok) {
           return authPromise.then(function (user) {
             currentUser = user;
-            if (!user && !isDemoQuery()) {
+            var stillTok = readAuthToken();
+            if (!user && !stillTok && !isDemoQuery()) {
               redirectToLogin();
               return null;
             }
@@ -2672,8 +2908,10 @@
               guardRouteAccess(user);
               return null;
             }
-            renderTopNav(user);
-            updateNavUser(user);
+            if (user) {
+              renderTopNav(user);
+              updateNavUser(user);
+            }
             return ok;
           });
         });
@@ -2846,6 +3084,12 @@
       p.startsWith("/site/chargen") ||
       p.startsWith("/play") ||
       p.startsWith("/site/play") ||
+      p === "/login" ||
+      p === "/site/login" ||
+      p === "/site/login.html" ||
+      p === "/profile" ||
+      p === "/site/profile" ||
+      p === "/site/profile.html" ||
       p === "/site/" ||
       p === "/site" ||
       p === "/"
@@ -2896,6 +3140,8 @@
 
   globalThis.SiteShell = globalThis.SiteShell || {};
   globalThis.SiteShell.navigate = siteNavigate;
+  globalThis.SiteShell.ensureMediaSeps = ensureMediaSeps;
+  globalThis.SiteShell.frameMediaImg = frameMediaImg;
 
   // Initial route load
   loadCurrentRoute();

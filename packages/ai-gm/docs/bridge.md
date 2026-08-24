@@ -93,6 +93,23 @@ await gameHooks.emit("shadowrun:roll" as never, {
 
 No configuration needed — install both plugins and they find each other.
 
+## Utopia Integration
+
+`@ursamu/utopia` registers system `utopia` (`charCollection`:
+`utopia.chars`) and emits:
+
+| Event | When | AI-GM |
+|-------|------|-------|
+| `utopia:roll` | After `+act` | City narrates the ruling |
+| `utopia:feed:ticked` | After `+feed/tick` | City bulletin |
+| `utopia:week:ready` | All crew ready | City answers the week |
+
+Narration uses the city graph. Engine numbers in the
+summary are law — the model must not change them.
+
+Install `@ursamu/help`, `@ursamu/utopia`, `@ursamu/ai-gm`.
+The city persona activates when the live system is still `generic`.
+
 ## Adding New Events
 
 Any plugin can declare additional events by extending `GameHookMap` via

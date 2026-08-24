@@ -3,19 +3,20 @@ hidden: true
 ---
 +LOCKS
 
-Locks are boolean **keys** checked when someone tries to use an
-object or exit. Empty lock = always pass.
+Locks are boolean **keys** checked when someone
+tries to use an object or exit. Empty = pass.
 
 TOPICS
-  locks/keys       Atoms: me, #id, *Name, +flag, attr:val
-  locks/types      @lock switches (basic, use, enter, …)
-  locks/funcs      flag() holds() is() owner() perm()
-  locks/examples   Exits, items, rooms, eval-style keys
+  locks/keys       Atoms + operators
+  locks/types      @lock switches
+  locks/funcs      flag() holds() is() …
+  locks/examples   Exit / room patterns
   @lock            Command syntax
 
-Operators: `&` / `&&` (and), `|` / `||` (or), `!` (not),
-`( )` grouping. Adjacent atoms imply AND.
+OPERATORS
+  `&` / `&&`  AND     `|` / `||`  OR
+  `!`  NOT            `( )` group
+  Adjacent atoms imply AND (space = `&`).
 
-On fail: **FAIL** / **OFAIL** / **AFAIL** fire.
-
-SEE ALSO: +help @lock, +help locks/examples
+Channels use the same keys on `@chanset …/lock=`.
+SEE ALSO: +help locks/keys, +help staff/locks

@@ -1,7 +1,18 @@
 import { dbojs } from "@ursamu/mush";
-import { gameEvents, eventRsvps, getNextEventNumber, parseDateTime } from "./db.ts";
-import type { IGameEvent, IEventRSVP } from "./types.ts";
-import { eventHooks } from "./hooks.ts";
+import { parseDateTime } from "./db.ts";
+import { flagSetFromRaw, isStaffFlags } from "./helpers.ts";
+import type { IGameEvent } from "./types.ts";
+import {
+  cancelRsvp,
+  createEventFromStrings,
+  deleteEvent,
+  listEvents,
+  listUpcomingEvents,
+  resolveEvent,
+  updateEventFields,
+  upsertRsvp,
+  withRsvpSummary,
+} from "./service.ts";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -14,29 +25,7 @@ function jsonResponse(data: unknown, status = 200): Response {
 async function isStaffUser(userId: string): Promise<boolean> {
   const player = await dbojs.queryOne({ id: userId });
   if (!player) return false;
-  // deno-lint-ignore no-explicit-any
-  const flags = player.flags as any as Set<string>;
-  return flags.has("admin") || flags.has("wizard") || flags.has("superuser");
-}
-
-async function resolveEvent(idParam: string): Promise<IGameEvent | null> {
-  const num = parseInt(idParam, 10);
-  if (!isNaN(num)) return await gameEvents.queryOne({ number: num }) || null;
-  return await gameEvents.queryOne({ id: idParam }) || null;
-}
-
-/** Attach attending/maybe/declined counts and the caller's own RSVP to an event. */
-async function withRsvpSummary(ev: IGameEvent, userId?: string) {
-  const all       = await eventRsvps.find({ eventId: ev.id });
-  const attending = all.filter(r => r.status === "attending");
-  const maybe     = all.filter(r => r.status === "maybe");
-  const myRsvp    = userId ? all.find(r => r.playerId === userId) || null : null;
-  return {
-    ...ev,
-    attendingCount: attending.length,
-    maybeCount:     maybe.length,
-    myRsvp:         myRsvp ? myRsvp.status : null,
-  };
+  return isStaffFlags(flagSetFromRaw(player.flags));
 }
 
 // ─── route handler ────────────────────────────────────────────────────────────
@@ -54,47 +43,48 @@ async function withRsvpSummary(ev: IGameEvent, userId?: string) {
  */
 export async function eventsRouteHandler(
   req: Request,
-  userId: string | null
+  userId: string | null,
 ): Promise<Response> {
   if (!userId) return jsonResponse({ error: "Unauthorized" }, 401);
 
-  const url    = new URL(req.url);
-  const path   = url.pathname;
+  const url = new URL(req.url);
+  const path = url.pathname;
   const method = req.method;
-  const staff  = await isStaffUser(userId);
+  const staff = await isStaffUser(userId);
 
   // ── GET /api/v1/events ───────────────────────────────────────────────────
   if (path === "/api/v1/events" && method === "GET") {
-    const params   = url.searchParams;
-    const statusF  = params.get("status");
-    const tagF     = params.get("tag");
-    const fromF    = params.get("from") ? parseInt(params.get("from")!, 10) : null;
-    const toF      = params.get("to")   ? parseInt(params.get("to")!,   10) : null;
-    const limit    = Math.min(parseInt(params.get("limit")  || "50", 10), 200);
-    const offset   = Math.max(parseInt(params.get("offset") || "0",  10), 0);
+    const params = url.searchParams;
+    const statusF = params.get("status");
+    const tagF = params.get("tag");
+    const fromF = params.get("from")
+      ? parseInt(params.get("from")!, 10)
+      : null;
+    const toF = params.get("to") ? parseInt(params.get("to")!, 10) : null;
+    const limit = Math.min(parseInt(params.get("limit") || "50", 10), 200);
+    const offset = Math.max(parseInt(params.get("offset") || "0", 10), 0);
 
-    let all = await gameEvents.find({});
-
-    if (!staff) all = all.filter(e => e.status !== "cancelled");
-    if (statusF) all = all.filter(e => e.status === statusF);
-    if (tagF)    all = all.filter(e => e.tags.includes(tagF));
-    if (fromF)   all = all.filter(e => e.startTime >= fromF);
-    if (toF)     all = all.filter(e => e.startTime <= toF);
-
-    all.sort((a, b) => a.startTime - b.startTime);
+    const all = await listEvents({
+      staff,
+      status: statusF,
+      tag: tagF,
+      from: fromF,
+      to: toF,
+    });
     const page = all.slice(offset, offset + limit);
-    const result = await Promise.all(page.map(e => withRsvpSummary(e, userId)));
+    const result = await Promise.all(
+      page.map((e) => withRsvpSummary(e, userId)),
+    );
 
     return jsonResponse({ total: all.length, events: result });
   }
 
   // ── GET /api/v1/events/upcoming ──────────────────────────────────────────
   if (path === "/api/v1/events/upcoming" && method === "GET") {
-    const now = Date.now();
-    const all = (await gameEvents.find({}))
-      .filter(e => (e.status === "upcoming" || e.status === "active") && e.startTime >= now)
-      .sort((a, b) => a.startTime - b.startTime);
-    const result = await Promise.all(all.map(e => withRsvpSummary(e, userId)));
+    const all = await listUpcomingEvents();
+    const result = await Promise.all(
+      all.map((e) => withRsvpSummary(e, userId)),
+    );
     return jsonResponse(result);
   }
 
@@ -103,59 +93,49 @@ export async function eventsRouteHandler(
     if (!staff) return jsonResponse({ error: "Forbidden" }, 403);
 
     let body: Record<string, unknown>;
-    try { body = await req.json(); }
-    catch { return jsonResponse({ error: "Invalid JSON body" }, 400); }
-
-    const title       = typeof body.title       === "string" ? body.title.trim()       : "";
-    const description = typeof body.description === "string" ? body.description.trim() : "";
-    const startDate   = typeof body.startTime   === "string" ? body.startTime.trim()   : "";
-
-    if (!title || !description || !startDate) {
-      return jsonResponse({ error: "title, description, and startTime are required" }, 400);
+    try {
+      body = await req.json();
+    } catch {
+      return jsonResponse({ error: "Invalid JSON body" }, 400);
     }
 
-    const startTime = typeof body.startTime === "number"
-      ? body.startTime
-      : parseDateTime(startDate);
-    if (!startTime) return jsonResponse({ error: "Invalid startTime format" }, 400);
+    const title = typeof body.title === "string" ? body.title.trim() : "";
+    const description = typeof body.description === "string"
+      ? body.description.trim()
+      : "";
+    if (!title || !description || body.startTime == null) {
+      return jsonResponse({
+        error: "title, description, and startTime are required",
+      }, 400);
+    }
 
-    const endTime = body.endTime
-      ? (typeof body.endTime === "number" ? body.endTime : parseDateTime(String(body.endTime)))
-      : undefined;
-
-    const player = await dbojs.queryOne({ id: userId });
-    const createdByName = (player && player.data?.name) || userId;
-
-    const num = await getNextEventNumber();
-    const now = Date.now();
-
-    const ev: IGameEvent = {
-      id:            `ev-${num}`,
-      number:        num,
+    const created = await createEventFromStrings({
       title,
       description,
-      location:      typeof body.location === "string" ? body.location.trim() : undefined,
-      startTime,
-      endTime:       endTime || undefined,
-      createdBy:     userId,
-      createdByName,
-      status:        "upcoming",
-      tags:          Array.isArray(body.tags) ? (body.tags as string[]).map(t => String(t).trim()) : [],
-      maxAttendees:  typeof body.maxAttendees === "number" ? body.maxAttendees : 0,
-      createdAt:     now,
-      updatedAt:     now,
-    };
-
-    await gameEvents.create(ev);
-    await eventHooks.emit("event:created", ev);
-    return jsonResponse(ev, 201);
+      startTimeRaw: body.startTime as string | number,
+      endTimeRaw: body.endTime as string | number | undefined,
+      location: typeof body.location === "string"
+        ? body.location.trim()
+        : undefined,
+      tags: Array.isArray(body.tags)
+        ? (body.tags as string[]).map((t) => String(t).trim())
+        : [],
+      maxAttendees: typeof body.maxAttendees === "number"
+        ? body.maxAttendees
+        : 0,
+      createdBy: userId,
+    });
+    if (!created.ok) {
+      return jsonResponse({ error: created.error }, created.status);
+    }
+    return jsonResponse(created.value, 201);
   }
 
   // ── event by id/number sub-routes ────────────────────────────────────────
   const evMatch = path.match(/^\/api\/v1\/events\/([^/]+)(\/rsvps?)?$/);
   if (evMatch) {
     const idParam = evMatch[1];
-    const sub     = evMatch[2] || "";
+    const sub = evMatch[2] || "";
 
     if (idParam === "upcoming") return jsonResponse({ error: "Not Found" }, 404);
 
@@ -163,22 +143,10 @@ export async function eventsRouteHandler(
     if (!sub && method === "GET") {
       const ev = await resolveEvent(idParam);
       if (!ev) return jsonResponse({ error: "Not found" }, 404);
-
-      if (!staff && ev.status === "cancelled") return jsonResponse({ error: "Not found" }, 404);
-
-      const rsvps    = await eventRsvps.find({ eventId: ev.id });
-      const myRsvp   = rsvps.find(r => r.playerId === userId) || null;
-      const attending = rsvps.filter(r => r.status === "attending");
-      const maybe    = rsvps.filter(r => r.status === "maybe");
-
-      return jsonResponse({
-        ...ev,
-        attendingCount: attending.length,
-        maybeCount:     maybe.length,
-        myRsvp:         myRsvp ? myRsvp.status : null,
-        attendees:      attending.map(r => ({ id: r.playerId, name: r.playerName })),
-        maybes:         maybe.map(r => ({ id: r.playerId, name: r.playerName })),
-      });
+      if (!staff && ev.status === "cancelled") {
+        return jsonResponse({ error: "Not found" }, 404);
+      }
+      return jsonResponse(await withRsvpSummary(ev, userId));
     }
 
     // ── PATCH /api/v1/events/:id ───────────────────────────────────────────
@@ -189,14 +157,26 @@ export async function eventsRouteHandler(
       if (!ev) return jsonResponse({ error: "Not found" }, 404);
 
       let body: Record<string, unknown>;
-      try { body = await req.json(); }
-      catch { return jsonResponse({ error: "Invalid JSON body" }, 400); }
+      try {
+        body = await req.json();
+      } catch {
+        return jsonResponse({ error: "Invalid JSON body" }, 400);
+      }
 
-      const ALLOWED = ["title", "description", "location", "status", "tags", "maxAttendees"];
-      const update: Partial<IGameEvent> = { updatedAt: Date.now() };
+      const ALLOWED = [
+        "title",
+        "description",
+        "location",
+        "status",
+        "tags",
+        "maxAttendees",
+      ];
+      const update: Partial<IGameEvent> = {};
 
       for (const field of ALLOWED) {
-        if (field in body) (update as Record<string, unknown>)[field] = body[field];
+        if (field in body) {
+          (update as Record<string, unknown>)[field] = body[field];
+        }
       }
 
       if (typeof body.startTime === "string") {
@@ -215,21 +195,7 @@ export async function eventsRouteHandler(
         update.endTime = body.endTime;
       }
 
-      const updated: IGameEvent = { ...ev, ...update };
-      await gameEvents.update({ id: ev.id }, updated);
-
-      if (updated.status !== ev.status) {
-        if (updated.status === "cancelled") {
-          await eventHooks.emit("event:cancelled", updated);
-        } else if (updated.status === "completed") {
-          await eventHooks.emit("event:completed", updated);
-        } else {
-          await eventHooks.emit("event:updated", updated);
-        }
-      } else {
-        await eventHooks.emit("event:updated", updated);
-      }
-
+      const updated = await updateEventFields(ev, update);
       return jsonResponse(updated);
     }
 
@@ -240,9 +206,7 @@ export async function eventsRouteHandler(
       const ev = await resolveEvent(idParam);
       if (!ev) return jsonResponse({ error: "Not found" }, 404);
 
-      await gameEvents.delete({ id: ev.id });
-      await eventRsvps.delete({ eventId: ev.id });
-      await eventHooks.emit("event:deleted", ev);
+      await deleteEvent(ev);
       return jsonResponse({ deleted: true });
     }
 
@@ -251,74 +215,48 @@ export async function eventsRouteHandler(
       const ev = await resolveEvent(idParam);
       if (!ev) return jsonResponse({ error: "Not found" }, 404);
 
-      const all = await eventRsvps.find({ eventId: ev.id });
-
+      const summary = await withRsvpSummary(ev, userId);
       if (staff) {
-        return jsonResponse(all);
-      } else {
-        const attending = all.filter(r => r.status === "attending");
-        const maybe     = all.filter(r => r.status === "maybe");
-        const myRsvp    = all.find(r => r.playerId === userId) || null;
-        return jsonResponse({
-          attendingCount: attending.length,
-          maybeCount:     maybe.length,
-          myRsvp:         myRsvp ? myRsvp.status : null,
-          attendees:      attending.map(r => ({ name: r.playerName })),
-        });
+        return jsonResponse(summary.rsvps);
       }
+      return jsonResponse({
+        attendingCount: summary.attendingCount,
+        maybeCount: summary.maybeCount,
+        myRsvp: summary.myRsvp,
+        attendees: summary.attendees.map((a) => ({ name: a.name })),
+      });
     }
 
     // ── POST /api/v1/events/:id/rsvp ──────────────────────────────────────
     if (sub === "/rsvp" && method === "POST") {
       const ev = await resolveEvent(idParam);
       if (!ev) return jsonResponse({ error: "Not found" }, 404);
-      if (ev.status === "cancelled") return jsonResponse({ error: "Event is cancelled" }, 400);
-      if (ev.status === "completed") return jsonResponse({ error: "Event has already occurred" }, 400);
 
       let body: Record<string, unknown>;
-      try { body = await req.json(); }
-      catch { return jsonResponse({ error: "Invalid JSON body" }, 400); }
-
-      const rawStatus = typeof body.status === "string" ? body.status.trim().toLowerCase() : "attending";
-      const VALID_STATUSES = ["attending", "maybe", "declined"];
-      if (!VALID_STATUSES.includes(rawStatus)) {
-        return jsonResponse({ error: "status must be attending, maybe, or declined" }, 400);
-      }
-      const status = rawStatus as IEventRSVP["status"];
-      const note   = typeof body.note === "string" ? body.note.trim() : undefined;
-
-      if (status === "attending" && ev.maxAttendees > 0) {
-        const attending = await eventRsvps.find({ eventId: ev.id, status: "attending" });
-        const myRsvp    = await eventRsvps.queryOne({ eventId: ev.id, playerId: userId });
-        const alreadyAttending = myRsvp?.status === "attending";
-        if (!alreadyAttending && attending.length >= ev.maxAttendees) {
-          return jsonResponse({ error: "Event is at capacity" }, 409);
-        }
+      try {
+        body = await req.json();
+      } catch {
+        return jsonResponse({ error: "Invalid JSON body" }, 400);
       }
 
-      const player     = await dbojs.queryOne({ id: userId });
-      const playerName = (player && player.data?.name) || userId;
+      const rawStatus = typeof body.status === "string"
+        ? body.status.trim()
+        : "attending";
+      const note = typeof body.note === "string" ? body.note.trim() : undefined;
 
-      const existing = await eventRsvps.queryOne({ eventId: ev.id, playerId: userId });
-      if (existing) {
-        const updated = { ...existing, status, note, createdAt: existing.createdAt };
-        await eventRsvps.update({ id: existing.id }, updated);
-        await eventHooks.emit("event:rsvp", ev, updated);
-        return jsonResponse(updated);
-      }
-
-      const rsvp: IEventRSVP = {
-        id:         crypto.randomUUID(),
-        eventId:    ev.id,
-        playerId:   userId,
-        playerName,
-        status,
+      const result = await upsertRsvp({
+        event: ev,
+        playerId: userId,
+        statusRaw: rawStatus,
         note,
-        createdAt:  Date.now(),
-      };
-      await eventRsvps.create(rsvp);
-      await eventHooks.emit("event:rsvp", ev, rsvp);
-      return jsonResponse(rsvp, 201);
+      });
+      if (!result.ok) {
+        return jsonResponse({ error: result.error }, result.status);
+      }
+      return jsonResponse(
+        result.value.rsvp,
+        result.value.created ? 201 : 200,
+      );
     }
 
     // ── DELETE /api/v1/events/:id/rsvp ────────────────────────────────────
@@ -326,11 +264,10 @@ export async function eventsRouteHandler(
       const ev = await resolveEvent(idParam);
       if (!ev) return jsonResponse({ error: "Not found" }, 404);
 
-      const existing = await eventRsvps.queryOne({ eventId: ev.id, playerId: userId });
-      if (!existing) return jsonResponse({ error: "No RSVP to cancel" }, 404);
-
-      await eventRsvps.delete({ id: existing.id });
-      await eventHooks.emit("event:rsvp-cancelled", ev, existing);
+      const result = await cancelRsvp({ event: ev, playerId: userId });
+      if (!result.ok) {
+        return jsonResponse({ error: result.error }, result.status);
+      }
       return jsonResponse({ deleted: true });
     }
   }

@@ -1084,7 +1084,14 @@ watch(
           <code>site.css</code>, optional
           <code>imgs/</code> and
           <code>fonts/</code>.
-          Pack with
+          Build visually with
+          <a
+            href="https://github.com/UrsaMU/theme-studio"
+            target="_blank"
+            rel="noopener"
+          >Theme Studio</a>
+          (<code>deno task dev</code> → export zip),
+          or pack with
           <code>deno task pack-theme</code>
           in
           <code>@ursamu/site</code>.

@@ -1,0 +1,93 @@
+{
+  "key": "sg-desc",
+  "label": "Sprawl Goons — Look (@desc + live gear)",
+  "vars": { "player": "Neon" },
+  "setup": {
+    "character": {
+      "version": 1,
+      "chargenStatus": "approved",
+      "chargenComplete": true,
+      "name": "Neon",
+      "stats": {
+        "morphology": 1,
+        "equilibrium": 0,
+        "reaction": 2,
+        "cognition": 1,
+        "affinity": 0
+      },
+      "resilience": 12,
+      "resilienceMax": 12,
+      "loadoutMax": 10,
+      "bityuan": 2000,
+      "background": "nodejacker",
+      "backgroundName": "Nodejacker",
+      "edge": "nodejacker-edge",
+      "edgeName": "Feedwise",
+      "affectations": ["NeonPunk"],
+      "accessories": [],
+      "quirks": [],
+      "loadout": [],
+      "augs": [
+        { "slug": "neural-lattice", "name": "Neural Lattice" }
+      ],
+      "shards": [],
+      "software": [],
+      "ap": 0,
+      "level": 0,
+      "notes": ""
+    },
+    "items": [
+      {
+        "slug": "pkd-45",
+        "name": "Charon PKD-45",
+        "kind": "firearm",
+        "load": 1,
+        "bonus": 1
+      },
+      {
+        "slug": "motorcycle-leathers",
+        "name": "Motorcycle Leathers",
+        "kind": "armor",
+        "load": 1,
+        "bonus": 1
+      }
+    ]
+  },
+  "steps": [
+    { "sub": "@desc is the base body" },
+    {
+      "cmd": "@desc me=Rain beads on chrome. Neon looks like overtime never ended.",
+      "label": "set DESCRIPTION"
+    },
+    { "expect": "DESCRIPTION set" },
+    { "cmd": "+desc", "label": "base only" },
+    { "expect": "Rain beads on chrome" },
+    { "expect": "LOOK" },
+    { "expect": "SPRAWL" },
+
+    { "sub": "Wear/wield weave live street prose" },
+    { "cmd": "+gear/wear motorcycle-leathers", "label": "wear" },
+    { "cmd": "+gear/wield pkd-45", "label": "wield" },
+    { "cmd": "+desc", "label": "@desc + gear" },
+    { "expect": "Rain beads on chrome" },
+    { "expect": "Motorcycle Leathers" },
+    { "expect": "Charon PKD-45" },
+    { "expect": "rides low" },
+
+    { "sub": "Generator also writes @desc field" },
+    { "cmd": "+desc/roll", "label": "roll into DESCRIPTION" },
+    { "cmd": "+desc", "label": "generated base + gear" },
+    { "expect": "Motorcycle Leathers" },
+    { "expect": "LOOK" },
+
+    { "sub": "@desc again overrides base" },
+    {
+      "cmd": "@desc me=A scarred goon in a cheap suit.",
+      "label": "override base"
+    },
+    { "cmd": "+gear/stow pkd-45", "label": "holster" },
+    { "cmd": "+desc", "label": "custom base + leathers" },
+    { "expect": "scarred goon" },
+    { "expect": "Motorcycle Leathers" }
+  ]
+}

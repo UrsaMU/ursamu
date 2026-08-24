@@ -1,0 +1,166 @@
+{
+  "key": "cpr-market",
+  "label": "Cyberpunk RED — Night Market (Open, Browse, Sell, Buy, Haggle, Close)",
+  "vars": { "player": "Rogue" },
+  "setup": {
+    "room": {
+      "name": "Night Market — Kabuki Alley",
+      "desc": "Folding tables and salvaged display cases line the narrow passage between two collapsing buildings. Bare bulbs string from balcony to balcony overhead. The smell of fried protein and machine oil. Vendors pack up fast when the wrong kind of attention shows up — everyone here knows the drill.",
+      "zone": "Watson"
+    },
+    "character": {
+      "_state": {
+        "shortdesc": "Tall woman, chrome arm, eyes that price everything.",
+        "desc": "Rogue hasn't gotten where she is by being careless. The chrome arm is old but functional — custom work, not street-grade. She keeps her back to the wall and her options open. You get the impression every item on her table was liberated from somewhere it didn't belong."
+      },
+      "stats": { "int": 8, "ref": 7, "dex": 6, "tech": 5, "cool": 9, "will": 8, "luck": 5, "move": 6, "body": 6, "emp": 6, "empBase": 7 },
+      "hp": { "max": 40, "current": 40 },
+      "swThreshold": 20,
+      "deathSave": 6,
+      "deathSavePenalty": 0,
+      "role": "fixer",
+      "roleRank": 9,
+      "roleData": {},
+      "skills": { "athletics": 4, "brawling": 3, "handgun": 5, "evasion": 4, "perception": 5, "persuasion": 7, "streetwise": 8, "trading": 7, "black_market_contacts": 6 },
+      "luckRemaining": 5,
+      "woundState": "healthy",
+      "criticalInjuries": [],
+      "armorBody": { "name": "Armored Jacket", "sp": 13, "currentSp": 13, "penalty": 0 },
+      "armorHead": null,
+      "cyberware": [
+        { "id": "r_cw1", "name": "Cyberarm", "category": "cyberlimb", "location": "right arm", "hl": 4, "slots": 4, "installType": "hospital", "installedAt": 0 }
+      ],
+      "humanityLoss": 4,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 9,
+      "reputationDeeds": [],
+      "eurodollars": 22000,
+      "lifestyle": { "tier": "corporate", "nextDueDate": 9999999999999 },
+      "lifepath": { "culturalOrigin": "North American", "language": "English" },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": []
+    },
+    "targets": {
+      "V": {
+        "_state": {
+          "shortdesc": "Edgerunner in a scuffed jacket, eyes moving.",
+          "desc": "V circles the stalls without touching anything — the universal sign of someone who knows how markets like this work. She's got eddies and a list. The question is whether the fixer has what she needs."
+        },
+        "stats": { "int": 7, "ref": 8, "dex": 7, "tech": 5, "cool": 8, "will": 6, "luck": 7, "move": 6, "body": 7, "emp": 7, "empBase": 8 },
+        "hp": { "max": 45, "current": 45 },
+        "swThreshold": 23,
+        "deathSave": 7,
+        "deathSavePenalty": 0,
+        "role": "fixer",
+        "roleRank": 5,
+        "roleData": {},
+        "skills": { "athletics": 6, "brawling": 4, "handgun": 7, "evasion": 6, "perception": 6, "streetwise": 5, "trading": 5 },
+        "luckRemaining": 7,
+        "woundState": "healthy",
+        "criticalInjuries": [],
+        "armorBody": { "name": "Light Armorjack", "sp": 11, "currentSp": 11, "penalty": 0 },
+        "armorHead": null,
+        "cyberware": [],
+        "humanityLoss": 0,
+        "bodysculpt": [],
+        "activeEffects": [],
+        "reputation": 5,
+        "reputationDeeds": [],
+        "eurodollars": 8500,
+        "lifestyle": { "tier": "streetrat", "nextDueDate": 9999999999999 },
+        "lifepath": { "culturalOrigin": "North American", "language": "English" },
+        "chargenComplete": true,
+        "chargenStage": "complete",
+        "chargenMethod": "complete",
+        "restTimer": null,
+        "humanityGainedAt": null,
+        "locationEffects": []
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Rogue Opens Her Stand and Posts Listings" },
+    {
+      "note": "Rogue (Fixer rank 9) opens a named Night Market and posts three items. The 8-char listing IDs appear after each sell."
+    },
+    { "cmd": "+market/open Rogue's Stand", "label": "Rogue opens a named Night Market" },
+    { "cmd": "+market/sell Lexington 10mm=450=costly", "label": "post a pistol — costly tier" },
+    { "cmd": "+market/sell Trauma Team Card=1200=premium", "label": "post a Trauma Team card — premium tier" },
+    { "cmd": "+market/sell Militech Cred Chip=3500=expensive", "label": "post a cred chip — expensive tier" },
+    { "cmd": "+market/list", "label": "Rogue reviews her active listings" },
+
+    { "sub": "V Opens a Competing Stand" },
+    {
+      "note": "V (Fixer rank 5) opens her own stall in the same room. Two vendors competing side-by-side — both stalls visible in the area browse."
+    },
+    { "cmd": "+market/open V's Corner", "as": "V", "label": "V opens her own Night Market (rank 5 req)" },
+    { "cmd": "+market/sell Trauma Rippers=800=costly", "as": "V", "label": "V posts melee cyberware" },
+    { "cmd": "+market/sell Kevlar Vest=200=everyday", "as": "V", "label": "V posts light armor" },
+
+    { "sub": "Browse the Area — Two Stalls" },
+    {
+      "note": "With two active stalls in the room, +market/browse shows the area overview: both stands, fixer names, tiers, and item counts. Enter a specific stall by name."
+    },
+    { "cmd": "+market/browse", "label": "area overview — both stalls visible" },
+    { "cmd": "+market/browse Rogue", "label": "enter Rogue's Stand by name" },
+    { "cmd": "+market/browse V", "as": "V", "label": "V browses her own stand" },
+
+    { "sub": "Compare All Listings Across Stalls" },
+    {
+      "note": "+market/all shows every listing from every active stall in the room, sorted alphabetically by item name. Same item from different vendors appears together for easy price comparison."
+    },
+    { "cmd": "+market/all", "label": "all 5 listings from both stalls — sorted by name" },
+
+    { "sub": "Haggle on Price (Live Play)" },
+    {
+      "note": "In live play: copy a listing ID from +market/browse and use +market/haggle <id>. V (rank 5) gets 15% off on success; Rogue (rank 9) would get 20%. The updated price persists in the listing. The error below shows what happens with a bad ID."
+    },
+    { "cmd": "+market/haggle badid", "as": "V", "label": "error — bad listing ID shows clean feedback" },
+
+    { "sub": "Buy an Item (Live Play)" },
+    {
+      "note": "In live play: +market/buy <id> deducts EB from buyer and credits seller immediately. Listing is removed. The error below shows what happens with a bad ID."
+    },
+    { "cmd": "+market/buy badid", "as": "V", "label": "error — bad listing ID shows clean feedback" },
+
+    { "sub": "Close Markets" },
+    {
+      "note": "+market/close deactivates the stall and destroys the in-world stall object. Each fixer closes their own."
+    },
+    { "cmd": "+market/close", "label": "Rogue closes her stand" },
+    { "cmd": "+market/close", "as": "V", "label": "V closes her stand" },
+
+    { "sub": "Open a Midnight Market" },
+    {
+      "note": "Midnight Market requires Fixer rank 9+. Signals access to premium and very_expensive inventory unavailable at a standard Night Market."
+    },
+    { "cmd": "+market/open midnight Black Site", "label": "Rogue opens a named Midnight Market (rank 9 req)" },
+    { "cmd": "+market/browse", "label": "browse the Midnight Market — auto-stocked with high-tier items" },
+    { "cmd": "+market/close", "label": "Rogue closes the Midnight Market" },
+
+    { "sub": "Stall Locks" },
+    {
+      "note": "Rogue locks her stand to fixer-rank+ players. V (rank 5 fixer) can enter since she passes 'connected fixer+'. A non-fixer would see the stall hidden or as <dark> if staff. +market/lock open clears it."
+    },
+    { "cmd": "+market/open Rogue's Stand", "label": "Rogue opens her stand again" },
+    { "cmd": "+market/lock connected fixer+", "label": "Rogue restricts to Fixers only" },
+    { "cmd": "+market/browse Rogue", "as": "V", "label": "V (fixer) can still enter — passes lock" },
+    { "cmd": "+market/lock open", "label": "Rogue removes the lock" },
+    { "cmd": "+market/close", "label": "Rogue closes" },
+
+    { "sub": "Error Cases" },
+    {
+      "note": "Double-open attempt, browsing with no active market, and V trying Midnight Market without rank 9 all return clean errors."
+    },
+    { "cmd": "+market/open V's Second Stand", "as": "V", "label": "V opens a stand" },
+    { "cmd": "+market/open V's Third Stand", "as": "V", "label": "V tries to open a second stall — error: already have one open" },
+    { "cmd": "+market/close", "as": "V", "label": "V closes her stand" },
+    { "cmd": "+market/browse", "label": "no active market in this room — error" },
+    { "cmd": "+market/open midnight Restricted Access", "as": "V", "label": "V (rank 5) tries Midnight Market — error: rank 9 required" }
+  ]
+}

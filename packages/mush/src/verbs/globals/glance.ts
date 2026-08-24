@@ -10,6 +10,7 @@ import {
 } from "../../format/handlers.ts";
 import { lookAction, sendListLayout } from "../cmd-ui.ts";
 import { fmtIdle } from "./time-fmt.ts";
+import { gameHooks } from "@ursamu/core";
 
 function shortDesc(obj: IDBObj): string {
   const attrs =
@@ -28,11 +29,21 @@ function plainName(p: IDBObj): string {
   return String((p.state?.name as string) || p.name || "").trim();
 }
 
-function roomPlayers(here: IDBObj): IDBObj[] {
-  return (here.contents ?? []).filter(
+function roomPlayers(here: IDBObj, u?: IUrsamuSDK): IDBObj[] {
+  let players = (here.contents ?? []).filter(
     (o: IDBObj) =>
       o.flags.has("player") && o.flags.has("connected"),
   );
+  // Plugins may hide seated/vehicle crew, etc.
+  const bag = { u, here, players };
+  try {
+    // deno-lint-ignore no-explicit-any
+    (gameHooks as any).emit?.("glance:players", bag);
+    if (Array.isArray(bag.players)) players = bag.players;
+  } catch {
+    /* optional */
+  }
+  return players;
 }
 
 /** Telnet glance with full layout chrome. */
@@ -78,7 +89,7 @@ export async function execGlance(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
-  const players = roomPlayers(here).sort((a, b) =>
+  const players = roomPlayers(here, u).sort((a, b) =>
     plainName(a).localeCompare(plainName(b), undefined, {
       sensitivity: "base",
     })

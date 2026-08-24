@@ -7,7 +7,7 @@
 //   4. Saves every exchange to the job record
 //   5. When all items are resolved, commits the system
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import type {
   IIngestionExchange,
@@ -78,7 +78,7 @@ export async function resolveItem(
   value: string | null, // null = skip (accept suggestion)
   adminId: string,
   adminName: string,
-  model: ChatGoogleGenerativeAI,
+  model: BaseChatModel,
 ): Promise<string> {
   const item = job.uncertainItems.find((i) => i.id === itemId);
   if (!item) return `Unknown item ID: ${itemId}`;
@@ -238,7 +238,7 @@ export function applyResolution(
 // ─── LLM acknowledgement ──────────────────────────────────────────────────────
 
 async function generateAck(
-  model: ChatGoogleGenerativeAI,
+  model: BaseChatModel,
   item: IUncertainItem,
   value: string,
 ): Promise<string> {

@@ -426,8 +426,8 @@ describe("plugin", () => {
     assertEquals(plugin.name, "help");
   });
 
-  it("is version 1.2.0", () => {
-    assertEquals(plugin.version, "1.2.0");
+  it("is version 1.3.0", () => {
+    assertEquals(plugin.version, "1.3.0");
   });
 
   it("remove() does not throw even if init never ran", () => {

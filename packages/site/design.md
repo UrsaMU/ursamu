@@ -83,6 +83,11 @@ drop-in familiarity with court-template CSS ports.
 | `--site-aside-min` / `-max` | Side rail widths |
 | `--site-gutter` / `--site-sticky-top` | Spacing |
 
+**Normative catalog (Theme Studio Phase 0):**  
+`packages/theme-studio/spec/tokens.json` + `spec/SPEC.md`  
+(selector allowlist: `spec/selectors.json`; draft schema:
+`spec/theme-draft.schema.json`).
+
 ---
 
 ## 4. Play client (`/play`) — Figma client frame
@@ -107,6 +112,43 @@ Styles use site tokens only (see `packages/web/design.md` §11).
 
 Enter submits (same as Send); Shift+Enter newline. Tokens only —
 Court skin maps gold/cream.
+
+### 4a. Utopia pinned deck (≤900px)
+
+Pins hide until a `utopia-feed` or `utopia-week` layout arrives.
+Desktop (>900px) keeps the log-only client. Telnet gets a 78-col
+text twin of every card.
+
+| `meta.type` | Pin / log | Components |
+|-------------|-----------|------------|
+| `utopia-feed` | masthead + sheet | header, list/actions; `meta.city`, `meta.week`, `meta.stories[]` |
+| `utopia-week` | crew strip | header, entity-list (crew), text (plan), actions |
+| `utopia-ruling` | log packet | header (HOLDS/HITCH/FAILS/REVISED), text, table |
+| `utopia-sphere` | sheet / log | header, entity-list (rep), table (bills) |
+| `utopia-you` | sheet / log | header, table, actions |
+
+Crew `entity-list` items: `meta` is `ready` or `wait`;
+`action.cmd` is `+week/ready`. Dock chips send `+week`,
+`+act take-job`, `+act gather-information`, `+act hack`,
+`+act lay-low`, `+act`.
+
+Engine owns numbers. LLM writes packet body only.
+
+**Theme:** installable `examples/themes/utopia/` (RetroWave mapped
+to `--site-*`). Glow on masthead, SEND, and ruling packets only.
+`prefers-reduced-motion`: static border, no pulse.
+
+| RetroWave | Token |
+|-----------|--------|
+| Surface Base `#0A0A2E` | `--site-bg` |
+| Surface raised `#12123A` | `--site-bg-surface` |
+| Hot Pink `#FF006E` | `--site-accent` / `--site-btn-bg` |
+| Purple `#8338EC` | `--site-border-strong` |
+| Electric Blue `#3A86FF` | `--site-info` |
+| Neon green / gold / pink | `--site-success` / `-warning` / `-error` |
+| Bebas Neue | `--site-font-display` (masthead) |
+| Poppins | `--site-font-ui` |
+| IBM Plex Mono | `--site-font-mono` |
 
 ---
 

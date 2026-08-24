@@ -7,7 +7,7 @@ templateEngine: [vto, md]
 
 <!-- ── HERO ───────────────────────────────────────────────────────── -->
 <div class="home-hero animate-in">
-  <p class="home-hero__chip">mush 1.0.30 · cli 0.1.2 · MIT</p>
+  <p class="home-hero__chip">mush 1.0.35 · cli 0.1.4 · MIT</p>
   <h1>A Modern MUSH Server</h1>
   <p class="home-hero__lede">
     High-performance MU* engine in <strong>TypeScript</strong> and
@@ -30,7 +30,7 @@ templateEngine: [vto, md]
   <div class="home-stack__code">
     <div class="home-stack__code-bar">Terminal</div>
     <pre class="home-stack__pre"><span class="cmt"># Scaffold a game (engine + portal stack)</span>
-<span class="cmd">deno run -A jsr:@ursamu/cli@0.1.2/create my-game</span>
+<span class="cmd">deno run -A jsr:@ursamu/cli@0.1.4/create my-game</span>
 <span class="cmd">cd my-game</span>
 <span class="cmd">deno task start</span>
 <span class="cmt"># http://localhost:4203/  ·  /play  ·  /admin/</span></pre>

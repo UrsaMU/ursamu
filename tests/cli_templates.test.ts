@@ -92,3 +92,45 @@ Deno.test("C1-fix — standaloneShowcaseTs: does not import jsr:@ursamu/ursamu/c
   );
   assertStringIncludes(out, "cmds", "standaloneShowcaseTs must still reference cmds registry");
 });
+
+// ─── Game shell scripts load from templates/game-scripts ───────────────────
+
+import {
+  gameDaemonSh,
+  gamePortsSh,
+  gameStatusSh,
+  gameStopSh,
+  gameRestartSh,
+  gameRunSh,
+} from "../packages/cli/src/create-templates.ts";
+
+Deno.test("game scripts: daemon sources _ports and waits for ready", OPTS, async () => {
+  const d = await gameDaemonSh();
+  assertStringIncludes(d, "_ports.sh");
+  assertStringIncludes(d, "ursamu_read_ports");
+  assertStringIncludes(d, "ursamu_api_ready");
+  assertStringIncludes(d, "ursamu_find_supervisor");
+});
+
+Deno.test("game scripts: ports helper reads config.json", OPTS, async () => {
+  const p = await gamePortsSh();
+  assertStringIncludes(p, "config/config.json");
+  assertStringIncludes(p, "TELNET_PORT");
+  assertStringIncludes(p, "API_PORT");
+  assertStringIncludes(p, "packages/cli/src/start.ts");
+});
+
+Deno.test(
+  "game scripts: stop/status/restart/run share port helper",
+  OPTS,
+  async () => {
+    for (const s of [
+      await gameStopSh(),
+      await gameStatusSh(),
+      await gameRestartSh(),
+      await gameRunSh("demo"),
+    ]) {
+      assertStringIncludes(s, "_ports.sh");
+    }
+  },
+);

@@ -1,0 +1,491 @@
+[
+  {
+    "slug": "club",
+    "name": "Club",
+    "type": "weapon",
+    "category": "simple",
+    "priceGp": 1,
+    "damage": "1d4",
+    "damageType": "bludgeoning",
+    "properties": ["light"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "dagger",
+    "name": "Dagger",
+    "type": "weapon",
+    "category": "simple",
+    "priceGp": 2,
+    "damage": "1d4",
+    "damageType": "piercing",
+    "properties": ["finesse", "light", "thrown"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "handaxe",
+    "name": "Handaxe",
+    "type": "weapon",
+    "category": "simple",
+    "priceGp": 5,
+    "damage": "1d6",
+    "damageType": "slashing",
+    "properties": ["light", "thrown"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "javelin",
+    "name": "Javelin",
+    "type": "weapon",
+    "category": "simple",
+    "priceGp": 5,
+    "damage": "1d6",
+    "damageType": "piercing",
+    "properties": ["thrown"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "mace",
+    "name": "Mace",
+    "type": "weapon",
+    "category": "simple",
+    "priceGp": 5,
+    "damage": "1d6",
+    "damageType": "bludgeoning",
+    "properties": [],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "quarterstaff",
+    "name": "Quarterstaff",
+    "type": "weapon",
+    "category": "simple",
+    "priceGp": 2,
+    "damage": "1d6",
+    "damageType": "bludgeoning",
+    "properties": ["versatile"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "spear",
+    "name": "Spear",
+    "type": "weapon",
+    "category": "simple",
+    "priceGp": 1,
+    "damage": "1d6",
+    "damageType": "piercing",
+    "properties": ["thrown", "versatile"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "light-crossbow",
+    "name": "Light Crossbow",
+    "type": "weapon",
+    "category": "simple",
+    "priceGp": 25,
+    "damage": "1d8",
+    "damageType": "piercing",
+    "properties": ["ranged", "loading", "two-handed"],
+    "weaponType": "ranged",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "shortbow",
+    "name": "Shortbow",
+    "type": "weapon",
+    "category": "simple",
+    "priceGp": 25,
+    "damage": "1d6",
+    "damageType": "piercing",
+    "properties": ["ranged", "two-handed"],
+    "weaponType": "ranged",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "shortsword",
+    "name": "Shortsword",
+    "type": "weapon",
+    "category": "martial",
+    "priceGp": 10,
+    "damage": "1d6",
+    "damageType": "piercing",
+    "properties": ["finesse", "light"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "longsword",
+    "name": "Longsword",
+    "type": "weapon",
+    "category": "martial",
+    "priceGp": 15,
+    "damage": "1d8",
+    "damageType": "slashing",
+    "properties": ["versatile"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "battleaxe",
+    "name": "Battleaxe",
+    "type": "weapon",
+    "category": "martial",
+    "priceGp": 10,
+    "damage": "1d8",
+    "damageType": "slashing",
+    "properties": ["versatile"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "warhammer",
+    "name": "Warhammer",
+    "type": "weapon",
+    "category": "martial",
+    "priceGp": 15,
+    "damage": "1d8",
+    "damageType": "bludgeoning",
+    "properties": ["versatile"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "rapier",
+    "name": "Rapier",
+    "type": "weapon",
+    "category": "martial",
+    "priceGp": 25,
+    "damage": "1d8",
+    "damageType": "piercing",
+    "properties": ["finesse"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "greataxe",
+    "name": "Greataxe",
+    "type": "weapon",
+    "category": "martial",
+    "priceGp": 30,
+    "damage": "1d12",
+    "damageType": "slashing",
+    "properties": ["heavy", "two-handed"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "greatsword",
+    "name": "Greatsword",
+    "type": "weapon",
+    "category": "martial",
+    "priceGp": 50,
+    "damage": "2d6",
+    "damageType": "slashing",
+    "properties": ["heavy", "two-handed"],
+    "weaponType": "melee",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "padded-armor",
+    "name": "Padded Armor",
+    "type": "armor",
+    "category": "light",
+    "priceGp": 5,
+    "ac": 11,
+    "armorType": "light",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "leather-armor",
+    "name": "Leather Armor",
+    "type": "armor",
+    "category": "light",
+    "priceGp": 10,
+    "ac": 11,
+    "armorType": "light",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "studded-leather",
+    "name": "Studded Leather",
+    "type": "armor",
+    "category": "light",
+    "priceGp": 45,
+    "ac": 12,
+    "armorType": "light",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "hide-armor",
+    "name": "Hide Armor",
+    "type": "armor",
+    "category": "medium",
+    "priceGp": 10,
+    "ac": 12,
+    "armorType": "medium",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "chain-shirt",
+    "name": "Chain Shirt",
+    "type": "armor",
+    "category": "medium",
+    "priceGp": 50,
+    "ac": 13,
+    "armorType": "medium",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "scale-mail",
+    "name": "Scale Mail",
+    "type": "armor",
+    "category": "medium",
+    "priceGp": 50,
+    "ac": 14,
+    "armorType": "medium",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "breastplate",
+    "name": "Breastplate",
+    "type": "armor",
+    "category": "medium",
+    "priceGp": 400,
+    "ac": 14,
+    "armorType": "medium",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "chain-mail",
+    "name": "Chain Mail",
+    "type": "armor",
+    "category": "heavy",
+    "priceGp": 75,
+    "ac": 16,
+    "armorType": "heavy",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "shield",
+    "name": "Shield",
+    "type": "shield",
+    "category": "shield",
+    "priceGp": 10,
+    "ac": 2,
+    "armorType": "shield",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "arrows-20",
+    "name": "Arrows (20)",
+    "type": "general",
+    "category": "ammo",
+    "priceGp": 1,
+    "subtype": "ammo",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "bolts-20",
+    "name": "Crossbow Bolts (20)",
+    "type": "general",
+    "category": "ammo",
+    "priceGp": 1,
+    "subtype": "ammo",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "backpack",
+    "name": "Backpack",
+    "type": "general",
+    "category": "gear",
+    "priceGp": 2,
+    "subtype": "container",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "bedroll",
+    "name": "Bedroll",
+    "type": "general",
+    "category": "gear",
+    "priceGp": 1,
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "blanket",
+    "name": "Blanket",
+    "type": "general",
+    "category": "gear",
+    "priceGp": 1,
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "crowbar",
+    "name": "Crowbar",
+    "type": "general",
+    "category": "tool",
+    "priceGp": 2,
+    "subtype": "tool",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "hammer",
+    "name": "Hammer",
+    "type": "general",
+    "category": "tool",
+    "priceGp": 1,
+    "subtype": "tool",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "healers-kit",
+    "name": "Healer's Kit",
+    "type": "general",
+    "category": "kit",
+    "priceGp": 5,
+    "subtype": "kit",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "holy-symbol",
+    "name": "Holy Symbol",
+    "type": "general",
+    "category": "focus",
+    "priceGp": 5,
+    "subtype": "focus",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "lantern-hooded",
+    "name": "Lantern (hooded)",
+    "type": "general",
+    "category": "gear",
+    "priceGp": 5,
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "oil-flask",
+    "name": "Oil (flask)",
+    "type": "general",
+    "category": "gear",
+    "priceGp": 1,
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "pouch",
+    "name": "Pouch",
+    "type": "general",
+    "category": "gear",
+    "priceGp": 1,
+    "subtype": "container",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "rope-hempen",
+    "name": "Rope (hempen, 50 ft)",
+    "type": "general",
+    "category": "gear",
+    "priceGp": 1,
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "torch",
+    "name": "Torch",
+    "type": "general",
+    "category": "gear",
+    "priceGp": 1,
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "tinderbox",
+    "name": "Tinderbox",
+    "type": "general",
+    "category": "gear",
+    "priceGp": 1,
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "waterskin",
+    "name": "Waterskin",
+    "type": "general",
+    "category": "gear",
+    "priceGp": 2,
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "rations-1",
+    "name": "Rations (1 day)",
+    "type": "general",
+    "category": "food",
+    "priceGp": 1,
+    "subtype": "food",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "rations-5",
+    "name": "Rations (5 days)",
+    "type": "general",
+    "category": "food",
+    "priceGp": 5,
+    "subtype": "food",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "ale-mug",
+    "name": "Ale (mug)",
+    "type": "general",
+    "category": "food",
+    "priceGp": 1,
+    "subtype": "food",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "wine-pitcher",
+    "name": "Wine (pitcher)",
+    "type": "general",
+    "category": "food",
+    "priceGp": 2,
+    "subtype": "food",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "component-pouch",
+    "name": "Component Pouch",
+    "type": "general",
+    "category": "focus",
+    "priceGp": 25,
+    "subtype": "focus",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "spellbook",
+    "name": "Spellbook",
+    "type": "general",
+    "category": "focus",
+    "priceGp": 50,
+    "subtype": "focus",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "thieves-tools",
+    "name": "Thieves' Tools",
+    "type": "general",
+    "category": "tool",
+    "priceGp": 25,
+    "subtype": "tool",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "travelers-clothes",
+    "name": "Traveler's Clothes",
+    "type": "general",
+    "category": "gear",
+    "priceGp": 2,
+    "book": "SRD 5.2"
+  }
+]

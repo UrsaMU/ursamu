@@ -1,0 +1,206 @@
+{
+  "key": "cpr-chopshop",
+  "label": "Cyberpunk RED — Chopshop (Open, Browse, Buy, Harvest, Close)",
+  "vars": { "player": "Doc Samir" },
+  "setup": {
+    "room": {
+      "name": "Night Market — Watson Underpass",
+      "desc": "A maze of stalls and tarps wedged beneath the crumbling overpass. Bootleg chrome changes hands next to street food and knockoff weapons. The smell of ozone and antiseptic cuts through the noodle steam. At the far end, a rust-spotted cargo container has been converted into a clinic — a hand-painted cross above the door, strip lighting inside.",
+      "zone": "Watson"
+    },
+    "character": {
+      "_state": {
+        "shortdesc": "Compact man in a medtech coat, chrome fingers, sharp eyes.",
+        "desc": "Doc Samir moves with the practiced economy of someone who has patched a lot of people back together in bad lighting. His left hand is full chrome — surgical-grade, no cosmetics. A battered medtech bag hangs from one shoulder. He sizes you up before he says hello."
+      },
+      "stats": { "int": 8, "ref": 6, "dex": 7, "tech": 9, "cool": 7, "will": 8, "luck": 5, "move": 6, "body": 5, "emp": 6, "empBase": 9 },
+      "hp": { "max": 35, "current": 35 },
+      "swThreshold": 18,
+      "deathSave": 5,
+      "deathSavePenalty": 0,
+      "role": "medtech",
+      "roleRank": 8,
+      "roleData": {},
+      "skills": { "surgery": 8, "tech": 7, "first_aid": 8, "pharmaceuticals": 5, "cybertech": 6, "perception": 6, "persuasion": 5 },
+      "luckRemaining": 5,
+      "woundState": "healthy",
+      "criticalInjuries": [],
+      "armorBody": { "name": "Medtech Scrubs", "sp": 4, "currentSp": 4, "penalty": 0 },
+      "armorHead": null,
+      "cyberware": [
+        { "id": "ds_cw1", "name": "Cyberarm", "category": "cyberlimb", "location": "left arm", "hl": 4, "slots": 4, "installType": "hospital", "installedAt": 0 },
+        { "id": "ds_cw1a", "name": "Medscanner", "category": "cyberlimb", "hl": 2, "installedIn": "ds_cw1", "slotCost": 2, "installType": "hospital", "installedAt": 0 }
+      ],
+      "humanityLoss": 14,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 6,
+      "reputationDeeds": [],
+      "eurodollars": 12000,
+      "lifestyle": { "tier": "middle", "nextDueDate": 0 },
+      "lifepath": { "culturalOrigin": "Mideastern/North African", "language": "Arabic" },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": [],
+      "gear": [
+        { "id": "ds_g1", "name": "Medtech Bag", "type": "gear", "slot": "carried", "concealed": false },
+        { "id": "ds_g2", "name": "Speeder (drug)", "type": "drug", "slot": "carried", "concealed": true }
+      ]
+    },
+    "targets": {
+      "V": {
+        "_state": {
+          "shortdesc": "Quiet edgerunner. No chrome visible yet.",
+          "desc": "V keeps to the edges of the market, hood up, watching the stalls. Nothing obvious in the way of cyberware — not yet. She has the look of someone about to make a decision they can't undo."
+        },
+        "stats": { "int": 7, "ref": 8, "dex": 7, "tech": 5, "cool": 8, "will": 6, "luck": 7, "move": 6, "body": 7, "emp": 7, "empBase": 8 },
+        "hp": { "max": 45, "current": 45 },
+        "swThreshold": 23,
+        "deathSave": 7,
+        "deathSavePenalty": 0,
+        "role": "solo",
+        "roleRank": 3,
+        "roleData": {},
+        "skills": { "athletics": 6, "brawling": 5, "handgun": 7, "evasion": 6, "perception": 6, "stealth": 5 },
+        "luckRemaining": 7,
+        "woundState": "healthy",
+        "criticalInjuries": [],
+        "armorBody": { "name": "Light Armorjack", "sp": 11, "currentSp": 11, "penalty": 0 },
+        "armorHead": null,
+        "cyberware": [],
+        "humanityLoss": 0,
+        "bodysculpt": [],
+        "activeEffects": [],
+        "reputation": 2,
+        "reputationDeeds": [],
+        "eurodollars": 4200,
+        "lifestyle": { "tier": "low", "nextDueDate": 0 },
+        "lifepath": { "culturalOrigin": "North American", "language": "English" },
+        "chargenComplete": true,
+        "chargenStage": "complete",
+        "chargenMethod": "complete",
+        "restTimer": null,
+        "humanityGainedAt": null,
+        "locationEffects": [],
+        "gear": [
+          { "id": "v_g1", "name": "Lexington 10mm", "type": "weapon", "slot": "wielded", "concealed": false }
+        ]
+      },
+      "Jackie": {
+        "_state": {
+          "shortdesc": "Big guy with chrome and a worse attitude about doctors.",
+          "desc": "Jackie Welles stands near the noodle cart pretending he doesn't notice the clinic container. His Neural Link port is visible just above the collar — clinic-grade install, a little rough around the edges. He rubs the back of his neck when he thinks no one is looking."
+        },
+        "stats": { "int": 6, "ref": 7, "dex": 7, "tech": 4, "cool": 7, "will": 7, "luck": 6, "move": 7, "body": 9, "emp": 7, "empBase": 7 },
+        "hp": { "max": 55, "current": 55 },
+        "swThreshold": 28,
+        "deathSave": 9,
+        "deathSavePenalty": 0,
+        "role": "solo",
+        "roleRank": 3,
+        "roleData": {},
+        "skills": { "athletics": 7, "brawling": 8, "handgun": 7, "evasion": 5, "perception": 5, "streetwise": 6 },
+        "luckRemaining": 6,
+        "woundState": "healthy",
+        "criticalInjuries": [],
+        "armorBody": { "name": "Kevlar", "sp": 7, "currentSp": 7, "penalty": 0 },
+        "armorHead": null,
+        "cyberware": [
+          { "id": "jw_cw1", "name": "Neural Link", "category": "neuralware", "location": "skull", "hl": 7, "slots": 5, "installType": "mall", "installedAt": 0 }
+        ],
+        "humanityLoss": 2,
+        "bodysculpt": [],
+        "activeEffects": [],
+        "reputation": 3,
+        "reputationDeeds": [],
+        "eurodollars": 800,
+        "lifestyle": { "tier": "low", "nextDueDate": 0 },
+        "lifepath": { "culturalOrigin": "South American", "language": "Spanish" },
+        "chargenComplete": true,
+        "chargenStage": "complete",
+        "chargenMethod": "complete",
+        "restTimer": null,
+        "humanityGainedAt": null,
+        "locationEffects": [],
+        "gear": [
+          { "id": "jw_g1", "name": "Malorian Arms 3516", "type": "weapon", "slot": "wielded", "concealed": false }
+        ]
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Open the Shop"
+    },
+    {
+      "note": "Doc Samir opens a chopshop in the current room. His surgery skill and role rank determine what tier of cyberware he can install."
+    },
+    {
+      "cmd": "+chopshop/open Doc Samir's Clinic",
+      "label": "Doc Samir opens the chopshop"
+    },
+    {
+      "sub": "Browse Available Services"
+    },
+    {
+      "note": "+chopshop/list shows the active shop in this room — medtech name, tier cap, and queue status."
+    },
+    {
+      "cmd": "+chopshop/list",
+      "label": "list the active chopshop"
+    },
+    {
+      "sub": "Check Prices"
+    },
+    {
+      "note": "+chopshop/prices shows V what cyberware is available for installation and the cost breakdown by tier."
+    },
+    {
+      "cmd": "+chopshop/prices",
+      "label": "V checks the price list"
+    },
+    {
+      "sub": "Buy and Install Chrome"
+    },
+    {
+      "note": "+chopshop/buy queues an installation. For mall-tier chrome like a Neural Link, Doc Samir completes it on the spot."
+    },
+    {
+      "cmd": "+chopshop/buy neural_link",
+      "label": "V buys a Neural Link installation"
+    },
+    {
+      "sub": "Inspect the Result"
+    },
+    {
+      "note": "After installation, V's cyberware is visible on look. The Neural Link shows in her chrome list."
+    },
+    {
+      "cmd": "look V",
+      "label": "look at V — Neural Link now installed"
+    },
+    {
+      "sub": "Harvest Chrome"
+    },
+    {
+      "note": "+chopshop/harvest extracts cyberware from a willing patient. The chrome goes into extracted inventory and may be damaged depending on the surgery roll."
+    },
+    {
+      "cmd": "+chopshop/harvest Jackie=Neural Link",
+      "label": "Doc Samir harvests Jackie's Neural Link"
+    },
+    {
+      "sub": "Close the Shop"
+    },
+    {
+      "note": "+chopshop/close deactivates the shop. Any pending queue entries are cancelled."
+    },
+    {
+      "cmd": "+chopshop/close",
+      "label": "Doc Samir closes the chopshop"
+    }
+  ]
+}

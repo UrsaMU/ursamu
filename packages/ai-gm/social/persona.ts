@@ -7,7 +7,7 @@
 // Personas are lightweight: just a display name + optional description.
 // The GM uses the active persona name when generating responses.
 
-import { DBO } from "ursamu";
+import { DBO } from "@ursamu/mush";
 import { nanoid } from "../ingestion/util.ts";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────

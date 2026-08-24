@@ -1,0 +1,76 @@
+/**
+ * Utopia RetroWave — installable @ursamu/site theme.
+ * Maps RetroWave tokens onto --site-*. Do not rename shell classes.
+ * Glow is reserved for masthead, SEND, and ruling packets
+ * (see public/css/play-deck.css).
+ */
+
+@import url(
+  "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=Poppins:wght@300;400;500;600&display=swap"
+);
+
+:root {
+  --site-bg: #0a0a2e;
+  --site-bg-elevated: #12123a;
+  --site-bg-surface: #12123a;
+  --site-bg-surface-2: #1c1c4a;
+  --site-bg-code: #060620;
+
+  --site-border: rgba(131, 56, 236, 0.45);
+  --site-border-subtle: rgba(131, 56, 236, 0.22);
+  --site-border-strong: #8338ec;
+
+  --site-text: #ffffff;
+  --site-text-secondary: #c8c4e0;
+  --site-text-muted: #9a96b8;
+  --site-text-on-accent: #ffffff;
+  --site-text-on-primary: #ffffff;
+
+  --site-accent: #ff006e;
+  --site-accent-hover: #ff4d94;
+  --site-accent-muted: rgba(255, 0, 110, 0.16);
+  --site-accent-border: rgba(255, 0, 110, 0.45);
+
+  --site-btn-bg: #ff006e;
+  --site-btn-bg-hover: #ff4d94;
+  --site-btn-fg: #ffffff;
+
+  --site-success: #00f5a0;
+  --site-warning: #ffd700;
+  --site-error: #ff3366;
+  --site-info: #3a86ff;
+
+  --site-font-ui: Poppins, ui-sans-serif, system-ui, sans-serif;
+  --site-font-display: "Bebas Neue", Poppins, sans-serif;
+  --site-font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --site-nav-h: 60px;
+  --site-banner-offset: 160px;
+  --site-sticky-top: 80px;
+  --site-gutter: 40px;
+  --site-max-w: 1440px;
+  --site-main-max: 800px;
+  --site-aside-min: 280px;
+  --site-aside-max: 360px;
+  --site-radius-sm: 4px;
+  --site-radius-md: 8px;
+
+  --site-bg-image-top: none;
+  --site-bg-image-bottom: none;
+  --site-rule-image: none;
+  --site-search-icon: none;
+}
+
+.site-shell.is-mode-play .play-prompt__send {
+  background-image: linear-gradient(135deg, #ff006e, #8338ec);
+  background-color: #ff006e;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-shell.is-mode-play .play-prompt__send {
+    background-image: none;
+  }
+}

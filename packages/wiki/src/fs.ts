@@ -209,3 +209,26 @@ export async function findPageFile(wikiPath: string): Promise<string | null> {
 export function normalisePath(raw: string): string {
   return raw.replace(/^\/+/, "").replace(/\/+/g, "/").replace(/\/$/, "");
 }
+
+/** Find the wiki page flagged `home: true`, if any (there should be at most one). */
+export async function findHomePage(): Promise<{ urlPath: string; meta: WikiMeta; body: string } | null> {
+  for await (const { urlPath, absPath } of walkWiki(resolve(WIKI_DIR))) {
+    const page = await readPageFile(absPath);
+    if (page && page.meta.home === true) return { urlPath, ...page };
+  }
+  return null;
+}
+
+/**
+ * Only one wiki page may be `home: true` at a time. Clear the flag from every
+ * other page so checking it on a new page always replaces the old one.
+ */
+export async function clearHomeFlagExcept(exceptUrlPath: string): Promise<void> {
+  for await (const { urlPath, absPath } of walkWiki(resolve(WIKI_DIR))) {
+    if (urlPath === exceptUrlPath) continue;
+    const page = await readPageFile(absPath);
+    if (!page || page.meta.home !== true) continue;
+    const { home: _home, ...rest } = page.meta;
+    await Deno.writeTextFile(absPath, serializePage(rest, page.body));
+  }
+}

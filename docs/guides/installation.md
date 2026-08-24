@@ -17,7 +17,7 @@ claim the first staff account on the web portal.
 ## Method 1: Scaffold from JSR (recommended)
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.2/create my-game
+deno run -A jsr:@ursamu/cli@0.1.4/create my-game
 cd my-game
 deno task start
 ```
@@ -37,13 +37,13 @@ When `@ursamu/site` is selected, config sets
 Optional: interactive menu and package picker:
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.2/ursamu
+deno run -A jsr:@ursamu/cli@0.1.4/ursamu
 ```
 
 Engine-dev mode (link imports to a local monorepo checkout):
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.2/create my-game --local
+deno run -A jsr:@ursamu/cli@0.1.4/create my-game --local
 ```
 
 > **Imports:** game code uses `jsr:@ursamu/mush`. The legacy package

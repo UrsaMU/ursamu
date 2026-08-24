@@ -1,0 +1,20 @@
+{
+  "havenbrook": {
+    "slug": "havenbrook",
+    "name": "Havenbrook",
+    "summary": "Town militia and guilds of the lantern fountain.",
+    "book": "SRD 5.2"
+  },
+  "millhaven": {
+    "slug": "millhaven",
+    "name": "Millhaven",
+    "summary": "Millers, fishers, and dock hands on the river bend.",
+    "book": "SRD 5.2"
+  },
+  "ashford": {
+    "slug": "ashford",
+    "name": "Ashford",
+    "summary": "Miners' guild and hill-road caravan masters.",
+    "book": "SRD 5.2"
+  }
+}

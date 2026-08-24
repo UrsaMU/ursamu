@@ -1,0 +1,107 @@
+[
+  {
+    "slug": "blinded",
+    "name": "Blinded",
+    "book": "SRD 5.2",
+    "effects": ["attack_disadvantage", "attacks_against_advantage"]
+  },
+  {
+    "slug": "charmed",
+    "name": "Charmed",
+    "book": "SRD 5.2",
+    "effects": ["social"]
+  },
+  {
+    "slug": "deafened",
+    "name": "Deafened",
+    "book": "SRD 5.2",
+    "effects": ["hear"]
+  },
+  {
+    "slug": "frightened",
+    "name": "Frightened",
+    "book": "SRD 5.2",
+    "effects": ["attack_disadvantage", "ability_disadvantage"]
+  },
+  {
+    "slug": "grappled",
+    "name": "Grappled",
+    "book": "SRD 5.2",
+    "effects": ["speed_zero"]
+  },
+  {
+    "slug": "incapacitated",
+    "name": "Incapacitated",
+    "book": "SRD 5.2",
+    "effects": ["no_actions"]
+  },
+  {
+    "slug": "invisible",
+    "name": "Invisible",
+    "book": "SRD 5.2",
+    "effects": ["attack_advantage", "attacks_against_disadvantage"]
+  },
+  {
+    "slug": "paralyzed",
+    "name": "Paralyzed",
+    "book": "SRD 5.2",
+    "effects": [
+      "no_actions",
+      "attacks_against_advantage",
+      "auto_fail_str_dex"
+    ]
+  },
+  {
+    "slug": "petrified",
+    "name": "Petrified",
+    "book": "SRD 5.2",
+    "effects": ["no_actions", "attacks_against_advantage"]
+  },
+  {
+    "slug": "poisoned",
+    "name": "Poisoned",
+    "book": "SRD 5.2",
+    "effects": ["attack_disadvantage", "ability_disadvantage"]
+  },
+  {
+    "slug": "prone",
+    "name": "Prone",
+    "book": "SRD 5.2",
+    "effects": [
+      "attack_disadvantage",
+      "melee_against_advantage",
+      "ranged_against_disadvantage"
+    ]
+  },
+  {
+    "slug": "restrained",
+    "name": "Restrained",
+    "book": "SRD 5.2",
+    "effects": [
+      "speed_zero",
+      "attack_disadvantage",
+      "attacks_against_advantage"
+    ]
+  },
+  {
+    "slug": "stunned",
+    "name": "Stunned",
+    "book": "SRD 5.2",
+    "effects": [
+      "no_actions",
+      "attacks_against_advantage",
+      "auto_fail_str_dex"
+    ]
+  },
+  {
+    "slug": "unconscious",
+    "name": "Unconscious",
+    "book": "SRD 5.2",
+    "effects": [
+      "no_actions",
+      "prone",
+      "attacks_against_advantage",
+      "auto_fail_str_dex"
+    ]
+  }
+]

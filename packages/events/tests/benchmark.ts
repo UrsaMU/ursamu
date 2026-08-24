@@ -77,4 +77,7 @@ async function runBenchmark() {
 
 }
 
-runBenchmark().then(() => Deno.exit(0));
+// Only run when executed directly (not under `deno test`).
+if (import.meta.main) {
+  runBenchmark().then(() => Deno.exit(0));
+}

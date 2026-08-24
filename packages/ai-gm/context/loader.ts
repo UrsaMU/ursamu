@@ -1,8 +1,8 @@
-import { DBO } from "ursamu";
+import { DBO, dbojs } from "@ursamu/mush";
 import type { IGMMemory, IGMReveal } from "../schema.ts";
 import { gmMemory, gmReveals } from "../db.ts";
-import { jobs } from "ursamu/jobs";
-import type { IJob } from "ursamu/jobs";
+import { jobs } from "@ursamu/jobs";
+import type { IJob } from "@ursamu/jobs";
 
 // ─── Minimal interfaces ────────────────────────────────────────────────────────
 // Defined here so ai-gm has no hard dependency on specific game plugins.
@@ -95,10 +95,130 @@ export interface ISessionSnapshot {
   loadedAt: number;
 }
 
+/** Normalize dbref-ish ids: "#2" and "2" compare equal. */
+export function bareId(id: unknown): string {
+  return String(id ?? "").replace(/^#/, "").trim();
+}
+
+export function idsEqual(a: unknown, b: unknown): boolean {
+  const x = bareId(a);
+  const y = bareId(b);
+  return !!x && !!y && x === y;
+}
+
+function flagsText(flags: unknown): string {
+  if (flags instanceof Set) return [...flags].join(" ");
+  if (Array.isArray(flags)) return flags.join(" ");
+  return String(flags ?? "");
+}
+
+function cprFromPlayer(raw: Record<string, unknown>): Record<
+  string,
+  unknown
+> | null {
+  const data = raw.data as Record<string, unknown> | undefined;
+  const state = raw.state as Record<string, unknown> | undefined;
+  const cpr = (data?.cpr ?? state?.cpr) as
+    | Record<string, unknown>
+    | undefined;
+  if (!cpr || typeof cpr !== "object") return null;
+  return cpr;
+}
+
+function sheetFromCprPlayer(
+  raw: Record<string, unknown>,
+  cpr: Record<string, unknown>,
+): ICharSheet {
+  const pid = bareId(raw.id);
+  const name = String(
+    (raw.data as { name?: string } | undefined)?.name ??
+      raw.name ??
+      cpr.name ??
+      pid,
+  );
+  return {
+    id: `cpr-${pid}`,
+    playerId: pid,
+    name,
+    playbook: String(cpr.role ?? "edgerunner"),
+    status: "approved",
+    system: "cyberpunk-red",
+    data: {
+      role: cpr.role,
+      roleRank: cpr.roleRank,
+      stats: cpr.stats,
+      skills: cpr.skills,
+      hp: cpr.hp,
+      woundState: cpr.woundState,
+      eurodollars: cpr.eurodollars,
+      lifestyle: cpr.lifestyle,
+      humanityLoss: cpr.humanityLoss,
+      cyberware: Array.isArray(cpr.cyberware)
+        ? cpr.cyberware.map((x: unknown) => {
+          if (typeof x === "string") return x;
+          if (x && typeof x === "object" &&
+            "name" in (x as object)) {
+            return String((x as { name?: string }).name ?? "?");
+          }
+          return "?";
+        })
+        : [],
+      armorBody: cpr.armorBody,
+      armorHead: cpr.armorHead,
+      gear: cpr.gear,
+      reputation: cpr.reputation,
+    },
+  };
+}
+
+/** CPR sheets live on player objects (data.cpr), not a sheet DBO. */
+export async function loadCprPlayerSheets(): Promise<ICharSheet[]> {
+  // Don't rely on flag-regex queries (Set vs string storage varies).
+  const all = await dbojs.all();
+  const out: ICharSheet[] = [];
+  for (const p of all) {
+    // deno-lint-ignore no-explicit-any
+    const raw = p as any as Record<string, unknown>;
+    const fl = flagsText(raw.flags);
+    if (!/\bplayer\b/i.test(fl)) continue;
+    const cpr = cprFromPlayer(raw);
+    if (!cpr) continue;
+    out.push(sheetFromCprPlayer(raw, cpr));
+  }
+  return out;
+}
+
+/** Load one CPR sheet by player id (for room injection fallback). */
+export async function loadCprSheetForPlayer(
+  playerId: string,
+): Promise<ICharSheet | null> {
+  const want = bareId(playerId);
+  if (!want) return null;
+  let row = await dbojs.queryOne({ id: want });
+  if (!row) row = await dbojs.queryOne({ id: `#${want}` });
+  if (!row) {
+    const all = await dbojs.all();
+    row = all.find((p) => idsEqual(p.id, want));
+  }
+  if (!row) return null;
+  const cpr = cprFromPlayer(row as unknown as Record<string, unknown>);
+  if (!cpr) return null;
+  return sheetFromCprPlayer(
+    row as unknown as Record<string, unknown>,
+    cpr,
+  );
+}
+
 export async function loadSessionSnapshot(
   charCollection = "server.playbooks",
 ): Promise<ISessionSnapshot> {
-  const sheets = new DBO<ICharSheet>(charCollection);
+  const loadChars = charCollection === "cpr.players" ||
+      charCollection === "cyberpunk-red"
+    ? loadCprPlayerSheets()
+    : (new DBO<ICharSheet>(charCollection).all() as Promise<
+      ICharSheet[]
+    >);
+
   const [
     allChars,
     allNpcs,
@@ -109,7 +229,7 @@ export async function loadSessionSnapshot(
     allJobs,
     allDowntime,
   ] = await Promise.all([
-    sheets.all() as Promise<ICharSheet[]>,
+    loadChars,
     npcs.all() as Promise<INPC[]>,
     orgs.all() as Promise<IOrg[]>,
     fronts.all() as Promise<IFront[]>,
@@ -121,14 +241,19 @@ export async function loadSessionSnapshot(
 
   return {
     characters: allChars.filter((c) =>
-      c.status === "approved" || c.chargenState === "approved"
+      c.status === "approved" ||
+      c.chargenState === "approved" ||
+      c.system === "cyberpunk-red" ||
+      c.system === "utopia"
     ),
     npcs: allNpcs,
     orgs: allOrgs,
     fronts: allFronts.filter((f) => f.status === "active"),
     memories: allMemories,
     reveals: allReveals.filter((r) => !r.fired),
-    openJobs: allJobs.filter((j) => j.status === "new" || j.status === "open"),
+    openJobs: allJobs.filter((j) =>
+      j.status === "new" || j.status === "open"
+    ),
     openDowntime: allDowntime.filter((a) => !a.resolved),
     loadedAt: Date.now(),
   };
@@ -142,17 +267,92 @@ export interface IRoomContext {
   recentExchangeTexts: string[];
 }
 
+async function loadRoomObject(roomId: string): Promise<{
+  id: string;
+  name: string;
+  desc: string;
+} | null> {
+  const want = bareId(roomId);
+  let row = await dbojs.queryOne({ id: want });
+  if (!row) row = await dbojs.queryOne({ id: `#${want}` });
+  if (!row) {
+    const all = await dbojs.all();
+    row = all.find((o) => idsEqual(o.id, want));
+  }
+  if (!row) return null;
+  // deno-lint-ignore no-explicit-any
+  const raw = row as any;
+  const name = String(raw?.data?.name ?? raw?.name ?? `Room ${want}`);
+  const desc = String(
+    raw?.data?.desc ??
+      raw?.data?.description ??
+      raw?.description ??
+      "",
+  ).trim();
+  return { id: bareId(raw.id), name, desc };
+}
+
 export async function loadRoomContext(
   roomId: string,
   snapshot: ISessionSnapshot,
   playerIds: string[],
   recentExchangeTexts: string[],
 ): Promise<IRoomContext> {
-  const scene =
+  const wantRoom = bareId(roomId);
+  let scene =
     await (scenes.queryOne({ id: roomId }) as Promise<IScene | null>);
-  const playersInRoom = snapshot.characters.filter((c) =>
-    playerIds.includes(c.playerId)
+  if (!scene) {
+    scene = await (scenes.queryOne({ id: wantRoom }) as Promise<
+      IScene | null
+    >);
+  }
+
+  // Match players with # stripped (contrib ids vs sheet playerIds)
+  let playersInRoom = snapshot.characters.filter((c) =>
+    playerIds.some((pid) => idsEqual(pid, c.playerId))
   );
+
+  // CPR fallback: pull sheets directly if snapshot missed them
+  if (playersInRoom.length < playerIds.length) {
+    const have = new Set(playersInRoom.map((c) => bareId(c.playerId)));
+    for (const pid of playerIds) {
+      if (have.has(bareId(pid))) continue;
+      const sheet = await loadCprSheetForPlayer(pid);
+      if (sheet) {
+        playersInRoom = [...playersInRoom, sheet];
+        have.add(bareId(pid));
+      }
+    }
+  }
+
+  // No formal scene record — synthesize from room object
+  if (!scene) {
+    const room = await loadRoomObject(roomId);
+    if (room) {
+      scene = {
+        id: room.id,
+        roomId: room.id,
+        title: room.name,
+        description: room.desc ||
+          `${room.name}. A street in Night City — ` +
+            `neon, rain-slick asphalt, distant sirens. ` +
+            `The Time of the Red.`,
+        status: "active",
+      };
+    } else {
+      scene = {
+        id: wantRoom,
+        roomId: wantRoom,
+        title: `Room ${wantRoom}`,
+        description:
+          `Night City street (room ${wantRoom}). Neon haze, ` +
+          `wet pavement, traffic growl. Time of the Red, 2045. ` +
+          `Fill in detail from the fiction as players act.`,
+        status: "active",
+      };
+    }
+  }
+
   return { scene, playersInRoom, recentExchangeTexts };
 }
 

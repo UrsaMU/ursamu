@@ -1,6 +1,7 @@
 import type { IGMConfig } from "../schema.ts";
 import type { IGameSystem } from "../systems/interface.ts";
 import {
+  NEVER_POSE_FOR_PLAYERS,
   SOLO_GM_MOVE_PRINCIPLES,
   SOLO_GM_ORACLE_PRINCIPLES,
   SOLO_GM_PRINCIPLES,
@@ -45,6 +46,9 @@ export function buildBasePrompt(
     `Style: ${config.persona.style}`,
     "",
   );
+
+  // 1b. Hard agency rule — always first among behaviour rules
+  parts.push(NEVER_POSE_FOR_PLAYERS, "");
 
   // 2. Core system rules
   parts.push(system.coreRulesPrompt, "");

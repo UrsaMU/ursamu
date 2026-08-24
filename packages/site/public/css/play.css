@@ -11,11 +11,15 @@
  *
  * Colors use classes (play-palette.css) — CSP blocks inline style=.
  */
-@import url("/site/css/play-palette.css?v=20260809playmob");
+@import url("/site/css/play-palette.css?v=20260809desk");
+@import url("/site/css/play-deck.css?v=20260819deck");
 
 /*
  * Play mode: fill the viewport under the fixed nav.
  * Output scrolls; input + SEND stay pinned to the bottom.
+ *
+ * Desktop (default, >1024): design.md 3-col shell — left rail |
+ * main | right rail. Full-bleed / stacked prompt only ≤1024.
  */
 .site-shell.is-mode-play {
   height: 100vh;
@@ -25,7 +29,6 @@
   max-height: 100vh;
   max-height: 100dvh;
   overflow: hidden;
-  /* shell is already column flex; keep children stretching */
   align-items: stretch;
 }
 
@@ -39,6 +42,29 @@
   display: none !important;
 }
 
+/* Rails visible on desktop (sticky side menus) */
+.site-shell.is-mode-play .site-aside {
+  display: flex !important;
+  flex-direction: column;
+  position: sticky;
+  top: var(--site-sticky-top, var(--site-nav-h, 3.75rem));
+  align-self: stretch;
+  min-height: 0;
+  max-height: 100%;
+  max-width: var(--site-aside-max, none);
+  overflow: auto;
+  scrollbar-width: thin;
+  order: 0;
+}
+
+.site-shell.is-mode-play .site-aside--start {
+  grid-column: 1;
+}
+
+.site-shell.is-mode-play .site-aside--end {
+  grid-column: 3;
+}
+
 .site-shell.is-mode-play .site-body {
   flex: 1 1 0;
   min-height: 0;
@@ -49,37 +75,54 @@
   padding-top: calc(var(--site-nav-h, 3.75rem) + 0.5rem);
   padding-bottom: 0.5rem;
   align-items: stretch;
-  /* One row that can shrink — required for nested overflow */
+  justify-content: center;
+  /* Explicit 3-col — never inherit mobile 1fr outside media */
+  grid-template-columns:
+    minmax(var(--site-aside-min), var(--site-aside-width))
+    minmax(0, var(--site-main-max, 1fr))
+    minmax(var(--site-aside-min), var(--site-aside-width));
   grid-template-rows: minmax(0, 1fr);
+  column-gap: var(--site-col-gap, 1.5rem);
   box-sizing: border-box;
-}
-
-.site-shell.is-mode-play .site-aside {
-  min-height: 0;
-  max-height: 100%;
-  overflow: auto;
-  scrollbar-width: none;
-}
-
-.site-shell.is-mode-play .site-aside::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
 }
 
 .site-shell.is-mode-play .site-main {
   display: flex;
   flex-direction: column;
   align-self: stretch;
+  grid-column: 2;
+  order: 0;
+  position: relative;
   min-width: 0;
   min-height: 0;
   height: 100%;
   max-height: 100%;
   width: 100%;
-  /* Use full center-column track (no 78ch shrink) */
   max-width: none;
   overflow: hidden;
   padding-bottom: 0;
+}
+
+/* Desktop prompt: input + fixed SEND side-by-side (Figma 119×55) */
+.site-shell.is-mode-play .play-prompt {
+  flex-wrap: nowrap;
+  flex-direction: row;
+  align-items: flex-end;
+}
+
+.site-shell.is-mode-play .play-prompt__input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.site-shell.is-mode-play .play-prompt__send {
+  flex: 0 0 auto;
+  width: 119px;
+  min-width: 119px;
+  max-width: 119px;
+  height: 55px;
+  min-height: 55px;
 }
 
 /* Chat column — fills main; prompt pinned at bottom of column */
@@ -270,15 +313,17 @@
 .play-chat__meta {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 0.55rem;
+  align-items: center;
+  gap: 0.3rem 0.45rem;
   margin: 0 0 0.15rem;
+  min-height: 1.25rem;
   line-height: 1.25;
 }
 
 .play-chat__name {
   font-weight: 600;
   font-size: 0.875rem;
+  line-height: 1.25;
   color: var(--site-text);
   min-width: 0;
   overflow: hidden;
@@ -289,6 +334,7 @@
 .play-chat__time {
   flex: 0 0 auto;
   font-size: 0.7rem;
+  line-height: 1.25;
   font-variant-numeric: tabular-nums;
   color: var(--site-text-muted);
 }
@@ -350,24 +396,30 @@
   font-style: normal;
 }
 
-/* OOC / channel badge */
+/* OOC / channel badge — fixed box so label sits centered with name */
 .play-chat__tag {
   flex: 0 0 auto;
-  display: inline-block;
-  padding: 0.05rem 0.35rem;
-  border-radius: 2px;
-  font-size: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 1.15rem;
+  min-width: 1.15rem;
+  padding: 0 0.4rem;
+  border-radius: 3px;
+  font-size: 0.625rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  line-height: 1.3;
+  line-height: 1;
   border: 1px solid var(--site-border-subtle, #444);
   color: var(--site-text-muted, #aaa);
   background: transparent;
+  vertical-align: middle;
 }
 .play-chat__tag--ooc {
   color: var(--site-error, #e07070);
-  border: 1px solid color-mix(
+  border-color: color-mix(
     in srgb,
     var(--site-error, #e07070) 55%,
     transparent
@@ -388,24 +440,31 @@
   );
   color: inherit;
 }
-.play-chat__tag .mush-text {
-  /* Colored spans inside the badge keep their own colors */
+.play-chat__tag .mush-text,
+.play-chat__tag .mush-text * {
+  /* Keep badge metrics even when MUSH color spans wrap the label */
+  font-size: inherit;
   font-weight: inherit;
   letter-spacing: inherit;
+  line-height: inherit;
+  display: inline;
 }
 /* Origin chips (Discord bridge, …) */
 .play-chat__chip {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 1.15rem;
   gap: 0.2rem;
-  padding: 0.05rem 0.35rem;
-  border-radius: 2px;
-  font-size: 0.6rem;
+  padding: 0 0.4rem;
+  border-radius: 3px;
+  font-size: 0.625rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  line-height: 1.3;
+  line-height: 1;
   border: 1px solid transparent;
 }
 .play-chat__chip--discord {
@@ -834,6 +893,18 @@
   text-decoration: underline;
 }
 
+/* In-markdown help / cmd links */
+.play-md__cmd {
+  color: var(--site-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  cursor: pointer;
+}
+.play-md__cmd:hover {
+  color: var(--site-text);
+}
+
+
 .play-md code {
   font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
   font-size: 0.85em;
@@ -947,193 +1018,6 @@
   column-gap: 0.75rem;
   padding: 0.32rem 0.1rem;
 }
-
-/* Shop proficiency: soft background, no text marks (mobile-safe) */
-.play-entity--usable {
-  background: color-mix(
-    in srgb,
-    var(--site-accent, #c9a227) 14%,
-    transparent
-  );
-  border-left: 3px solid var(--site-accent, #c9a227);
-  /* Clear the accent bar — name was flush against the edge */
-  padding-left: 1rem;
-  box-sizing: border-box;
-}
-
-.play-entity--usable:hover:not(.play-entity--static) {
-  background: color-mix(
-    in srgb,
-    var(--site-accent, #c9a227) 22%,
-    transparent
-  );
-}
-
-.play-entity--unusable {
-  opacity: 0.72;
-  padding-left: 1rem;
-}
-
-.play-entity--unusable .play-entity__name {
-  color: var(--site-text-muted, var(--site-text));
-}
-
-/* Shop list: extra room so names never hug the left edge */
-.play-layout--vendor-shop .play-entity {
-  padding-left: 1rem;
-  padding-right: 0.75rem;
-}
-
-.play-layout--vendor-shop .play-entity--usable {
-  padding-left: 1.1rem;
-}
-
-.play-entity:hover:not(.play-entity--static) {
-  background: color-mix(
-    in srgb,
-    var(--site-accent) 8%,
-    transparent
-  );
-}
-
-.play-entity__name-col {
-  grid-column: 1;
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 0.25rem;
-  min-width: 0;
-  max-width: 19.5rem;
-  overflow: hidden;
-  line-height: 1.25;
-}
-
-.play-layout--vendor-shop .play-entity__name-col,
-.play-layout--vendor-sell .play-entity__name-col,
-.play-layout--dnd-inventory .play-entity__name-col,
-.play-layout--inventory .play-entity__name-col {
-  max-width: 17.6rem;
-}
-
-.play-layout--look .play-entity__name-col {
-  max-width: 22rem;
-}
-
-.play-entity__name {
-  flex: 0 1 auto;
-  min-width: 0;
-  font-weight: 600;
-  color: var(--site-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Keep moniker color spans from forcing wrap */
-.play-entity__name .mush-text {
-  white-space: nowrap;
-}
-
-.play-entity__role-col {
-  grid-column: 2;
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  min-height: 1.25em;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  line-height: 1.25;
-}
-
-.play-entity__role {
-  display: inline-block;
-  max-width: 100%;
-  font-size: 0.8125rem;
-  line-height: 1.25;
-  color: var(--site-text-secondary, var(--site-text-muted));
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
-}
-
-.play-entity__dbref,
-.play-action__dbref {
-  flex: 0 0 auto;
-  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: var(--site-text-muted);
-  white-space: nowrap;
-}
-
-.play-entity__meta {
-  grid-column: 3;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
-  font-size: 0.75rem;
-  line-height: 1.25;
-  color: var(--site-text-muted);
-  white-space: nowrap;
-  text-align: right;
-}
-
-.play-entity__sub {
-  grid-column: 4;
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  font-size: 0.8125rem;
-  line-height: 1.25;
-  color: var(--site-text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Exit chips — multi-column like text look EXITFORMAT */
-.play-actions {
-  display: grid;
-  gap: 0.45rem 0.75rem;
-  width: 100%;
-}
-
-.play-actions--cols-1 {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.play-actions--cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.play-actions--cols-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.play-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  width: 100%;
-  min-width: 0;
-  margin: 0;
-  padding: 0.4rem 0.55rem;
-  box-sizing: border-box;
-  font-family: var(--site-font-ui);
-  font-size: 0.875rem;
-  line-height: 1.2;
-  color: var(--site-text);
-  background: var(--site-bg-surface, transparent);
-  border: 1px solid var(--site-border);
-  border-radius: 0;
-  cursor: pointer;
-  transition: border-color 0.12s ease, background-color 0.12s ease;
-}
-
-
 
 /* Channels hub — tight chrome like mail/jobs */
 .play-layout--channels-hub .play-layout__text,
@@ -1412,8 +1296,9 @@
 
 .play-entity {
   display: grid;
+  /* name | role | idle | short-desc — hard 300px name col */
   grid-template-columns:
-    minmax(0, 12rem)
+    300px
     minmax(4.5rem, 7.5rem)
     3.25rem
     minmax(0, 1fr);
@@ -1452,8 +1337,10 @@
   flex-wrap: nowrap;
   align-items: center;
   gap: 0.25rem;
+  width: 300px;
+  max-width: 300px;
   min-width: 0;
-  max-width: 12rem;
+  box-sizing: border-box;
   overflow: hidden;
   line-height: 1.25;
 }
@@ -1552,6 +1439,10 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.play-actions--cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .play-action {
   display: inline-flex;
   align-items: center;
@@ -1622,7 +1513,7 @@
   .play-entity {
     display: grid;
     grid-template-columns:
-      minmax(0, 1.2fr)
+      300px
       minmax(0, max-content)
       minmax(0, max-content)
       minmax(0, 1fr);
@@ -1638,7 +1529,8 @@
   .play-entity__name-col {
     grid-column: 1;
     grid-row: 1;
-    max-width: none;
+    width: 300px;
+    max-width: 300px;
     min-width: 0;
     overflow: hidden;
   }
@@ -1766,7 +1658,7 @@
 }
 
 /* Prompt row — pinned to bottom of play column.
-   Input grows with content (JS) up to 300px; output flex-shrinks. */
+   Input grows with content (JS) up to 500px; output flex-shrinks. */
 .play-prompt {
   flex: 0 0 auto;
   flex-shrink: 0;
@@ -1787,8 +1679,8 @@
   width: 100%;
   height: 55px;
   min-height: 55px;
-  /* Cap: ~14 lines at 0.875rem / 1.35 lh + pad ≈ 300px */
-  max-height: 300px;
+  /* Cap: ~14 lines at 0.875rem / 1.35 lh + pad ≈ 500px */
+  max-height: 500px;
   margin: 0;
   padding: 0.85rem;
   box-sizing: border-box;
@@ -1882,40 +1774,59 @@
   display: none;
 }
 
+
+/* ── Mobile / tablet play (≤1024) — full-bleed, stacked prompt ── */
 @media (max-width: 1024px) {
+  /* Rails stack above main and steal height — hide in play */
+  .site-shell.is-mode-play .site-aside {
+    display: none !important;
+  }
+
+  .site-shell.is-mode-play .site-aside--start,
+  .site-shell.is-mode-play .site-aside--end {
+    grid-column: 1;
+  }
+
   .site-shell.is-mode-play .site-body {
+    max-width: 100%;
+    margin: 0;
     padding-top: calc(var(--site-nav-h, 3.5rem) + 0.5rem);
     padding-bottom: 0.5rem;
+    grid-template-columns: minmax(0, 1fr) !important;
+    column-gap: 0;
+    justify-content: stretch;
   }
 
   .site-shell.is-mode-play .site-main {
-    max-width: 100%;
+    grid-column: 1 !important;
+    order: 0;
+    width: 100%;
+    max-width: none;
   }
 
-  .play-prompt {
+  .site-shell.is-mode-play .play-prompt {
     flex-wrap: wrap;
     align-items: stretch;
     gap: 0.55rem;
   }
 
-  .play-prompt__input {
+  .site-shell.is-mode-play .play-prompt__input {
     flex: 1 1 100%;
     min-width: 0;
     width: 100%;
   }
 
-  /* SEND grows full width (drop fixed 119×55) */
-  .play-prompt__send {
+  .site-shell.is-mode-play .play-prompt__send {
     flex: 1 1 100%;
     width: 100%;
     min-width: 0;
     max-width: none;
     height: auto;
-    min-height: 3rem; /* touch target */
+    min-height: 3rem;
     padding: 0.75rem 1rem;
   }
 
-  /* Look exit chips / action buttons — single column, fill row */
+  /* Look exit chips — single column on phone */
   .play-actions,
   .play-actions--cols-1,
   .play-actions--cols-2,
@@ -1938,97 +1849,181 @@
   .play-pre {
     font-size: 0.8125rem;
   }
-}
 
-
-/* D&D sheet full-width */
-.play-layout--dnd-sheet {
-  width: 100%;
-  max-width: none;
-  margin: 0.25rem 0 0.85rem;
-  box-sizing: border-box;
-}
-
-.play-layout--dnd-sheet .dnd-sheet {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-}
-
-.play-msg:has(.play-layout--dnd-sheet),
-.play-msg:has(.dnd-sheet) {
-  width: 100%;
-  max-width: none;
-}
-
-.play-layout--sheet .play-layout__text {
-  margin: 0 0 0.55rem;
-  font-size: 0.88rem;
-  color: var(--site-text-muted);
-}
-
-.play-layout--sheet .play-layout__list {
-  list-style: none;
-  margin: 0 0 0.75rem;
-  padding: 0;
-}
-
-.play-layout--sheet .play-layout__list li {
-  padding: 0.35rem 0.55rem;
-  margin: 0;
-  font-size: 0.88rem;
-}
-
-.play-layout--sheet .play-layout__list li:nth-child(odd) {
-  background: var(--site-bg-surface, transparent);
-}
-
-.play-layout--sheet .play-layout__list li:nt
-
-
-@media (max-width: 1024px) {
-
-  /* Character sheet edge-to-edge under nav on phones */
   .play-layout--dnd-sheet,
   .play-layout--dnd-sheet .dnd-sheet,
-  .play-msg:has(.dnd-sheet) {
+  .play-msg:has(.dnd-sheet),
+  .play-layout--cpr-sheet,
+  .play-layout--cpr-sheet .cpr-sheet,
+  .play-msg:has(.cpr-sheet) {
     width: 100%;
     max-width: none;
     margin-inline: 0;
   }
 
   .play-layout--dnd-sheet .dnd-sheet__banner,
-  .play-layout--dnd-sheet .dnd-sheet__panel {
+  .play-layout--dnd-sheet .dnd-sheet__panel,
+  .play-layout--cpr-sheet .cpr-live__id,
+  .play-layout--cpr-sheet .cpr-live__block {
     border-radius: 0;
   }
-
-  .play-layout--dnd-sheet .dnd-sheet__combat .dnd-sheet__stat {
-    flex: 1 1 calc(50% - 0.35rem);
-    min-width: 0;
-  }
-
-  .play-layout--dnd-sheet .dnd-sheet__abil {
-    flex: 1 1 calc(33.333% - 0.35rem);
-  }
-
-  .play-prompt {
-    flex-wrap: wrap;
-    align-items: stretch;
-    gap: 0.55rem;
-  }
-
-  .play-prompt__input {
-    flex: 1 1 100%;
-    min-width: 0;
-    width: 100%;
-  }
-
-  /* SEND grows full width (drop fixed 119×55) */
-  .play-prompt__send {
-    flex: 1 1 100%;
-    width: 100%;
-    min-width: 0;
-    max-width: none;
-    height: auto;
-    min-height
 }
+
+/* Narrow screens: hard 200px name column */
+@media (max-width: 900px) {
+  .play-entity {
+    grid-template-columns:
+      200px
+      minmax(0, max-content)
+      minmax(0, max-content)
+      minmax(0, 1fr);
+  }
+
+  .play-entity__name-col {
+    width: 200px;
+    max-width: 200px;
+  }
+}
+
+/* Shop proficiency highlight (mobile-safe, no text marks) */
+.play-entity--usable {
+  background: color-mix(
+    in srgb,
+    var(--site-accent, #c9a227) 14%,
+    transparent
+  );
+  border-left: 3px solid var(--site-accent, #c9a227);
+  padding-left: 0.65rem;
+}
+
+.play-entity--unusable {
+  opacity: 0.55;
+}
+
+/* Full-width D&D / CPR sheets in chat */
+.play-layout--dnd-sheet,
+.play-layout--cpr-sheet {
+  width: 100%;
+  max-width: none;
+  margin: 0.25rem 0 0.85rem;
+  box-sizing: border-box;
+}
+
+.play-layout--dnd-sheet .dnd-sheet,
+.play-layout--cpr-sheet .cpr-sheet {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.play-msg:has(.play-layout--dnd-sheet),
+.play-msg:has(.dnd-sheet),
+.play-msg:has(.play-layout--cpr-sheet),
+.play-msg:has(.cpr-sheet) {
+  width: 100%;
+  max-width: none;
+}
+
+
+
+.play-layout--help-topic .play-md {
+  margin: 0.35rem 0 0.75rem;
+}
+
+/* ── Help: multi-column topic chips (design.md play-action) ── */
+.play-actions--cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.play-layout--help-index .play-layout__title,
+.play-layout--help-section .play-layout__title,
+.play-layout--help-topic .play-layout__title {
+  color: var(--site-accent);
+  letter-spacing: 0.04em;
+}
+
+.play-layout--help-index .play-layout__section-title,
+.play-layout--help-section .play-layout__section-title {
+  color: var(--site-accent);
+  border-bottom: 1px solid var(--site-border-subtle);
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.55rem;
+}
+
+/* Topic chips: quieter than exit chips, still clickable */
+.play-layout--help-index .play-action,
+.play-layout--help-section .play-action {
+  background: transparent;
+  border-color: var(--site-border-subtle);
+  padding: 0.35rem 0.45rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+}
+
+.play-layout--help-index .play-action:hover,
+.play-layout--help-section .play-action:hover {
+  border-color: var(--site-accent);
+  background: color-mix(
+    in srgb,
+    var(--site-accent) 10%,
+    transparent
+  );
+  color: var(--site-text);
+}
+
+.play-layout--help-index .play-action__label,
+.play-layout--help-section .play-action__label {
+  color: var(--site-text);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+}
+
+.play-layout--help-topic .play-md {
+  margin: 0.35rem 0 0.85rem;
+  color: var(--site-text-secondary, var(--site-text));
+}
+
+.play-layout--help-topic .play-layout__text {
+  font-size: 0.8125rem;
+  color: var(--site-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+/*
+ * Help stays multi-column on mobile (never collapse to 1).
+ * Beat generic ≤1024 .play-actions { 1fr } with higher specificity.
+ */
+@media (max-width: 1024px) {
+  .play-layout--help-index .play-actions,
+  .play-layout--help-index .play-actions--cols-2,
+  .play-layout--help-index .play-actions--cols-3,
+  .play-layout--help-index .play-actions--cols-4,
+  .play-layout--help-section .play-actions,
+  .play-layout--help-section .play-actions--cols-2,
+  .play-layout--help-section .play-actions--cols-3,
+  .play-layout--help-section .play-actions--cols-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .play-layout--help-index .play-action,
+  .play-layout--help-section .play-action {
+    min-height: 2.25rem;
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .play-layout--help-index .play-actions,
+  .play-layout--help-index .play-actions--cols-2,
+  .play-layout--help-index .play-actions--cols-3,
+  .play-layout--help-index .play-actions--cols-4,
+  .play-layout--help-section .play-actions,
+  .play-layout--help-section .play-actions--cols-2,
+  .play-layout--help-section .play-actions--cols-3,
+  .play-layout--help-section .play-actions--cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+

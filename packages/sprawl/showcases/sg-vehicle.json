@@ -1,0 +1,584 @@
+{
+  "key": "sg-vehicle",
+  "label": "Sprawl Goons \u2014 Vehicles, Crew, Combat & Mecha",
+  "vars": {
+    "player": "Neon"
+  },
+  "setup": {
+    "room": {
+      "name": "Dockside Alley",
+      "desc": "Rain-slick asphalt. A sodium lamp buzzes overhead."
+    },
+    "character": {
+      "version": 1,
+      "chargenStatus": "approved",
+      "chargenComplete": true,
+      "name": "Neon",
+      "stats": {
+        "morphology": 1,
+        "equilibrium": 0,
+        "reaction": 2,
+        "cognition": 1,
+        "affinity": 0
+      },
+      "resilience": 12,
+      "resilienceMax": 12,
+      "loadoutMax": 10,
+      "bityuan": 5000000,
+      "background": "zone-wars-veteran",
+      "backgroundName": "Zone Wars Veteran",
+      "edge": "zone-wars-veteran-edge",
+      "edgeName": "Situational Awareness",
+      "affectations": [],
+      "quirks": [],
+      "loadout": [],
+      "augs": [],
+      "shards": [],
+      "software": [],
+      "ap": 0,
+      "level": 0,
+      "notes": ""
+    },
+    "targets": {
+      "Ghost": {
+        "flags": [
+          "player",
+          "connected"
+        ],
+        "state": {
+          "version": 1,
+          "chargenStatus": "approved",
+          "chargenComplete": true,
+          "name": "Ghost",
+          "stats": {
+            "morphology": 0,
+            "equilibrium": 1,
+            "reaction": 2,
+            "cognition": 1,
+            "affinity": 0
+          },
+          "resilience": 12,
+          "resilienceMax": 12,
+          "loadoutMax": 10,
+          "bityuan": 100,
+          "affectations": [],
+          "quirks": [],
+          "loadout": [],
+          "augs": [],
+          "shards": [],
+          "software": [],
+          "ap": 0,
+          "level": 0,
+          "notes": ""
+        }
+      }
+    },
+    "items": [
+      {
+        "slug": "kr-16",
+        "name": "KR-16 Assault Rifle",
+        "kind": "firearm",
+        "category": "rifle",
+        "load": 2,
+        "bonus": 1,
+        "mag": 200,
+        "magMax": 200,
+        "mods": [
+          {
+            "slug": "custom-grips",
+            "name": "Custom grips",
+            "bonus": 1,
+            "tags": [
+              "shot"
+            ]
+          },
+          {
+            "slug": "smart-targeting",
+            "name": "Smart targeting",
+            "tags": [
+              "upgrade-shot"
+            ]
+          }
+        ]
+      },
+      {
+        "slug": "barrett-at3",
+        "name": "Barrett AT3 Anti-Tank",
+        "kind": "heavy",
+        "category": "rifle",
+        "load": 3,
+        "bonus": 1,
+        "mag": 50,
+        "magMax": 50
+      }
+    ]
+  },
+  "steps": [
+    {
+      "sub": "Catalog"
+    },
+    {
+      "cmd": "+vehicle/chassis",
+      "label": "chassis list"
+    },
+    {
+      "expect": "tanksuit"
+    },
+    {
+      "cmd": "+vehicle/mods",
+      "label": "mod catalog"
+    },
+    {
+      "expect": "mecha-frame"
+    },
+    {
+      "cmd": "+vehicle/showroom rider",
+      "label": "showroom filter"
+    },
+    {
+      "expect": "Rider"
+    },
+    {
+      "sub": "Street racer build"
+    },
+    {
+      "cmd": "+vehicle/buy ground-car",
+      "label": "buy car"
+    },
+    {
+      "expect": "Garaged"
+    },
+    {
+      "cmd": "+vehicle/buymod cybercontrol-rig",
+      "label": "buy rig"
+    },
+    {
+      "cmd": "+vehicle/buymod spoiler-alert",
+      "label": "buy spoiler"
+    },
+    {
+      "cmd": "+vehicle/buymod crazy-fast",
+      "label": "buy fast"
+    },
+    {
+      "cmd": "+vehicle/buymod door-gun",
+      "label": "buy door gun"
+    },
+    {
+      "cmd": "+vehicle/buymod tough",
+      "label": "buy tough"
+    },
+    {
+      "cmd": "+vehicle/mod ground-car=cybercontrol-rig",
+      "label": "install rig"
+    },
+    {
+      "expect": "Installed"
+    },
+    {
+      "cmd": "+vehicle/mod ground-car=spoiler-alert",
+      "label": "install spoiler"
+    },
+    {
+      "cmd": "+vehicle/mod ground-car=crazy-fast",
+      "label": "install fast"
+    },
+    {
+      "cmd": "+vehicle/mod ground-car=door-gun",
+      "label": "install door gun"
+    },
+    {
+      "cmd": "+vehicle/mod ground-car=tough",
+      "label": "install tough"
+    },
+    {
+      "cmd": "+vehicle",
+      "label": "garage nested mods"
+    },
+    {
+      "expect": "Door Gun"
+    },
+    {
+      "sub": "Room look \u2014 crew hide, vehicle shows"
+    },
+    {
+      "cmd": "look here",
+      "label": "before board: Neon + Ghost"
+    },
+    {
+      "expect": "Ghost"
+    },
+    {
+      "expect": "Neon"
+    },
+    {
+      "cmd": "+vehicle/board ground-car",
+      "label": "Neon boards car"
+    },
+    {
+      "expect": "Boarded"
+    },
+    {
+      "cmd": "look here",
+      "label": "Neon hidden; car listed"
+    },
+    {
+      "expect": "Ghost"
+    },
+    {
+      "expect": "Ground Car"
+    },
+    {
+      "expect": "aboard"
+    },
+    {
+      "expect": "!Neon"
+    },
+    {
+      "cmd": "+vehicle/crew ground-car",
+      "label": "crew still on hull"
+    },
+    {
+      "expect": "Neon"
+    },
+    {
+      "sub": "Drive & chase (from car)"
+    },
+    {
+      "cmd": "+drive tight-turn",
+      "label": "maneuver + mods"
+    },
+    {
+      "expect": "rig"
+    },
+    {
+      "cmd": "+chase 12",
+      "label": "chase with crazy-fast"
+    },
+    {
+      "expect": "faster"
+    },
+    {
+      "sub": "Attack FROM the car"
+    },
+    {
+      "cmd": "+gear/wield kr-16",
+      "label": "wield rifle aboard"
+    },
+    {
+      "cmd": "+reload",
+      "label": "top off mag"
+    },
+    {
+      "cmd": "+attack/auto 10",
+      "label": "full auto from car"
+    },
+    {
+      "expect": "gun"
+    },
+    {
+      "cmd": "+reload",
+      "label": "top off mag"
+    },
+    {
+      "cmd": "+attack/burst genexus-agent",
+      "label": "burst NPC from car"
+    },
+    {
+      "expect": "from"
+    },
+    {
+      "sub": "Attack INTO hull + NPC occupants"
+    },
+    {
+      "cmd": "+vehicle/stow",
+      "label": "Neon leaves car"
+    },
+    {
+      "expect": "Left"
+    },
+    {
+      "cmd": "look here",
+      "label": "Neon visible again"
+    },
+    {
+      "expect": "Neon"
+    },
+    {
+      "cmd": "+vehicle/buy truck-apc",
+      "label": "park target truck"
+    },
+    {
+      "expect": "Garaged"
+    },
+    {
+      "cmd": "+vehicle/seat truck-apc=driver:Wheelman/12",
+      "label": "seat driver NPC"
+    },
+    {
+      "expect": "Seated"
+    },
+    {
+      "cmd": "+vehicle/seat truck-apc=gunner:Shooter/14",
+      "label": "seat gunner"
+    },
+    {
+      "cmd": "+vehicle/seat truck-apc=Exec/10",
+      "label": "seat exec DS10"
+    },
+    {
+      "cmd": "+vehicle/crew truck-apc",
+      "label": "list crew before fire"
+    },
+    {
+      "expect": "Wheelman"
+    },
+    {
+      "expect": "Shooter"
+    },
+    {
+      "expect": "Exec"
+    },
+    {
+      "cmd": "+reload",
+      "label": "top off mag"
+    },
+    {
+      "cmd": "+attack/auto truck-apc",
+      "label": "riddle truck + crew"
+    },
+    {
+      "expect": "Hull"
+    },
+    {
+      "expect": "CREW FIRE"
+    },
+    {
+      "expect": "Wheelman"
+    },
+    {
+      "expect": "Exec"
+    },
+    {
+      "cmd": "+vehicle/crew truck-apc",
+      "label": "crew DS after hits"
+    },
+    {
+      "expect": "DS"
+    },
+    {
+      "cmd": "+vehicle",
+      "label": "truck shows N aboard"
+    },
+    {
+      "expect": "aboard"
+    },
+    {
+      "cmd": "+reload",
+      "label": "top off mag"
+    },
+    {
+      "cmd": "+attack/auto bmw-t9-series",
+      "label": "catalog limo DS only"
+    },
+    {
+      "expect": "catalog"
+    },
+    {
+      "sub": "Armoured hull shields crew"
+    },
+    {
+      "cmd": "+vehicle/buy hopper",
+      "label": "buy hopper"
+    },
+    {
+      "cmd": "+vehicle/buymod armoured-combat",
+      "label": "armour hopper"
+    },
+    {
+      "cmd": "+vehicle/mod hopper=armoured-combat",
+      "label": "install armour"
+    },
+    {
+      "cmd": "+vehicle/seat hopper=Pilot/12",
+      "label": "pilot in armour"
+    },
+    {
+      "cmd": "+reload",
+      "label": "top off mag"
+    },
+    {
+      "cmd": "+attack/auto hopper",
+      "label": "small arms vs armour"
+    },
+    {
+      "expect": "ARMOURED"
+    },
+    {
+      "expect": "shielded"
+    },
+    {
+      "cmd": "+gear/wield barrett-at3",
+      "label": "wield AT rifle"
+    },
+    {
+      "expect": "wielded"
+    },
+    {
+      "cmd": "+reload",
+      "label": "top off mag"
+    },
+    {
+      "cmd": "+attack/auto hopper",
+      "label": "AT cracks armour + crew"
+    },
+    {
+      "expect": "ATTACK"
+    },
+    {
+      "sub": "MECHA DEMO"
+    },
+    {
+      "cmd": "+vehicle/buy tanksuit",
+      "label": "buy tanksuit"
+    },
+    {
+      "expect": "Tanksuit"
+    },
+    {
+      "cmd": "+vehicle/buymod mecha-frame",
+      "label": "mecha frame"
+    },
+    {
+      "cmd": "+vehicle/buymod mecha-weapons-bay",
+      "label": "weapons bay"
+    },
+    {
+      "cmd": "+vehicle/buymod tough",
+      "label": "tough plating"
+    },
+    {
+      "cmd": "+vehicle/buymod cybercontrol-rig",
+      "label": "mecha rig"
+    },
+    {
+      "cmd": "+vehicle/mod tanksuit=mecha-frame",
+      "label": "frame on suit"
+    },
+    {
+      "expect": "Installed"
+    },
+    {
+      "cmd": "+vehicle/mod tanksuit=mecha-weapons-bay",
+      "label": "bay on suit"
+    },
+    {
+      "cmd": "+vehicle/mod tanksuit=tough",
+      "label": "tough on suit"
+    },
+    {
+      "cmd": "+vehicle/mod tanksuit=cybercontrol-rig",
+      "label": "rig on suit"
+    },
+    {
+      "cmd": "+vehicle",
+      "label": "mecha in garage"
+    },
+    {
+      "expect": "Mecha"
+    },
+    {
+      "cmd": "+vehicle/board tanksuit",
+      "label": "PILOT MECHA"
+    },
+    {
+      "expect": "Boarded"
+    },
+    {
+      "cmd": "look here",
+      "label": "mecha pilot hidden"
+    },
+    {
+      "expect": "Ghost"
+    },
+    {
+      "expect": "Tanksuit"
+    },
+    {
+      "expect": "!Neon"
+    },
+    {
+      "cmd": "+drive bootlegger",
+      "label": "mecha maneuver"
+    },
+    {
+      "expect": "frame"
+    },
+    {
+      "cmd": "+reload",
+      "label": "top off mag"
+    },
+    {
+      "cmd": "+attack/auto 12",
+      "label": "mecha weapons vs DS12"
+    },
+    {
+      "expect": "from tanksuit"
+    },
+    {
+      "expect": "bay+1"
+    },
+    {
+      "expect": "auto+4"
+    },
+    {
+      "cmd": "+reload",
+      "label": "top off mag"
+    },
+    {
+      "cmd": "+attack/burst truck-apc",
+      "label": "mecha into truck + crew"
+    },
+    {
+      "expect": "ATTACK"
+    },
+    {
+      "cmd": "+attack/melee 10",
+      "label": "mecha smash"
+    },
+    {
+      "expect": "from tanksuit"
+    },
+    {
+      "expect": "melee"
+    },
+    {
+      "cmd": "+vehicle/mod tanksuit",
+      "label": "list mecha loadout"
+    },
+    {
+      "expect": "mecha-weapons-bay"
+    },
+    {
+      "cmd": "+vehicle/stow",
+      "label": "leave mecha"
+    },
+    {
+      "expect": "Left"
+    },
+    {
+      "cmd": "look here",
+      "label": "Neon back in Players"
+    },
+    {
+      "expect": "Neon"
+    },
+    {
+      "cmd": "inv",
+      "label": "garage note in inv"
+    },
+    {
+      "expect": "vehicle"
+    }
+  ]
+}

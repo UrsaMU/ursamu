@@ -1,0 +1,27 @@
+{
+  "sections": ["general", "chargen"],
+  "topics": [
+    {
+      "name": "+look",
+      "path": "look",
+      "section": "general",
+      "sample": "Examine the room or a target.",
+      "num": "1.01"
+    },
+    {
+      "name": "+sheet",
+      "path": "sheet",
+      "section": "general",
+      "sample": "Show your character sheet.",
+      "num": "1.02"
+    },
+    {
+      "name": "+chargen",
+      "path": "chargen",
+      "section": "chargen",
+      "sample": "Start or resume character generation.",
+      "num": "2.01"
+    }
+  ],
+  "staff": false
+}

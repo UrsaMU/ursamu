@@ -1,0 +1,404 @@
+/**
+ * UrsaMU FE wireframe skeleton — greyscale structure only.
+ *
+ * Purpose: show placement, default sizing, and spacing without
+ * brand color, display faces, or decorative art.
+ *
+ * Served as: /site/theme/installed/skeleton/site.css
+ *
+ * Rules:
+ *   - Greys only (no hue).
+ *   - One neutral sans-serif stack.
+ *   - No background art, rule images, or search icons.
+ *   - Do NOT rename .site-* classes.
+ */
+
+:root {
+  /* ── Surfaces (paper wireframe) ─────────────────────────── */
+  --site-bg: #f0f0f0;
+  --site-bg-elevated: #e8e8e8;
+  --site-bg-surface: #ffffff;
+  --site-bg-surface-2: #e4e4e4;
+  --site-bg-code: #eaeaea;
+
+  /* ── Borders ────────────────────────────────────────────── */
+  --site-border: #c8c8c8;
+  --site-border-subtle: #dcdcdc;
+  --site-border-strong: #9a9a9a;
+
+  /* ── Text ───────────────────────────────────────────────── */
+  --site-text: #1a1a1a;
+  --site-text-secondary: #404040;
+  --site-text-muted: #6e6e6e;
+  --site-text-on-accent: #ffffff;
+  --site-text-on-primary: #ffffff;
+  --site-text-inverse: #f5f5f5;
+
+  /*
+   * Accent = mid grey (still used for links / active nav so
+   * structure is visible — not a brand color).
+   */
+  --site-accent: #555555;
+  --site-accent-hover: #333333;
+  --site-accent-muted: rgba(0, 0, 0, 0.06);
+  --site-accent-border: rgba(0, 0, 0, 0.18);
+  --site-accent-focus: rgba(0, 0, 0, 0.28);
+
+  --site-btn-bg: #5a5a5a;
+  --site-btn-bg-hover: #3d3d3d;
+  --site-btn-fg: #ffffff;
+
+  --site-btn-default-bg: #e4e4e4;
+  --site-btn-default-fg: #1a1a1a;
+  --site-btn-default-border: #9a9a9a;
+  --site-btn-outline-fg: #1a1a1a;
+  --site-btn-outline-border: #9a9a9a;
+
+  /* Status — desaturated greys with slight value shift only */
+  --site-success: #4a4a4a;
+  --site-warning: #6a6a6a;
+  --site-error: #2a2a2a;
+  --site-info: #5a5a5a;
+
+  /* ── Type: system sans only ─────────────────────────────── */
+  --site-font-ui: system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --site-font-display: var(--site-font-ui);
+  --site-font-mono: ui-monospace, "SF Mono", Menlo, Consolas,
+    monospace;
+  --site-font-size: 16px;
+  --site-line-height: 1.5;
+
+  /* Keep wireframe type scale (Figma 2054:137) */
+  --site-type-brand: 1.5rem;
+  --site-type-nav: 1rem;
+  --site-type-menu-title: 1.25rem;
+  --site-type-menu-link: 1rem;
+  --site-type-h1: 2.5rem;
+  --site-type-h2: 2rem;
+  --site-type-connect: 1.25rem;
+  --site-type-footer: 1rem;
+
+  /* Geometry — canonical shell numbers */
+  --site-nav-h: 6.375rem;
+  --site-max-w: 108rem;
+  --site-main-max: 61.0625rem;
+  --site-aside-width: 19.625rem;
+  --site-aside-min: 16rem;
+  --site-aside-max: 19.625rem;
+  --site-col-gap: 1.3125rem;
+  --site-search-h: 2.75rem;
+  --site-search-below: 2.0625rem;
+  --site-gutter: 2.625rem;
+  --site-banner-offset: 12rem;
+  --site-sticky-top: calc(var(--site-nav-h) + 1.5rem);
+
+  /* Flat geometry — no soft brand radius */
+  --site-radius-sm: 0;
+  --site-radius-md: 0;
+  --site-radius: 0;
+
+  /* No art */
+  --site-bg-image-top: none;
+  --site-bg-image-bottom: none;
+  --site-banner-image: none;
+  --site-rule-image: none;
+  --site-search-icon: none;
+
+  --site-scrollbar-size: 6px;
+  --site-scrollbar-track: #e0e0e0;
+  --site-scrollbar-thumb: #b0b0b0;
+  --site-scrollbar-thumb-hover: #888888;
+  --site-scrollbar-thumb-active: #555555;
+  --site-scrollbar-corner: #e0e0e0;
+
+  color-scheme: light;
+}
+
+/* ── Region fills (wireframe map) ───────────────────────────
+ * Light value shifts so columns / chrome read as boxes.
+ * Remove or neutralize when you start real branding.
+ */
+
+.site-shell {
+  background-image: none;
+  background-color: var(--site-bg);
+}
+
+.site-nav {
+  border-bottom: 1px solid var(--site-border);
+  background: #fafafa;
+}
+
+.site-nav::before {
+  background: #fafafa;
+}
+
+.site-nav.is-scrolled::before {
+  background: #fafafa;
+}
+
+.site-nav__brand {
+  font-family: var(--site-font-ui);
+  font-weight: 600;
+  font-size: var(--site-type-brand);
+  color: var(--site-text);
+  letter-spacing: 0;
+}
+
+.site-nav__list a {
+  color: var(--site-text-secondary);
+  font-weight: 400;
+  border-bottom: 1px solid transparent;
+}
+
+.site-nav__list a.is-active,
+.site-nav__list a:hover {
+  color: var(--site-text);
+  border-bottom-color: var(--site-border-strong);
+}
+
+/* Banner = empty grey slab (placement / height) */
+.site-banner {
+  min-height: 10rem;
+  margin-top: var(--site-nav-h);
+  padding: 2rem var(--site-gutter);
+  box-sizing: border-box;
+  background: #d8d8d8;
+  border-bottom: 1px solid var(--site-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.site-banner__title {
+  font-family: var(--site-font-ui);
+  font-size: var(--site-type-h1);
+  font-weight: 700;
+  color: var(--site-text);
+  margin: 0;
+}
+
+.site-banner__connect {
+  color: var(--site-text-muted);
+  font-size: var(--site-type-connect);
+  text-decoration: none;
+  margin-top: 0.35rem;
+}
+
+.site-banner__connect:hover {
+  color: var(--site-text);
+  text-decoration: underline;
+}
+
+/* Body columns — distinct greys for rails vs main */
+.site-body {
+  background: var(--site-bg);
+}
+
+.site-aside--start,
+.site-aside--end {
+  background: #e6e6e6;
+  border: 1px dashed var(--site-border-strong);
+  box-sizing: border-box;
+  padding: 0.75rem;
+}
+
+.site-main {
+  background: #fafafa;
+  border: 1px dashed var(--site-border);
+  box-sizing: border-box;
+  padding: 1rem 1.25rem;
+}
+
+.site-footer {
+  color: var(--site-text-muted);
+  font-size: var(--site-type-footer);
+}
+
+/* Menus / search — flat */
+.site-menu__title {
+  font-family: var(--site-font-ui);
+  font-size: var(--site-type-menu-title);
+  font-weight: 700;
+  color: var(--site-text);
+}
+
+.site-menu__list a {
+  color: var(--site-text-secondary);
+}
+
+.site-menu__list a:hover,
+.site-menu__list a.is-active,
+.site-menu__list li.is-current > a {
+  color: var(--site-text);
+  font-weight: 600;
+}
+
+.site-search__input {
+  background: #ffffff;
+  border: 1px solid var(--site-border-strong);
+  border-radius: 0;
+  color: var(--site-text);
+}
+
+.site-search__btn {
+  background: #d0d0d0;
+  border: 1px solid var(--site-border-strong);
+  border-radius: 0;
+}
+
+/* Section chrome */
+.site-section__title {
+  font-family: var(--site-font-ui);
+  font-weight: 700;
+  color: var(--site-text);
+}
+
+.site-rule,
+.site-rule--image {
+  height: 1px;
+  background: var(--site-border-strong);
+  border-radius: 0;
+  background-image: none;
+}
+
+/* Prose stays readable; no accent hue */
+.site-section__body h2,
+.site-section__body h3,
+.site-section__body h4,
+.site-section__body h5,
+.site-section__body h6 {
+  font-family: var(--site-font-ui);
+  color: var(--site-text);
+}
+
+.site-section__body a {
+  color: var(--site-text);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.site-section__body a:hover {
+  color: #000000;
+}
+
+.site-section__body code {
+  background: #e0e0e0;
+  color: var(--site-text);
+  border-color: var(--site-border);
+}
+
+.site-section__body pre {
+  background: #e8e8e8;
+  border: 1px solid var(--site-border-strong);
+  border-radius: 0;
+}
+
+.site-section__body blockquote {
+  border-left: 3px solid var(--site-border-strong);
+  background: #ececec;
+  color: var(--site-text-secondary);
+  font-style: normal;
+  border-radius: 0;
+}
+
+.site-section__body table {
+  border: 1px solid var(--site-border-strong);
+  border-radius: 0;
+}
+
+.site-section__body th {
+  background: #e0e0e0;
+  color: var(--site-text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.site-section__body tbody tr:nth-child(even) td {
+  background: #f3f3f3;
+}
+
+.site-section__body tbody tr:hover td {
+  background: #eaeaea;
+}
+
+/* Badges flat grey */
+.site-badge {
+  background: #e0e0e0;
+  color: var(--site-text);
+  border-color: var(--site-border-strong);
+  text-transform: none;
+  letter-spacing: 0;
+  border-radius: 0;
+}
+
+/* Auth / buttons */
+.site-gate-card {
+  background: #ffffff;
+  border: 1px solid var(--site-border-strong);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.site-gate-btn,
+.site-auth-submit,
+.site-auth-input,
+.site-help-search__input,
+.site-help-open-link,
+.site-wiki-open-link {
+  border-radius: 0;
+}
+
+.site-gate-btn--primary,
+.site-auth-submit {
+  background: var(--site-btn-bg);
+  color: var(--site-btn-fg);
+}
+
+.site-auth-tab.is-active {
+  color: var(--site-text);
+  border-bottom-color: var(--site-text);
+}
+
+/* Play prompt — grey only */
+.play-prompt__send {
+  background: var(--site-btn-bg);
+  color: var(--site-btn-fg);
+  border-radius: 0;
+}
+
+.play-prompt__send:hover {
+  background: var(--site-btn-bg-hover);
+}
+
+.play-prompt__input {
+  border-radius: 0;
+  background: #ffffff;
+  border: 1px solid var(--site-border-strong);
+  color: var(--site-text);
+}
+
+/* Optional: label structural regions (dev aid) */
+.site-aside--start::before,
+.site-aside--end::before,
+.site-main > .site-section:first-of-type::before {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--site-text-muted);
+  margin: 0 0 0.5rem;
+}
+
+.site-aside--start::before {
+  content: "aside · start";
+}
+
+.site-aside--end::before {
+  content: "aside · end";
+}
+
+/* Hide region labels in real content if you prefer —
+   comment the block above when forking into a brand. */

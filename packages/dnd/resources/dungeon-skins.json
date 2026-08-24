@@ -1,0 +1,744 @@
+{
+  "goblin-warren": {
+    "slug": "goblin-warren",
+    "name": "Goblin Warren",
+    "kind": "dungeon",
+    "tier": 1,
+    "book": "SRD 5.2",
+    "summary": "A stinking burrow. Random tunnels, a boss, and stolen loot.",
+    "linkFromWorld": "camp",
+    "exitNameToSite": "Down;Warren;Cave;In",
+    "exitNameFromSite": "Up;Out;Camp;Surface",
+    "roomsMin": 3,
+    "roomsMax": 5,
+    "roomNames": [
+      "Muddy Mouth",
+      "Root Tunnel",
+      "Bone Alcove",
+      "Sleeping Den",
+      "Fungus Bend",
+      "Stolen Larder",
+      "Chieftain's Hollow"
+    ],
+    "roomDescs": [
+      "Dirt walls sweat moisture. Chicken feathers stick to the floor.",
+      "Twisted roots claw through the ceiling. Something skittered ahead.",
+      "A low chamber reeking of grease and wet dog. Nests of stolen cloth.",
+      "Crude totems of bone and scrap metal lean against the wall.",
+      "The tunnel widens. Charcoal scratch-marks count raids.",
+      "Broken crates and gnawed boots litter a crooked bend.",
+      "A smoky firepit and a bigger nest mark a leader's claim."
+    ],
+    "fodder": [
+      {
+        "template": "goblin",
+        "names": [
+          "Goblin Scout",
+          "Goblin Sneak",
+          "Goblin Cutter"
+        ]
+      },
+      {
+        "template": "wolf",
+        "names": [
+          "Camp Wolf",
+          "Scruffy Wolf"
+        ]
+      },
+      {
+        "template": "kobold",
+        "names": [
+          "Kobold Sniveler",
+          "Kobold Runner"
+        ]
+      }
+    ],
+    "boss": {
+      "template": "bugbear",
+      "names": [
+        "Goblin Chieftain",
+        "Warren Boss",
+        "Bugbear Overseer"
+      ]
+    },
+    "bossLoot": "boss-stash",
+    "fodderPerRoom": [
+      0,
+      2
+    ],
+    "props": {
+      "chest": {
+        "chance": 0.45,
+        "tables": [
+          "scrap",
+          "tier1-cache"
+        ],
+        "names": [
+          "Stolen Chest",
+          "Raid Crate",
+          "Hidey-Hole Stash"
+        ]
+      },
+      "view": {
+        "chance": 0.4,
+        "names": [
+          "Crack of Daylight",
+          "Root Window",
+          "Glow-Fungus Seam"
+        ],
+        "descs": [
+          "A thin crack shows grey sky far above.",
+          "Pale fungus paints the wall in sickly light.",
+          "You glimpse another tunnel through a gap \u2014 then it twists shut in shadow."
+        ]
+      },
+      "altar": {
+        "chance": 0.2,
+        "names": [
+          "Scrap Totem",
+          "Blood-Streaked Idol",
+          "Shaman's Stone"
+        ],
+        "descs": [
+          "A pile of bones and nails roughly shaped like a grinning face.",
+          "Dark stains ring a flat stone. Offerings of teeth and copper."
+        ]
+      },
+      "campfire": {
+        "chance": 0.25,
+        "names": [
+          "Smoldering Firepit",
+          "Grease Fire"
+        ],
+        "descs": [
+          "Embers still glow under a spit of something best not named.",
+          "A ring of stones holds ash and half-burned arrows."
+        ]
+      }
+    }
+  },
+  "bone-crypt": {
+    "slug": "bone-crypt",
+    "name": "Crypt of Loose Bones",
+    "kind": "dungeon",
+    "tier": 1,
+    "book": "SRD 5.2",
+    "summary": "A barrow of shifting halls. Undead, an altar, and a sealed tomb.",
+    "linkFromWorld": "ruins",
+    "exitNameToSite": "Down;Crypt;Stairs;In",
+    "exitNameFromSite": "Up;Out;Ruins;Surface",
+    "roomsMin": 3,
+    "roomsMax": 5,
+    "roomNames": [
+      "Crypt Steps",
+      "Ossuary Hall",
+      "Name-Worn Corridor",
+      "Candle Niche",
+      "Collapsed Nave",
+      "Sealed Tomb",
+      "Reliquary"
+    ],
+    "roomDescs": [
+      "Stone stairs sink into chill air. Dust hangs like fog.",
+      "Shelves of skulls line the walls. Footfalls echo twice.",
+      "Names on plaques are worn to ghosts of letters.",
+      "A dry font holds nothing but grit and a single coin.",
+      "Rubble half-blocks the way. Something moved behind it.",
+      "A cracked sarcophagus waits under a vaulted ceiling.",
+      "Iron hooks once held banners. Only moth-eaten threads remain."
+    ],
+    "fodder": [
+      {
+        "template": "skeleton",
+        "names": [
+          "Rattling Skeleton",
+          "Crypt Skeleton",
+          "Bone Guard"
+        ]
+      },
+      {
+        "template": "zombie",
+        "names": [
+          "Shambling Zombie",
+          "Barrow Corpse"
+        ]
+      },
+      {
+        "template": "shadow",
+        "names": [
+          "Grave Shadow",
+          "Flitting Shade"
+        ]
+      }
+    ],
+    "boss": {
+      "template": "ghoul",
+      "names": [
+        "Tomb Ghoul",
+        "Crypt Warden",
+        "Hunger Below"
+      ]
+    },
+    "bossLoot": "boss-stash",
+    "fodderPerRoom": [
+      0,
+      2
+    ],
+    "props": {
+      "chest": {
+        "chance": 0.35,
+        "tables": [
+          "tier1-cache",
+          "scrap"
+        ],
+        "names": [
+          "Burial Coffer",
+          "Stone Cist",
+          "Offering Box"
+        ]
+      },
+      "view": {
+        "chance": 0.35,
+        "names": [
+          "Stained Glass Slit",
+          "Burial Mural",
+          "Name Wall"
+        ],
+        "descs": [
+          "Faded paint shows a knight kneeling to a dawn that never comes.",
+          "A slit of light from the surface dies on cold stone.",
+          "Hundreds of carved names. Yours is not among them \u2014 yet."
+        ]
+      },
+      "altar": {
+        "chance": 0.45,
+        "names": [
+          "Dusty Altar",
+          "Ancestral Slab",
+          "Font of Ash"
+        ],
+        "descs": [
+          "A stone slab still holds a shallow groove for offerings.",
+          "Cold ash fills a bowl. Touching it leaves pale dust on your fingers.",
+          "Candles long spent. Wax runs like frozen tears."
+        ]
+      },
+      "campfire": {
+        "chance": 0.05,
+        "names": [
+          "Cold Brazier"
+        ],
+        "descs": [
+          "A brazier holds only grey ash \u2014 no warmth left."
+        ]
+      }
+    }
+  },
+  "bandit-hollow": {
+    "slug": "bandit-hollow",
+    "kind": "camp",
+    "name": "Bandit Hollow",
+    "tier": 2,
+    "book": "SRD 5.2",
+    "summary": "A ravine camp of outlaws. Fires, lookouts, and a captain's stash.",
+    "linkFromWorld": "path",
+    "exitNameToSite": "Hollow;Bandits;Trail;In",
+    "exitNameFromSite": "Path;Out;Leave",
+    "roomsMin": 2,
+    "roomsMax": 4,
+    "roomNames": [
+      "Hidden Trail",
+      "Brush Blind",
+      "Main Camp",
+      "Cookfire Circle",
+      "Stash Cave",
+      "Captain's Lean-to"
+    ],
+    "roomDescs": [
+      "Brush parts on a narrow path. A snapped tripwire lies in the dirt.",
+      "A blind of cut branches faces the trail. Fresh boot prints.",
+      "Tents, a weapon rack, and the smell of stew and sweat.",
+      "Logs ring a fire. Dice and copper coins glitter in the ash.",
+      "A damp cleft stuffed with crates stamped with town seals.",
+      "A better tent, a map table, and a lockbox bolted to a stump."
+    ],
+    "fodder": [
+      {
+        "template": "bandit",
+        "names": [
+          "Bandit Thug",
+          "Bandit Lookout",
+          "Road Agent"
+        ]
+      },
+      {
+        "template": "scout",
+        "names": [
+          "Bandit Archer",
+          "Hollow Scout"
+        ]
+      }
+    ],
+    "boss": {
+      "template": "bandit_captain",
+      "names": [
+        "Bandit Captain",
+        "Hollow Chief",
+        "Road King"
+      ]
+    },
+    "bossLoot": "tier2-hoard",
+    "fodderPerRoom": [
+      1,
+      2
+    ],
+    "props": {
+      "chest": {
+        "chance": 0.5,
+        "tables": [
+          "tier1-hoard",
+          "tier1-cache"
+        ],
+        "names": [
+          "Captain's Lockbox",
+          "Loot Crate",
+          "Tax Chest"
+        ]
+      },
+      "view": {
+        "chance": 0.4,
+        "names": [
+          "Ravine Overlook",
+          "Trail Spyglass Spot"
+        ],
+        "descs": [
+          "From here you can see the gate road glinting far south.",
+          "A gap in the trees frames Havenbrook's smoke on the horizon."
+        ]
+      },
+      "altar": {
+        "chance": 0.1,
+        "names": [
+          "Lucky Charm Post"
+        ],
+        "descs": [
+          "A post hung with horseshoes and stolen holy symbols."
+        ]
+      },
+      "campfire": {
+        "chance": 0.55,
+        "names": [
+          "Cookfire",
+          "Watch Fire",
+          "Ash Circle"
+        ],
+        "descs": [
+          "A healthy fire under a spit. Rabbits \u2014 or something like them.",
+          "Coals banked for the night watch. Warmth and a target."
+        ]
+      }
+    }
+  },
+  "spider-grove": {
+    "slug": "spider-grove",
+    "name": "Webbed Grove",
+    "kind": "dungeon",
+    "tier": 1,
+    "book": "SRD 5.2",
+    "summary": "Silk-choked trees and something large at the heart of the web.",
+    "linkFromWorld": "path",
+    "exitNameToSite": "Webs;Grove;Silk;In",
+    "exitNameFromSite": "Path;Out;Leave",
+    "roomsMin": 3,
+    "roomsMax": 4,
+    "roomNames": [
+      "Silk Threshold",
+      "Cocoon Glade",
+      "Strand Gallery",
+      "Hatchery Hollow",
+      "Queen's Knot"
+    ],
+    "roomDescs": [
+      "Sticky strands cross the path at face height. Birds hang like fruit.",
+      "White cocoons sway gently though there is no wind.",
+      "Webs form corridors between black trunks.",
+      "Tiny spiders boil over egg-sacs the size of fists.",
+      "A cathedral of silk. The center sags under a heavy shape."
+    ],
+    "fodder": [
+      {
+        "template": "giant_wolf_spider",
+        "names": [
+          "Wolf Spider",
+          "Web Stalker"
+        ]
+      },
+      {
+        "template": "swarm_of_poisonous_snakes",
+        "names": [
+          "Spider Swarm"
+        ]
+      }
+    ],
+    "boss": {
+      "template": "giant_spider",
+      "names": [
+        "Grove Matriarch",
+        "Silk Queen",
+        "Web Tyrant"
+      ]
+    },
+    "bossLoot": "tier1-hoard",
+    "fodderPerRoom": [
+      0,
+      2
+    ],
+    "props": {
+      "chest": {
+        "chance": 0.3,
+        "tables": [
+          "scrap",
+          "tier1-cache"
+        ],
+        "names": [
+          "Web-Wrapped Pack",
+          "Traveler's Remains"
+        ]
+      },
+      "view": {
+        "chance": 0.5,
+        "names": [
+          "Silk Canopy Gap",
+          "Trapped Lantern"
+        ],
+        "descs": [
+          "Light filters green through layers of web.",
+          "An old lantern hangs, still faintly glowing inside a cocoon."
+        ]
+      },
+      "altar": {
+        "chance": 0.15,
+        "names": [
+          "Prey Mound"
+        ],
+        "descs": [
+          "Bones and empty scabbards piled where meals ended."
+        ]
+      },
+      "campfire": {
+        "chance": 0.0,
+        "names": [],
+        "descs": []
+      }
+    }
+  },
+  "ogre-den": {
+    "slug": "ogre-den",
+    "name": "Ogre Den",
+    "kind": "dungeon",
+    "tier": 2,
+    "book": "SRD 5.2",
+    "summary": "A stinking cave of bones. Ogres and worse.",
+    "linkFromWorld": "path",
+    "exitNameToSite": "Den;Cave;In",
+    "exitNameFromSite": "Out;Path",
+    "roomsMin": 3,
+    "roomsMax": 5,
+    "roomNames": [
+      "Bone Stoop",
+      "Meat Larder",
+      "Club Gallery",
+      "Slave Pit",
+      "Ogre Throne"
+    ],
+    "roomDescs": [
+      "Femurs crack underfoot. The smell is industrial.",
+      "Hooks hold things that used to be livestock.",
+      "Clubs lean like tree trunks against the wall.",
+      "Iron rings and old chains. Someone escaped \u2014 or didn't.",
+      "A crude stone seat and a pile of tribute sacks."
+    ],
+    "fodder": [
+      {
+        "template": "orc",
+        "names": [
+          "Orc Bruiser",
+          "Orc Raider"
+        ]
+      },
+      {
+        "template": "gnoll",
+        "names": [
+          "Gnoll Scavenger"
+        ]
+      },
+      {
+        "template": "ogre",
+        "names": [
+          "Young Ogre",
+          "Ogre Thug"
+        ]
+      }
+    ],
+    "boss": {
+      "template": "ogre",
+      "names": [
+        "Ogre Chieftain",
+        "Den Lord"
+      ]
+    },
+    "bossLoot": "tier2-hoard",
+    "fodderPerRoom": [
+      1,
+      2
+    ],
+    "props": {
+      "chest": {
+        "chance": 0.4,
+        "tables": [
+          "tier1-hoard",
+          "tier2-hoard"
+        ],
+        "names": [
+          "Tribute Sack",
+          "Iron Chest"
+        ]
+      },
+      "view": {
+        "chance": 0.3,
+        "names": [
+          "Smoke Hole"
+        ],
+        "descs": [
+          "Daylight and flies pour through a roof gap."
+        ]
+      },
+      "altar": {
+        "chance": 0.15,
+        "names": [
+          "Skull Pile"
+        ],
+        "descs": [
+          "A warning or a shrine \u2014 hard to tell."
+        ]
+      },
+      "campfire": {
+        "chance": 0.35,
+        "names": [
+          "Roasting Pit"
+        ],
+        "descs": [
+          "Grease fires pop under a spit."
+        ]
+      }
+    }
+  },
+  "haunted-keep": {
+    "slug": "haunted-keep",
+    "name": "Haunted Keep",
+    "kind": "dungeon",
+    "tier": 3,
+    "book": "SRD 5.2",
+    "summary": "A ruined keep of wights and worse. End loot is rare.",
+    "linkFromWorld": "ruins",
+    "exitNameToSite": "Keep;Gate;In",
+    "exitNameFromSite": "Out;Ruins",
+    "roomsMin": 4,
+    "roomsMax": 6,
+    "roomNames": [
+      "Gatehouse",
+      "Rookery",
+      "Great Hall",
+      "Chapel Ruin",
+      "Crypt Stair",
+      "Lord's Solar"
+    ],
+    "roomDescs": [
+      "Portcullis teeth rust overhead. Crows watch.",
+      "Guano and broken nests. Something larger nested here.",
+      "A long table still set for a feast that never ended.",
+      "Shattered saints. Cold air from below.",
+      "Steps spiral into dark that drinks torchlight.",
+      "Tattered banners. A coffer waits under dust."
+    ],
+    "fodder": [
+      {
+        "template": "skeleton",
+        "names": [
+          "Keep Skeleton",
+          "Armored Bones"
+        ]
+      },
+      {
+        "template": "ghoul",
+        "names": [
+          "Keep Ghoul"
+        ]
+      },
+      {
+        "template": "shadow",
+        "names": [
+          "Hall Shadow"
+        ]
+      },
+      {
+        "template": "wight",
+        "names": [
+          "Wight Guard"
+        ]
+      }
+    ],
+    "boss": {
+      "template": "wraith",
+      "names": [
+        "Keep Wraith",
+        "Fallen Lord"
+      ]
+    },
+    "bossLoot": "rare-cache",
+    "fodderPerRoom": [
+      1,
+      2
+    ],
+    "props": {
+      "chest": {
+        "chance": 0.35,
+        "tables": [
+          "tier2-hoard",
+          "boss-stash"
+        ],
+        "names": [
+          "Lord's Coffer",
+          "Tithe Chest"
+        ]
+      },
+      "view": {
+        "chance": 0.4,
+        "names": [
+          "Arrow Slit",
+          "Broken Balcony"
+        ],
+        "descs": [
+          "You see Havenbrook smoke far south."
+        ]
+      },
+      "altar": {
+        "chance": 0.4,
+        "names": [
+          "Desecrated Altar",
+          "Black Font"
+        ],
+        "descs": [
+          "Holy symbols lie snapped in the dust."
+        ]
+      },
+      "campfire": {
+        "chance": 0.1,
+        "names": [
+          "Cold Hearth"
+        ],
+        "descs": [
+          "Ash only."
+        ]
+      }
+    }
+  },
+  "troll-bridge": {
+    "slug": "troll-bridge",
+    "name": "Troll Bridge",
+    "kind": "camp",
+    "tier": 3,
+    "book": "SRD 5.2",
+    "summary": "A toll none should pay. Trolls and river stink.",
+    "linkFromWorld": "gate",
+    "exitNameToSite": "Bridge;River;In",
+    "exitNameFromSite": "Road;Out",
+    "roomsMin": 2,
+    "roomsMax": 4,
+    "roomNames": [
+      "River Approach",
+      "Toll Shack",
+      "Under-Bridge",
+      "Troll Nest"
+    ],
+    "roomDescs": [
+      "Muddy banks and snapped toll signs.",
+      "A shack of planks and stolen doors.",
+      "Dark water slaps stone. Something large moves.",
+      "Bones and wet furs. The stench is a weapon."
+    ],
+    "fodder": [
+      {
+        "template": "bandit",
+        "names": [
+          "Toll Thug"
+        ]
+      },
+      {
+        "template": "ogre",
+        "names": [
+          "Bridge Ogre"
+        ]
+      },
+      {
+        "template": "troll",
+        "names": [
+          "River Troll",
+          "Young Troll"
+        ]
+      }
+    ],
+    "boss": {
+      "template": "troll",
+      "names": [
+        "Bridge Troll",
+        "Toll King"
+      ]
+    },
+    "bossLoot": "rare-cache",
+    "fodderPerRoom": [
+      1,
+      2
+    ],
+    "props": {
+      "chest": {
+        "chance": 0.45,
+        "tables": [
+          "tier2-hoard",
+          "rare-cache"
+        ],
+        "names": [
+          "Toll Chest",
+          "Soggy Strongbox"
+        ]
+      },
+      "view": {
+        "chance": 0.35,
+        "names": [
+          "River Vista"
+        ],
+        "descs": [
+          "Black water runs toward distant farms."
+        ]
+      },
+      "altar": {
+        "chance": 0.1,
+        "names": [
+          "Luck Stone"
+        ],
+        "descs": [
+          "Travelers left copper for safe crossing."
+        ]
+      },
+      "campfire": {
+        "chance": 0.4,
+        "names": [
+          "Bank Fire"
+        ],
+        "descs": [
+          "Steam rises where fire meets damp wood."
+        ]
+      }
+    }
+  }
+}

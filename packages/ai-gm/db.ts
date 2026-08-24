@@ -1,4 +1,4 @@
-import { DBO } from "ursamu";
+import { DBO } from "@ursamu/mush";
 import type {
   IGMConfig,
   IGMExchange,

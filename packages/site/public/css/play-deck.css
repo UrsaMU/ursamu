@@ -1,0 +1,221 @@
+/**
+ * Utopia pinned deck — masthead, crew, dock, ruling packets.
+ * Tokens only. Theme (utopia zip) supplies RetroWave values.
+ * Visible ≤900px and only when a feed/week pin exists.
+ */
+
+.play-root {
+  position: relative;
+}
+
+.play-deck[hidden],
+.play-deck__sheet[hidden] {
+  display: none !important;
+}
+
+.play-deck__masthead,
+.play-deck__crew,
+.play-deck__dock {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .play-deck__masthead:not([hidden]),
+  .play-deck__crew:not([hidden]),
+  .play-deck__dock:not([hidden]) {
+    display: flex;
+  }
+}
+
+.play-deck__masthead {
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  border-bottom: 1px solid var(--site-border);
+  background: var(--site-bg-surface, var(--site-bg));
+}
+
+.play-deck__masthead-btn {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.play-deck__city {
+  font-family: var(--site-font-display, var(--site-font-ui));
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--site-text);
+}
+
+.play-deck__week {
+  font-family: var(--site-font-mono, monospace);
+  font-size: 0.75rem;
+  color: var(--site-text-secondary);
+}
+
+.play-deck__stories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  width: 100%;
+}
+
+.play-deck__story {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--site-text-secondary);
+}
+
+.play-deck__pips {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.play-deck__pip-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border: 1px solid var(--site-warning, var(--site-accent));
+  background: transparent;
+}
+
+.play-deck__pip-dot.is-on {
+  background: var(--site-warning, var(--site-accent));
+}
+
+.play-deck__crew {
+  flex: 0 0 auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border-top: 1px solid var(--site-border-subtle, var(--site-border));
+}
+
+.play-deck__pip {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--site-border);
+  background: transparent;
+  color: var(--site-text-secondary);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.play-deck__pip.is-ready {
+  border-color: var(--site-success, var(--site-accent));
+  color: var(--site-success, var(--site-text));
+}
+
+.play-deck__dock {
+  flex: 0 0 auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.play-deck__chip {
+  flex: 1 1 auto;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--site-border);
+  background: var(--site-bg-surface, transparent);
+  color: var(--site-text);
+  font-family: var(--site-font-ui);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.play-deck__sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  background: var(--site-bg);
+  padding: 0.75rem;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+  overflow: auto;
+}
+
+.play-deck__sheet-close {
+  align-self: flex-end;
+  min-height: 44px;
+  min-width: 44px;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--site-border);
+  background: transparent;
+  color: var(--site-text);
+  cursor: pointer;
+}
+
+.play-ruling__face {
+  font-family: var(--site-font-display, var(--site-font-ui));
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 1.1rem;
+  margin: 0 0 0.35rem;
+}
+
+.play-ruling--HOLDS .play-ruling__face {
+  color: var(--site-success, var(--site-accent));
+}
+
+.play-ruling--HITCH .play-ruling__face {
+  color: var(--site-accent);
+}
+
+.play-ruling--FAILS .play-ruling__face {
+  color: var(--site-error);
+}
+
+.play-ruling--REVISED .play-ruling__face {
+  color: var(--site-info, var(--site-accent));
+}
+
+@media (max-width: 900px) {
+  .play-deck__masthead:not([hidden]) {
+    box-shadow: 0 0 12px color-mix(
+      in srgb,
+      var(--site-accent) 28%,
+      transparent
+    );
+  }
+
+  .site-shell.is-mode-play .play-prompt__send {
+    box-shadow: 0 0 16px color-mix(
+      in srgb,
+      var(--site-accent) 35%,
+      transparent
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play-deck__masthead:not([hidden]),
+  .site-shell.is-mode-play .play-prompt__send {
+    box-shadow: none;
+  }
+}

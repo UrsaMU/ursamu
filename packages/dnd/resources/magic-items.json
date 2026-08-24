@@ -1,0 +1,90 @@
+{
+  "potion_of_healing": {
+    "slug": "potion_of_healing",
+    "name": "Potion of Healing",
+    "rarity": "common",
+    "attunement": false,
+    "type": "potion:2d4+2",
+    "valueGp": 50,
+    "book": "SRD 5.2",
+    "summary": "Regain 2d4+2 hit points."
+  },
+  "potion_of_greater_healing": {
+    "slug": "potion_of_greater_healing",
+    "name": "Potion of Greater Healing",
+    "rarity": "uncommon",
+    "attunement": false,
+    "type": "potion:4d4+4",
+    "valueGp": 150,
+    "book": "SRD 5.2",
+    "summary": "Regain 4d4+4 hit points."
+  },
+  "weapon_plus_1": {
+    "slug": "weapon_plus_1",
+    "name": "+1 Weapon",
+    "rarity": "uncommon",
+    "attunement": false,
+    "type": "weapon:1d8:slashing",
+    "bonus": 1,
+    "valueGp": 300,
+    "book": "SRD 5.2",
+    "summary": "+1 to attack and damage rolls."
+  },
+  "shield_plus_1": {
+    "slug": "shield_plus_1",
+    "name": "+1 Shield",
+    "rarity": "uncommon",
+    "attunement": false,
+    "type": "shield:3",
+    "bonus": 1,
+    "valueGp": 300,
+    "book": "SRD 5.2",
+    "summary": "Shield grants +3 AC total (+1 magic)."
+  },
+  "cloak_of_protection": {
+    "slug": "cloak_of_protection",
+    "name": "Cloak of Protection",
+    "rarity": "uncommon",
+    "attunement": true,
+    "type": "wondrous",
+    "bonusAc": 1,
+    "valueGp": 500,
+    "book": "SRD 5.2",
+    "summary": "While attuned, +1 AC (simplified)."
+  },
+  "gauntlets_of_ogre_power": {
+    "slug": "gauntlets_of_ogre_power",
+    "name": "Gauntlets of Ogre Power",
+    "rarity": "uncommon",
+    "attunement": true,
+    "type": "wondrous",
+    "setAbility": {
+      "strength": 19
+    },
+    "valueGp": 800,
+    "book": "SRD 5.2",
+    "summary": "While attuned, Strength becomes 19."
+  },
+  "boots_of_striding": {
+    "slug": "boots_of_striding",
+    "name": "Boots of Striding and Springing",
+    "rarity": "uncommon",
+    "attunement": true,
+    "type": "wondrous",
+    "speed": 30,
+    "valueGp": 400,
+    "book": "SRD 5.2",
+    "summary": "While attuned, speed at least 30 ft."
+  },
+  "ring_of_protection": {
+    "slug": "ring_of_protection",
+    "name": "Ring of Protection",
+    "rarity": "rare",
+    "attunement": true,
+    "type": "wondrous",
+    "bonusAc": 1,
+    "valueGp": 1200,
+    "book": "SRD 5.2",
+    "summary": "While attuned, +1 AC."
+  }
+}

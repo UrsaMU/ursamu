@@ -5,7 +5,7 @@ rendered by the Lume static-site generator — they also read cleanly directly
 on GitHub.
 
 **Current pins (docs):** engine `@ursamu/mush@1.0.30`, CLI
-`@ursamu/cli@0.1.2`, public FE `@ursamu/site`, staff FE `@ursamu/web`.
+`@ursamu/cli@0.1.4`, public FE `@ursamu/site`, staff FE `@ursamu/web`.
 
 Visual system matches the product FE contracts:
 

@@ -1,6 +1,6 @@
 // ─── Monetization DB Collections ─────────────────────────────────────────────
 
-import { DBO } from "ursamu";
+import { DBO } from "@ursamu/mush";
 import type { ILedgerEntry, IPlayerWallet } from "./interface.ts";
 
 export const gmWallets = new DBO<IPlayerWallet>("server.gm.wallets");

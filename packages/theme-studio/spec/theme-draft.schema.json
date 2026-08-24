@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ursamu.dev/schema/theme-draft-1.0.0.json",
+  "title": "UrsaMU Theme Draft",
+  "description": "In-memory / API payload for Theme Studio (specVersion 1.0.0)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["specVersion", "manifest", "tokens"],
+  "properties": {
+    "specVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,39}$"
+        },
+        "label": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "version": { "type": "string", "maxLength": 32 },
+        "description": { "type": "string", "maxLength": 500 },
+        "title": { "type": "string", "maxLength": 120 },
+        "css": { "type": "string", "maxLength": 120 },
+        "bannerImage": { "type": "string", "maxLength": 240 },
+        "logoImage": { "type": "string", "maxLength": 240 },
+        "plainBg": { "type": "boolean" }
+      }
+    },
+    "tokens": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^--site-[a-z0-9-]+$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 2000
+      }
+    },
+    "tokensLight": {
+      "type": "object",
+      "propertyNames": { "pattern": "^--site-[a-z0-9-]+$" },
+      "additionalProperties": { "type": "string", "maxLength": 2000 }
+    },
+    "tokensDark": {
+      "type": "object",
+      "propertyNames": { "pattern": "^--site-[a-z0-9-]+$" },
+      "additionalProperties": { "type": "string", "maxLength": 2000 }
+    },
+    "activeMode": {
+      "type": "string",
+      "enum": ["light", "dark"]
+    },
+    "dual": {
+      "type": "boolean",
+      "description": "Export prefers-color-scheme + data-theme dark block"
+    },
+    "presetId": { "type": "string", "maxLength": 64 },
+    "cssExtras": {
+      "type": "string",
+      "maxLength": 200000,
+      "description": "Allowlisted selector rules only (see selectors.json)"
+    },
+    "siteCss": {
+      "type": "string",
+      "maxLength": 400000,
+      "description": "Optional full CSS override; still validated"
+    },
+    "assets": {
+      "type": "object",
+      "description": "Relative path → base64 or omitted when binary map used server-side",
+      "propertyNames": {
+        "pattern": "^(imgs|fonts)/[A-Za-z0-9._@()-]+$"
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}

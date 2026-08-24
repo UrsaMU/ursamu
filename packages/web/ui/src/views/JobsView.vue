@@ -307,6 +307,52 @@ const approveNotes = ref("");
 const approveBusy = ref(false);
 const approveMsg = ref("");
 
+/** Pick system approve paths from CGEN job text. */
+function cgenApprovePaths(job: {
+  title?: string;
+  description?: string;
+}): string[] {
+  const blob = `${job.title || ""} ${job.description || ""}`
+    .toLowerCase();
+  const all = [
+    "/api/v1/cpr/approve",
+    "/api/v1/cofd/approve",
+    "/api/v1/dnd/approve",
+  ];
+  if (
+    /edgerunner|eurodollars|\bmethod:\b|\brole:\b.*rank|streetrat|cyberware/
+      .test(blob)
+  ) {
+    return [
+      "/api/v1/cpr/approve",
+      "/api/v1/cofd/approve",
+      "/api/v1/dnd/approve",
+    ];
+  }
+  if (
+    /chronicle|cofd|nWoD|vampire|werewolf|mage|seeming|clan:|template:/i
+      .test(blob)
+  ) {
+    return [
+      "/api/v1/cofd/approve",
+      "/api/v1/cpr/approve",
+      "/api/v1/dnd/approve",
+    ];
+  }
+  if (
+    /d&d|dnd|class:|species:|background:|hit points|\blevel\b/
+      .test(blob)
+  ) {
+    return [
+      "/api/v1/dnd/approve",
+      "/api/v1/cpr/approve",
+      "/api/v1/cofd/approve",
+    ];
+  }
+  // CPR house games are common in this monorepo — try CPR first.
+  return all;
+}
+
 /** Staff approve: live sheet + notify + close CGEN job. */
 async function approveCharacter(): Promise<void> {
   if (!selected.value || !canApproveCgen.value) return;
@@ -314,28 +360,50 @@ async function approveCharacter(): Promise<void> {
   approveMsg.value = "";
   saveError.value = "";
   try {
-    const { res, data } = await api<{
+    const body = JSON.stringify({
+      jobNumber: selected.value.number,
+      playerId: selected.value.submittedBy,
+      notes: approveNotes.value.trim(),
+    });
+    const paths = cgenApprovePaths(selected.value);
+    type ApproveRes = {
       ok?: boolean;
       name?: string;
       already?: boolean;
       error?: string;
       jobNumber?: number | null;
-    }>("/api/v1/cofd/approve", {
-      method: "POST",
-      body: JSON.stringify({
-        jobNumber: selected.value.number,
-        playerId: selected.value.submittedBy,
-        notes: approveNotes.value.trim(),
-      }),
-    });
-    if (res.status === 401) {
-      session.signOut();
-      await router.replace({ name: "login" });
-      return;
+    };
+    let res: Response | null = null;
+    let data: ApproveRes | null = null;
+    let lastErr = "";
+    for (const path of paths) {
+      const out = await api<ApproveRes>(path, {
+        method: "POST",
+        body,
+      });
+      res = out.res;
+      data = out.data;
+      if (res.status === 401) {
+        session.signOut();
+        await router.replace({ name: "login" });
+        return;
+      }
+      // Wrong system plugin → try next
+      if (
+        res.status === 404 ||
+        (res.status === 400 &&
+          /no (cpr|cofd|dnd)|not found|no draft/i.test(
+            String(data?.error || ""),
+          ))
+      ) {
+        lastErr = data?.error || `HTTP ${res.status}`;
+        continue;
+      }
+      break;
     }
-    if (!res.ok) {
-      saveError.value = data?.error ||
-        `Approve failed (${res.status}).`;
+    if (!res || !res.ok) {
+      saveError.value = data?.error || lastErr ||
+        `Approve failed (${res?.status ?? "?"}).`;
       return;
     }
     approveMsg.value = data?.already

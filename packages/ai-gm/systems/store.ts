@@ -1,4 +1,4 @@
-import { DBO } from "ursamu";
+import { DBO } from "@ursamu/mush";
 import { z } from "zod";
 import type { IGameSystem } from "./interface.ts";
 import { urbanShadowsSystem } from "./urban-shadows.ts";

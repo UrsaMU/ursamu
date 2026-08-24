@@ -1,0 +1,188 @@
+{
+  "key": "cpr-gm",
+  "label": "Cyberpunk RED — GM & Admin Commands",
+  "vars": { "player": "Admin" },
+  "setup": {
+    "targets": {
+      "V": {
+        "stats": { "int": 6, "ref": 8, "dex": 7, "tech": 5, "cool": 7, "will": 6, "luck": 6, "move": 6, "body": 7, "emp": 6, "empBase": 7 },
+        "hp": { "max": 45, "current": 30 },
+        "swThreshold": 23,
+        "deathSave": 7,
+        "deathSavePenalty": 0,
+        "role": "solo",
+        "roleRank": 4,
+        "roleData": {},
+        "skills": { "athletics": 6, "brawling": 4, "evasion": 6, "handgun": 6, "perception": 6, "shoulder_arms": 6, "stealth": 4 },
+        "luckRemaining": 6,
+        "woundState": "lightly",
+        "criticalInjuries": [],
+        "armorBody": { "name": "Light Armorjack", "sp": 11, "currentSp": 9, "penalty": 0 },
+        "armorHead": null,
+        "cyberware": [],
+        "humanityLoss": 0,
+        "bodysculpt": [],
+        "activeEffects": [],
+        "reputation": 3,
+        "reputationDeeds": [],
+        "eurodollars": 2550,
+        "lifestyle": { "tier": "streetrat", "nextDueDate": 9999999999999 },
+        "lifepath": { "culturalOrigin": "North American", "language": "English" },
+        "chargenComplete": true,
+        "chargenStage": "complete",
+        "chargenMethod": "complete",
+        "restTimer": null,
+        "humanityGainedAt": null,
+        "locationEffects": [],
+        "improvementPoints": 0,
+        "ipLifetime": 0
+      },
+      "T-Bug": {
+        "stats": { "int": 7, "ref": 6, "dex": 5, "tech": 9, "cool": 5, "will": 6, "luck": 5, "move": 5, "body": 5, "emp": 6, "empBase": 7 },
+        "hp": { "max": 35, "current": 35 },
+        "swThreshold": 18, "deathSave": 5, "deathSavePenalty": 0,
+        "role": "tech", "roleRank": 4, "roleData": { "specialty": "fabrication", "specialtyRank": 0 },
+        "skills": { "athletics": 3, "basic_tech": 6, "brawling": 2, "education": 5, "electronics": 6, "evasion": 3, "fabrication": 6, "handgun": 3, "perception": 4 },
+        "luckRemaining": 5, "woundState": "healthy", "criticalInjuries": [],
+        "armorBody": { "name": "Kevlar", "sp": 7, "currentSp": 7, "penalty": 0 }, "armorHead": null,
+        "cyberware": [], "humanityLoss": 0, "bodysculpt": [], "activeEffects": [],
+        "reputation": 2, "reputationDeeds": [], "eurodollars": 3000,
+        "lifestyle": { "tier": "streetrat", "nextDueDate": 9999999999999 }, "lifepath": {},
+        "chargenComplete": true, "chargenStage": "complete", "chargenMethod": "complete",
+        "restTimer": null, "humanityGainedAt": null, "locationEffects": []
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Character Info & Debug"
+    },
+    {
+      "note": "+cpr/info dumps the full character record as JSON. Useful for debugging or verifying DB state."
+    },
+    {
+      "cmd": "+cpr/info V",
+      "label": "dump full character record for player V",
+      "as": "admin"
+    },
+    {
+      "sub": "Stat & Skill Overrides"
+    },
+    {
+      "note": "Stat and skill overrides use <target>/<field>=<value> format. Role and rank use <target>=<value>."
+    },
+    {
+      "cmd": "+cpr/stat V/ref=8",
+      "label": "set V's REF to 8",
+      "as": "admin"
+    },
+    {
+      "cmd": "+cpr/skill V/athletics=6",
+      "label": "set V's Athletics to 6",
+      "as": "admin"
+    },
+    {
+      "cmd": "+cpr/role V=solo",
+      "label": "change V's role to Solo",
+      "as": "admin"
+    },
+    {
+      "cmd": "+cpr/rank V=7",
+      "label": "set V's role rank to 7",
+      "as": "admin"
+    },
+    {
+      "sub": "Economy & Reputation Overrides"
+    },
+    {
+      "cmd": "+cpr/eb V=5000",
+      "label": "set V's EB balance to 5000",
+      "as": "admin"
+    },
+    {
+      "cmd": "+cpr/rep V=5",
+      "label": "set V's reputation to 5",
+      "as": "admin"
+    },
+    {
+      "sub": "Improvement Points"
+    },
+    {
+      "note": "+ip awards Improvement Points to a player. Players spend IP via +improve to advance skills and role rank."
+    },
+    {
+      "cmd": "+ip V=10",
+      "label": "award 10 IP to V",
+      "as": "admin"
+    },
+    {
+      "sub": "Humanity & Healing"
+    },
+    {
+      "cmd": "+cpr/hl V=20",
+      "label": "set V's humanity loss to 20 (recalculates EMP)",
+      "as": "admin"
+    },
+    {
+      "cmd": "+cpr/heal V",
+      "label": "fully heal V to max HP and clear wound state",
+      "as": "admin"
+    },
+    {
+      "sub": "Environmental Hazards"
+    },
+    {
+      "note": "+hazard applies environmental damage to a target. Use for fires, drowning, falls, and electrocution."
+    },
+    {
+      "cmd": "+hazard/fire V",
+      "label": "apply fire damage to V (1d6 per round until extinguished)",
+      "as": "admin"
+    },
+    {
+      "cmd": "+hazard/extinguish V",
+      "label": "extinguish a burning character",
+      "as": "admin"
+    },
+    {
+      "cmd": "+hazard/fall V 10",
+      "label": "apply fall damage from 10 meters — 10d6 damage",
+      "as": "admin"
+    },
+    {
+      "cmd": "+hazard/electrocute V",
+      "label": "apply electrocution damage to V",
+      "as": "admin"
+    },
+    {
+      "cmd": "+hazard/drown V",
+      "label": "apply drowning damage to V",
+      "as": "admin"
+    },
+    {
+      "sub": "Maker Specialty"
+    },
+    {
+      "note": "+cpr/setmaker grants a Tech character a maker specialty rank needed to run advanced crafting projects."
+    },
+    {
+      "cmd": "+cpr/setmaker T-Bug/fabrication=4",
+      "label": "set T-Bug's fabrication specialty to rank 4",
+      "as": "admin"
+    },
+    {
+      "sub": "Character Reset"
+    },
+    {
+      "note": "+cpr/reset wipes the character record entirely. This is destructive — confirm before use."
+    },
+    {
+      "cmd": "+cpr/reset V",
+      "label": "wipe V's character data (admin only — destructive)",
+      "as": "admin"
+    },
+    {
+      "reset": true
+    }
+  ]
+}

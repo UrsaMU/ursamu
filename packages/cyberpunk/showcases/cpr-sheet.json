@@ -1,0 +1,272 @@
+{
+  "key": "cpr-sheet",
+  "label": "Cyberpunk RED \u2014 Character Sheet & Rolls",
+  "vars": {
+    "player": "V"
+  },
+  "setup": {
+    "character": {
+      "stats": {
+        "int": 6,
+        "ref": 8,
+        "dex": 7,
+        "tech": 5,
+        "cool": 7,
+        "will": 6,
+        "luck": 6,
+        "move": 6,
+        "body": 7,
+        "emp": 6,
+        "empBase": 7
+      },
+      "hp": {
+        "max": 45,
+        "current": 45
+      },
+      "swThreshold": 23,
+      "deathSave": 7,
+      "deathSavePenalty": 0,
+      "role": "solo",
+      "roleRank": 4,
+      "roleData": {},
+      "skills": {
+        "athletics": 6,
+        "brawling": 4,
+        "concentration": 3,
+        "conversation": 2,
+        "education": 2,
+        "evasion": 6,
+        "handgun": 6,
+        "human_perception": 3,
+        "interrogation": 4,
+        "local_expert": 2,
+        "perception": 6,
+        "persuasion": 2,
+        "shoulder_arms": 6,
+        "stealth": 4,
+        "streetwise": 4,
+        "tactics": 4,
+        "tracking": 2
+      },
+      "luckRemaining": 6,
+      "woundState": "healthy",
+      "criticalInjuries": [],
+      "armorBody": {
+        "name": "Light Armorjack",
+        "sp": 11,
+        "currentSp": 11,
+        "penalty": 0
+      },
+      "armorHead": null,
+      "cyberware": [
+        {
+          "id": "cw1",
+          "name": "neural_link",
+          "category": "neuralware",
+          "hl": 7,
+          "installType": "clinic",
+          "installedAt": 0
+        },
+        {
+          "id": "cw2",
+          "name": "interface_plugs",
+          "category": "neuralware",
+          "hl": 3,
+          "installType": "clinic",
+          "installedAt": 0
+        }
+      ],
+      "humanityLoss": 10,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 3,
+      "reputationDeeds": [
+        "Survived the Night City Arena",
+        "Took down a Militech convoy"
+      ],
+      "eurodollars": 2550,
+      "lifestyle": {
+        "tier": "low",
+        "nextDueDate": 0
+      },
+      "lifepath": {
+        "culturalOrigin": "North American",
+        "language": "English",
+        "personality": "Direct and professional",
+        "clothingStyle": "Nomad leathers",
+        "hairstyle": "Short, practical"
+      },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": [],
+      "improvementPoints": 50,
+      "ipLifetime": 50,
+      "gear": [
+        {
+          "id": "g1",
+          "name": "Lexington 10mm",
+          "type": "weapon",
+          "slot": "wielded",
+          "concealed": false
+        },
+        {
+          "id": "g2",
+          "name": "Agent (phone)",
+          "type": "gear",
+          "slot": "carried",
+          "concealed": false
+        },
+        {
+          "id": "g3",
+          "name": "Speed (drug)",
+          "type": "drug",
+          "slot": "carried",
+          "concealed": true
+        },
+        {
+          "id": "g4",
+          "name": "Medtech bag",
+          "type": "gear",
+          "slot": "carried",
+          "concealed": false
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "sub": "Character Sheet"
+    },
+    {
+      "note": "+sheet with no switch shows the full sheet: stats, skills, combat derived values, economy, and cyberware."
+    },
+    {
+      "cmd": "+sheet",
+      "label": "full character sheet"
+    },
+    {
+      "cmd": "+sheet/stats",
+      "label": "stats section only"
+    },
+    {
+      "cmd": "+sheet/skills",
+      "label": "skills section only"
+    },
+    {
+      "cmd": "+sheet/combat",
+      "label": "combat stats \u2014 HP, wound state, armor, death save threshold"
+    },
+    {
+      "cmd": "+sheet/cyber",
+      "label": "installed cyberware and humanity loss"
+    },
+    {
+      "cmd": "+sheet/economy",
+      "label": "eurodollars and lifestyle"
+    },
+    {
+      "sub": "Score (Compact View)"
+    },
+    {
+      "note": "+score is a quick one-line summary of your core stats and current HP."
+    },
+    {
+      "cmd": "+score",
+      "label": "compact stat line"
+    },
+    {
+      "sub": "Dice Rolls"
+    },
+    {
+      "note": "+roll accepts a dice expression or a STAT+skill format. All rolls are d10 based."
+    },
+    {
+      "cmd": "+roll 1d10",
+      "label": "basic d10 roll"
+    },
+    {
+      "cmd": "+roll 3d6",
+      "label": "3d6 roll (used for some damage)"
+    },
+    {
+      "cmd": "+roll ref+athletics",
+      "label": "stat+skill check \u2014 REF + Athletics"
+    },
+    {
+      "cmd": "+roll cool+stealth vs 15",
+      "label": "stat+skill check against a DV"
+    },
+    {
+      "cmd": "+roll int+perception vs 13",
+      "label": "notice check \u2014 INT + Perception"
+    },
+    {
+      "cmd": "+roll body+athletics vs 17",
+      "label": "feat of strength check"
+    },
+    {
+      "sub": "Luck"
+    },
+    {
+      "note": "Luck points add +1 per point to any roll. Pool resets at start of each session. Max Luck = LUCK stat."
+    },
+    {
+      "cmd": "+luck",
+      "label": "view current luck pool"
+    },
+    {
+      "cmd": "+luck 3",
+      "label": "spend 3 luck on your next roll"
+    },
+    {
+      "sub": "Improvement Points"
+    },
+    {
+      "note": "IP (Improvement Points) are awarded by GMs for session milestones. Spend them to advance skills or role rank. Cost scales with target rank."
+    },
+    {
+      "cmd": "+improve",
+      "label": "view IP balance, lifetime total, and affordable advances"
+    },
+    {
+      "cmd": "+improve/skill stealth",
+      "label": "spend IP to raise Stealth by 1 rank (rank 4\u21925, costs 8 IP)"
+    },
+    {
+      "sub": "Gear / Inventory"
+    },
+    {
+      "note": "+gear shows your full loadout \u2014 armor, wielded weapons, carried items. Admin users see dbrefs. Concealed items marked [C]."
+    },
+    {
+      "cmd": "+gear",
+      "label": "full gear list"
+    },
+    {
+      "cmd": "+gear/add Trauma Team card=gear",
+      "label": "add a carried item"
+    },
+    {
+      "cmd": "+gear/conceal g3",
+      "label": "toggle concealed on Speed (partial id match)"
+    },
+    {
+      "cmd": "+gear/equip g1=carried",
+      "label": "holster the Lexington"
+    },
+    {
+      "cmd": "+gear/remove g4",
+      "label": "drop the medtech bag"
+    },
+    {
+      "cmd": "+gear",
+      "label": "gear list after changes"
+    },
+    {
+      "reset": true
+    }
+  ]
+}

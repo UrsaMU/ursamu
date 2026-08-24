@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/cli",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "exports": {
     ".": "./mod.ts",
     "./templates": "./src/create-templates.ts",
@@ -35,6 +35,7 @@
   "publish": {
     "include": [
       "src",
+      "templates",
       "mod.ts",
       "deno.json",
       "README.md"

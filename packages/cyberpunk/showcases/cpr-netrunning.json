@@ -1,0 +1,71 @@
+{
+  "key": "cpr-netrunning",
+  "label": "Cyberpunk RED — Netrunning",
+  "vars": { "player": "Rache" },
+  "setup": {
+    "character": {
+      "stats": { "int": 8, "ref": 6, "dex": 6, "tech": 8, "cool": 5, "will": 5, "luck": 5, "move": 5, "body": 5, "emp": 5, "empBase": 6 },
+      "hp": { "max": 35, "current": 35 },
+      "swThreshold": 18,
+      "deathSave": 5,
+      "deathSavePenalty": 0,
+      "role": "netrunner",
+      "roleRank": 4,
+      "roleData": {},
+      "skills": { "athletics": 3, "brawling": 2, "concentration": 4, "conversation": 3, "education": 5, "evasion": 4, "handgun": 4, "human_perception": 4, "interface": 6, "local_expert": 3, "perception": 5, "persuasion": 3, "stealth": 4, "streetwise": 3 },
+      "luckRemaining": 5,
+      "woundState": "healthy",
+      "criticalInjuries": [],
+      "armorBody": { "name": "Kevlar", "sp": 7, "currentSp": 7, "penalty": 0 },
+      "armorHead": null,
+      "cyberware": [
+        { "id": "cw1", "name": "neural_link", "category": "neuralware", "hl": 7, "installType": "clinic", "installedAt": 0 },
+        { "id": "cw2", "name": "interface_plugs", "category": "neuralware", "hl": 3, "installType": "clinic", "installedAt": 0 }
+      ],
+      "humanityLoss": 10,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 2,
+      "reputationDeeds": ["Cracked a Militech black site from Night City"],
+      "eurodollars": 3000,
+      "lifestyle": { "tier": "streetrat", "nextDueDate": 9999999999999 },
+      "lifepath": { "culturalOrigin": "Eastern European", "language": "Polish" },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": []
+    }
+  },
+  "steps": [
+    {
+      "sub": "Programs"
+    },
+    {
+      "note": "Netrunners carry Interface Abilities and programs. Programs augment NET actions (Backdoor, Cloak, Control, Slide, Virus, Zap, Scanner)."
+    },
+    {
+      "cmd": "+netrun/programs",
+      "label": "list loaded programs and their stats"
+    },
+    {
+      "sub": "NET Architecture Workflow"
+    },
+    {
+      "note": "An Admin or authorized Netrunner builds an architecture first: +netrun/build <name> <floors> <floorDV>. Then jack in: +netrun/jack <name>. Check status: +netrun/status. Navigate floors with +netrun/action <ability>. Disconnect cleanly with +netrun/jack_out."
+    },
+    {
+      "note": "NET actions (all require being jacked in): backdoor — bypass floor; cloak — hide from ICE; slide — dodge ICE attacks; scanner — scout next floor; zap — damage ICE; virus — install data-destruction; control — take over a node."
+    },
+    {
+      "note": "ICE counters automatically each turn. Use +netrun/endturn to end your NET action phase. Architecture is persistent (KV-stored) between sessions."
+    },
+    {
+      "note": "Brain damage (errata p.204): damage taken from Black ICE goes directly to HP, bypasses worn and subdermal armor, and cannot cause a Critical Injury. It still triggers wound state and death save thresholds."
+    },
+    {
+      "reset": true
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 // Records memorable player moments so the GM can reference and reward them.
 // Staff can mark a spotlight; the GM auto-marks on exceptional move outcomes.
 
-import { DBO } from "ursamu";
+import { DBO } from "@ursamu/mush";
 import { nanoid } from "../ingestion/util.ts";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────

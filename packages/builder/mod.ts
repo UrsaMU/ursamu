@@ -78,7 +78,9 @@ export const builderPlugin: IPlugin = {
 
     // Soft-register help directory with @ursamu/help (optional dependency)
     try {
-      const { registerHelpDir } = await import("@ursamu/help");
+      const { registerHelpDir } = await import(
+        "@ursamu/help/register"
+      );
       registerHelpDir(new URL("./help", import.meta.url), "building");
     } catch {
       // @ursamu/help not installed

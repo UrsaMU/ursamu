@@ -126,6 +126,23 @@ const router = createRouter({
           props: true,
         },
         {
+          path: "events",
+          name: "events",
+          component: () => import("@/views/EventsView.vue"),
+        },
+        {
+          path: "events/:id",
+          name: "event-detail",
+          component: () => import("@/views/EventsView.vue"),
+          props: true,
+        },
+        {
+          path: "sprawl-gigs",
+          name: "sprawl-gigs",
+          component: () =>
+            import("@/views/SprawlGigRoomsView.vue"),
+        },
+        {
           path: "channels",
           name: "channels",
           component: () => import("@/views/ChannelsView.vue"),

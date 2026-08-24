@@ -124,6 +124,28 @@
   --site-rule-image: none;
   --site-search-icon: none;
 
+  /*
+   * Termv-2 media ornaments:
+   *   sep-top    = top-end bracket cap (right side of top rail)
+   *   sep-bottom = bottom-end bracket cap (left side of bottom rail)
+   * Hairline between caps is CSS (--site-sep-line-color).
+   * Banner / logo: seps forced off (.site-media--banner).
+   */
+  --site-sep-top: none;
+  --site-sep-bottom: none;
+  --site-sep-h: 15px;
+  /* Mock: rails float just outside the photo (no pad band) */
+  --site-sep-pad-y: 0;
+  --site-sep-top-offset: -7px;
+  --site-sep-bottom-offset: -7px;
+  /* Hairline only, relative to the bottom rail box */
+  --site-sep-bottom-tail-offset: 15px;
+  --site-sep-inset-end: 25px; /* open-end inset */
+  --site-sep-bracket-w: 53px; /* native sep-top/bottom width */
+  --site-sep-line-color: rgba(255, 255, 255, 0.5);
+  --site-portrait-ratio: 180 / 240;
+  --site-sep-z: 5;
+
   /* Play placeholder */
   --site-play-placeholder: var(--site-text-muted);
 

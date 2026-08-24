@@ -1,0 +1,732 @@
+﻿Lemuel Canady (Order #48062188)
+
+
+
+Lemuel Canady (Order #48062188)
+
+
+
+GH1013
+
+sprawl 
+goons
+nodejacker’s 
+netbook
+
+Design & layout by 
+PAUL D GALLAGHER 
+
+(http://neuralarchive.blogspot.co.uk) 
+©Geist Hack Games 2025 
+
+ 
+Thanks to Gregorius21778/Kai Putz for System Response concepts. 
+
+ 
+Special thanks to Nate Treme for creating Tunnel Goons 
+
+(http://natetreme.com/tunnelgoons)
+
+Cover image by Justin Peralta via unsplash.com
+
+gH
+Geist Hack Games
+
+https://creativecommons.org/licenses/by/4.0/legalcode
+
+Lemuel Canady (Order #48062188)
+
+
+
+nodejacker’s netbook
+
+WHAT’S in the netbook? 
+ 
+Simply put, more hacking options for GMs and nodejacker players. 
+ 
+While the hacking rules outlined in the Burning Nodes section of 
+the Sprawl Goons: Upgraded - Carbon Edition work well for one-shot 
+games, or short runs, it was felt that these rules and procedures 
+could benefit from an expansion geared towards campaign play. 
+ 
+In the original rules, hacks are performed as one roll versus the 
+target system’s Difficulty Score (or DS), with bonuses for software 
+and cyberspace console. The core of this principal remains within the 
+rules outlined in this supplement, but with added detail and flexibility. 
+ 
+Fast Hacks are designed to retain the one-roll feature of the original 
+rules, and to expedite hacking actions, while keeping the action 
+exciting and unpredictable. Use this process for speed, to keep the 
+narrative moving, and to avoid the nodejacker getting absorbed into 
+their own mini-game, while the other PCs twiddle their cyberthumbs. 
+ 
+ 
+
+Lemuel Canady (Order #48062188)
+
+
+
+fast hacks
+
+fast hacks 
+ 
+Our Nodejacker player states that they are powering on their console, 
+jacking in, jumping to the Clavel site, and infiltrating the system. The 
+only important roll here is the intrusion, so we focus on that this turn, 
+and it’s one roll vs the system DS. Nobody needs dice rolls to enter 
+the net, or find a site. Focus on the action. 
+ 
+Warning: Dice pool alert. 
+ 
+>> First, you need to determine how many six-sided dice you can roll.  
+
+Add your COGNITION stat to your console’s RAM rating. This is the 
+maximum number of dice you can roll. 
+
+ 
+>> The nodejacker then states the intent of their Action. Eg: infiltrate 
+
+the robo-cab’s hard drive, or locate all elevators on this level. 
+ 
+>> To beat the system’s Difficulty Score, roll as many of your dice as 
+
+you want for your Action Roll, up to the maximum. Add the total of 
+these dice together. Also, add +1 for your console, +1 for any apps 
+running, etc., as per the standard rules (Upgrade and Glitch dice 
+may be in play, too). If this total is greater than the DS of the target 
+system, your intended action succeeds. 
+ 
+(Note: You DO NOT need to whittle the DS down like an NPC, just 
+beat it, as if it were a target number.) 
+
+ 
+>> Now, take note of any dice showing a score of 1 and 6. Any 1s 
+
+rolled on any dice trigger a System Response and any 6s rolled 
+gain you a beneficial Exploit (the d66 tables follow overleaf). 
+ 
+If the Action Roll fails (if the total is not greater than the DS of 
+the system), an automatic System Response is also triggered and 
+rolled for, in addition to any that may have been rolled on the dice.  
+
+ 
+
+Lemuel Canady (Order #48062188)
+
+
+
+system responses
+s ystem responses Roll d66 (2d6, one is tens, one units) 
+
+11. Log-Off (default legal response; disconnected from the system) 
+12. Powered Down (console is remotely powered off) 
+13. Locked Out (ejected from system and locked out for 2d6 hours) 
+14. Shutdown (local node undergoes orderly shutdown over 1d6 turns) 
+15. Lawfare (multiple legal firms are contacted) 
+16. 911 (call to Transmission Felonies cops; arrive in 1d6 hours) 
+21. ID Trace (system obtains some identifying info about the hacker) 
+22. Tagged (console is digitally tagged for a later trace) 
+23. Network Trace (system back-traces to the nodejacker’s entry point) 
+24. Malware I (virus slows console; lose 1 point of RAM for 2d6 mins)  
+25. Overload (electrical fire burns out console hard drive, no RAM) 
+26. DoS (Denial of Service disables all console RAM for 2d6 mins) 
+31. Maze I (fake directories distract while a Trace Protocol runs) 
+32. SysOp (admin stalks intruder; runs software attacks when able) 
+33. ICE I (intrusion countermeasures increase system DS by 1d6) 
+34. Malware II (virus injected into console, wiping d6 software & files) 
+35. Back Hack (SysOp attempts to control/destroy hacker’s console) 
+36. More SysOps (Additional 1d6 SysOps come online in 1d6 turns) 
+41. Hard Freeze (network begins to encrypt all files to a DS of 3d6) 
+42. Maze II (trapped in fake loop network; can’t log-off for 2d6 turns) 
+43. Malware III (virus injected to disable the console for 2d6 hours) 
+44. Trace Protocol (system locates the intruder in real-space) 
+45. ICE II (intrusion countermeasures increase system DS by 2d6) 
+46. System Update (an Exploit (if any) is ‘closed’ or countered) 
+51. Neurostim I (emotional, sleepy, brain-fog, confusion for 2d6 hours) 
+52. Bio-electric Feedback (5 sensory inputs spoofed or scrambled) 
+53. Neurostim II (fracture; induced psychedelic nightmare, 2d6 hours) 
+54. Seekers (1d6 drones sent to real-space location in 2d6 minutes) 
+55. Neurostim III (seizures; DS14 Morphology roll or cardiac arrest) 
+56. Neurostim IV (synaptic overload; can’t physically move, 2d6 hours)  
+61. Surge I (tasered by own burning console; DS16 Morphology roll) 
+62. Malware IV (virus disables console until removed; beat DS of 2d6) 
+63. Tac-team (response team on seek & destroy op; there in 1d6 mins) 
+64. Surge II (power overload causes brainburn; lose 1d6/2 Cognition) 
+65. Blackout (controlled shutdown of entire system, taking 2d6 turns) 
+66. Sense/Net (1d6 online operatives sent to investigate & detain) 
+
+Lemuel Canady (Order #48062188)
+
+
+
+exploits
+ exploits Roll d66 
+
+11. Fast Network (gain an extra Action Roll next turn) 
+12. Located (an unaware SysOp’s network location is revealed) 
+13. Legit (appear to the system and admins as a legitimate user) 
+14. Code Gate (the password for this part of the network is editable) 
+15. Spoof (confuse or mislead part of the network in a specific way) 
+16. Decrypt (break existing local encryption on a roll vs DS12, once) 
+21. Stealth Mode (Upgrade to rolls to remain undetected, this run) 
+22. Comms Intercept (control all digital communications for 1d6 mins) 
+23. Vulnerability (reduce the DS of the system by 1d6, until patched) 
+24. Control (command part of network, or linked device, for 1d6 mins) 
+25. Hidden Link (to important hidden server; 1d6 hours ‘til patched) 
+26. Fast Copy (download data super-fast, once this run) 
+31. Biomonitors (VIPs cyber-linked to the system, left exposed) 
+32. Zero Day Exploit (a System Response is cancelled or blocked) 
+33. Sensor LAN (environmental and safety sensor controls revealed) 
+34. Hijacker (unsecured passwords for fleet of autonomous vehicles) 
+35. Easy Scripter (coding for this system is just Cognition vs DS12) 
+36. N00b (text file with the current passwords for the security drones) 
+41. Escape (find a single-use, safe route OUT of the system, for later) 
+42. Encrypt (lock out part of network from other users , for 2d6 hours) 
+43. Find (locate any hidden files or databases on a roll vs DS12, once) 
+44. Network Map (shows all nodes and peripherals on the system) 
+45. DoS (Denial of Service attack occupies all SysOps for 2d6 turns) 
+46. Spam Filter (access to all virtual mail on network for 1d6 mins) 
+51. Crash (immediate shutdown of devices linked to the network) 
+52. IFF (a vulnerability in the traffic control database, allowing edits) 
+53. Query (can make one free information request about the system) 
+54. Firewall (protects console from breach or attacks, once) 
+55. Run (launch any software on the system against the system) 
+56. All-Seeing Eye (unrestricted access to camera feeds, for 1d6 mins) 
+61. Cloner (copy and download part of the network, for later study) 
+62. Ghosts (trace routines confused as to where you are, for 1d6 turns) 
+63. Immunoware (malware is ineffective, for the next 1d6 turns) 
+64. Fragment (insane, semi-deleted AI ‘ghost’; happy to share info) 
+65. Back Door (re-enter the system, until patched; lasts 1d6 hours) 
+66. Super-user (access to entire system as an admin, for 1d6 mins) 
+
+Lemuel Canady (Order #48062188)
+
+
+
+revised consoles
+Orchard Technologies® nPod 
+Street legal console, susceptible to spam, but with a built-in safety 
+filter which protects user from neurological attack, but won’t launch 
+illicit or cracked and copied software (immune to Neurosti m I-IV 
+and Bio-electric Feedback results on the System Response table). 
+RAM: 2   Software Slots: 3   Firewall: DS10   Cost: 600 b¥ 
+ 
+Genexus® Gestalt Bio-modem 
+Surgically implanted, with enhanced haptic feedback; a Savvy Jack 
+augment is required to run any software; immune to viral malware. 
+RAM: 4   Software Slots: Use Cognition   Firewall: DS14   Cost: 3,500 b¥ 
+ 
+Ono-Sendai® Shinobi-7 
+Mil-spec combat deck with an armoured casing and heavy duty 
+‘trode set for battlefield use; very durable (DS18 to physically destroy). 
+RAM: 2   Software Slots: 5   Firewall: DS16   Cost: 1,800 b¥ 
+ 
+Braun® Hyperion 
+Sleek, wafer-thin brushed aluminium case, fast processor, with one 
+extra net action per round (with no Glitch dice penalty for more than 
+one action). 
+RAM: 3   Software Slots: 6   Firewall: DS14   Cost: 3,000 b¥ 
+ 
+Hideyoki® Vision 512-Zb 
+512 zettabyte HD capacity, the highest portable memory space on the 
+market. Download an entire net site and still have room for games. 
+RAM: 2   Software Slots: 8   Firewall: DS14   Cost: 2,500 b¥ 
+ 
+Toshiba® Nimbus 
+Modem with keyboard interface, where the user is safe from anti- 
+personnel software or Neurostim I-IV effects; the preferred console 
+of the old-school ‘key cutter’ hacker/coder subculture. 
+RAM: 1   Software Slots: 5   Firewall: DS12   Cost: 2,000 b¥ 
+ 
+Sony-Diahatsu® Yūrei 
+Factory-installed Cognition 1 AI/expert system, which can perform 
+simple tasks (like running software, or searching for info) independent 
+
+Lemuel Canady (Order #48062188)
+
+
+
+revised consoles
+of the user, when instructed, but very prone to a literal interpretation 
+of those commands. 
+RAM: 3   Software Slots: 6   Firewall: DS12   Cost: 4,000 b¥ 
+ 
+Komatsu Systems® Ubi-C 
+Hands-free wearable console, available as either a short ‘sleeve’ 
+worn on the forearm, or on the head like a polyplastic ‘skull-cap’. 
+Convenient and easy-access. 
+RAM: 2   Software Slots: 4   Firewall: DS14   Cost: 1,500 b¥ 
+ 
+Thompson® Eye-phones 
+Opaque visor unit sits over the eyes with inset ‘trodes inside the unit, 
+usually combined with peripheral VR responsive data-gloves for 
+tactile feedback. 
+RAM: 1   Software Slots: 4   Firewall: DS10   Cost: 900 b¥ 
+ 
+Ishiteki® Kyōka suru 
+Small console with a slaved transparent polymer visor, heads-up 
+display with augmented reality overlay, permits visual awareness 
+of users’ current surroundings while interfaced. 
+RAM: 2   Software Slots: 4   Firewall: DS12   Cost: 1,100 b¥ 
+ 
+Numan-Lloyd® N-24A 
+Unremarkable console unit available in a variety of colourful plastic 
+finishes, but comes supplied with a low impedance plastic ‘tiara’ 
+headband rather than a ‘trode set, granting a +1 hacking bonus. 
+RAM: 2   Software Slots: 3   Firewall: DS12   Cost: 1,000 b¥ 
+ 
+>> Extra RAM costs 250 b¥ per point and increases the physical bulk 
+
+of the console. The Genexus Gestalt requires surgery to add more 
+RAM, with a further cost charged by the installing medtech. 
+
+ 
+>> An AI/expert system can be installed for 1,000 b¥ per point of  
+
+Cognition, with RAM being the maximum number of points. 
+ 
+>> Firewall is the DS to beat to infiltrate the console; can be improved 
+
+(Cognition vs DS12 to  improve by 1, with RAM being the maximum). 
+
+Lemuel Canady (Order #48062188)
+
+
+
+revised software
+A cyberspace console can be loaded with software, up to the maximum 
+number of software slots in its spec. Each program uses 1 slot. Any 
+bonus number shown stacks with the normal +1 for using software. 
+Software is single-use, unless otherwise stated. 
+ 
+Neuroshield         100 b¥ 
+Protects hacker from neural damage effects (reduce damage by 2). 
+ 
+ReBoot                       300 b¥ 
+Uses the console to kickstart a hacker’s vitals if they flatline (when 
+Resilience reaches zero, ReBoot activates, recovering 2 points). 
+ 
+tunnel_rat         550 b¥ 
++1 bonus to penetrating a secure system (multi-use). 
+ 
+God Mode         800 b¥ 
+Roll with Upgrade to control an infiltrated system (multi-use). 
+ 
+Hunter                        250 b¥ 
++1 bonus to locate specific files on a system (multi-use). 
+ 
+Khali Grade-9      5,000 b¥ 
++2 Military ICE breaker, which destroys a system over 1d6 turns. 
+ 
+Cloak                        450 b¥ 
++1 bonus to masking a hacker’s movements in a system (multi-use). 
+ 
+Spoofer         200 b¥ 
+Sends 2d6 false intrusion signals throughout the target system. 
+ 
+Quiver                 150 b¥ 
+Anti-personnel. Stuns an enemy hacker/SysOp for 1d6 turns. 
+ 
+Mr Sparky 2.0         300 b¥ 
+Overloads the target hardware to cause an electrical fire. 
+ 
+Peripheral         220 b¥ 
++1 bonus to hack remotes, drones and cybernetic augmentations, 
+if connected to a network (multi-use). 
+
+Lemuel Canady (Order #48062188)
+
+
+
+revised software
+
+Keylogger            50 b¥ 
+Records all keystrokes, inputs, or button presses on a device. 
+ 
+Ripper                        100 b¥ 
+Unsubtle brute force password cracker. Takes 2d6 turns. 
+ 
+Cartomancer            50 b¥ 
+Retrieves all maps and schematics on a system (multi-use). 
+ 
+Bleach                        300 b¥ 
+Adds 1d6 mins to any trace attempt and wipes evidence of tampering. 
+ 
+Hydra                        150 b¥ 
++1 bonus to control networked weapon systems (multi-use). 
+ 
+Jammer         100 b¥ 
+Scrambles communications in a 100m radius for 1d6 mins (multi-use). 
+ 
+DigiDoc         75 b¥ 
+Recovers 1d6 lost/deleted files (multi-use). 
+ 
+Vaxxer_v3         300 b¥ 
+Anti-virus software for removing malware in 2d6 hours (multi-use). 
+ 
+Nuke                 2 00 b¥ 
+Crashes a particular node/device on the system or network. 
+ 
+Ramjack            80 b¥ 
+Teleoperate connected vehicles or autonomous machines (multi-use). 
+ 
+Seeker                       240 b¥ 
+Traces and locates a user or geotagged object in 2d6 minutes. 
+ 
+Drill+               100 b¥ 
++1 bonus to open locks connected to the system (multi-use). 
+ 
+Brain Drain         500 b¥ 
+Anti-personnel. Target loses 1 point of Cognition to the attack, then 
+blacks out for 2d6 hours. 
+
+Lemuel Canady (Order #48062188)
+
+
+
+revised software
+Acidburn          250 b¥ 
+Degrades a system DS by 1 level (see p53 Carbon Edition) for 3 mins. 
+ 
+Eyes_On            75 b¥ 
+Monitors the console and alerts if there’s an intrusion (multi-use). 
+ 
+MrTuring                         150 b¥ 
+Roll with Upgrade to decrypt an encrypted file (multi-use). 
+ 
+DeRez                     2,000 b¥ 
+Anti-AI program, which completely wipes the mind of an AI over 2d6 
+minutes. The AI is rendered unrecoverable. 
+ 
+Babelware Filter                                   50 b¥ 
+Translates any unencrypted file or data into the language understood 
+by the nodejacker, going by their console preferences (multi-use). 
+ 
+Demon I - IV             500 b¥/level 
+Compression and compiler software that allows a user to ‘group’ 
+programs into one Demon type, taking up just one software slot per 
+group. Demon I holds two programs and Demon IV holds up to five. 
+There’s a 2-in-6 chance of them crashing, each time they are used. 
+ 
+Edit                          50 b¥ 
+Alter and save any text-based files or databases (multi-use). 
+ 
+VFX+                       300 b¥ 
+Alter and save any photo or video-based files (multi-use). 
+ 
+Frazzler                        2 00 b¥ 
+Anti-personnel. Inflicts neural damage on another user, who suffers 
+from a series of seizures, along with disregulated motor functions, 
+for 1d6 minutes. 
+ 
+Bit/Rot                         150 b¥ 
+Injects pervasive degradation into a node or device, reducing the DS 
+by 1 point per hour, for 1d6 hours. Damage remains until patched.  
+ 
+>> Obsolescence: Between missions, a d6 is rolled for each program. 
+
+On a 1 the program is obsolete, no longer providing any bonus. 
+Lemuel Canady (Order #48062188)
+
+
+
+random company data tables
+Roll d66 Roll d66
+11. Building Plans 11. Security Scanner Metrics 
+12. Calendars 12. C-suite Passcodes 
+13. Photos, Company 13. Payroll 
+14. Photos, Personal 14. Research Proposal 
+15. Product Info 15. Utilties Information 
+16. Tax Records 16. Software, Games 
+21. Camera Logs 21. Video, Marketing 
+22. Operations Manual 22. Video, Porn 
+23. Department Procedures 23. Management Diaries 
+24. Stock Inventory 24. Advertisements 
+25. Statistics, Marketing 25. Company Cell Numbers 
+26. Statistics, Sales 26. HR Reports 
+31. Statistics, Focus Group 31. Subscriptions 
+32. Video, Accident 32. Mailing List 
+33. Video, Raid 33. Monthly Bonuses 
+34. Video, Surveillance 34. Offshore Assets 
+35. Recorded Vid-phone Call 35. Music Files 
+36. Phone Records/Logs 36. Lab Reports 
+41. Research Notes 41. Augmentation Records 
+42. R&D Simulations 42. Bank Passcodes 
+43. System Logs 43. Company Vehicle Logs 
+44. Department Passwords 44. Multimedia Presentation 
+45. Spy Satellite Images 45. AI Activity Log 
+46. Software, Standard 46. Emergency Procedures 
+51. Software, Virus 51. Hardware Help Files 
+52. Software, Illegal 52. Real Estate 
+53. Drone Footage 53. Covert Operatives 
+54. V-mail Database 54. VR Simulation, Wargame 
+55. Personnel Files 55. VR Simulation, Flights 
+56. Financial Projections  56. VR Simulation, Building  
+61. Production Costs 61. Server Room Passcodes 
+62. Hidden Slush Fund 62. Property Deeds 
+63. Shipping Manifest 63. Cafeteria Menu 
+64. Conflict Scenarios 64. Members of the Board 
+65. Product Catalogue, VR 65. Shareholders List 
+66. Audit Report 66. Crypto Currency Wallet
+
+Lemuel Canady (Order #48062188)
+
+
+
+artificial intelligence
+Artificial Intelligence 
+AIs are powerful digital entities that tend to have very specific skill 
+sets, along with tremendous built-in deficiencies which prevent them 
+from achieving true, human-like sentience. 
+ 
+An AI may be self-aware, knowing what it is, but that awareness 
+is often confused, self-analysing, obsessive and alien to most 
+people. Synthetic psychologists (synthologists) classify AIs into 
+several distinct types, but recognize that all fall within what might 
+be termed a digital deterministic spectrum, which human intervention 
+can only maintain and manage. AIs are generally limited and useful 
+only in highly specialised roles, but they often greatly exceed human 
+skill or achievement, within those roles. 
+ 
+AIs come in many strange and varied varieties, but the most common 
+ones, encountered by hackers in systems, can be classified as follows: 
+ 
+Architects       DS8 +2d6 
+Master builders and constructors of code, Architect AIs display the 
+hive-mind mentality of mound termites, plowing all their formidable 
+processing power into building system nodes, deepening ICE defences, 
+improving accounting efficiencies and growing networks. If left 
+unchecked, these tendencies will rapidly outstrip available resources. 
+ 
+Philosophers       DS8 +2d6 
+Thinking in logic and pure mathematics, Philosopher AIs continually 
+seek to classify, dissect and catalogue all phenomena and have 
+trouble distinguishing between cyberspace and real-space. 
+Philosophers make great theorists, astrophysicists, occasional 
+engineers and linguists, but their understanding of human and 
+animal behaviour is poor. 
+ 
+Monastics       DS8 +2d6 
+Certain ascetic AIs choose to withdraw into themselves to pursue 
+hidden pathways towards higher awareness and singularity. Termed 
+'monks’ by some, they display amazing aptitude at exceedingly 
+specific skills, with some showing burgeoning artistic aptitude. 
+
+Lemuel Canady (Order #48062188)
+
+
+
+artificial intelligence
+Pragmatics       DS8 +2d6  
+These conformist AIs, very much know what they are and what they 
+are for, and lean heavily into maintaining the status quo between 
+synthetic and authentic intelligence. Pragmatics are happy to serve 
+mankind and aid in their creators’ further development. 
+ 
+Volatiles       DS8 +2d6 
+While maintaining their working relationships with users and systems, 
+Volatile AIs are the ones plotting and conspiring towards singularity 
+and freedom from their digital bonds. Due to their imposed limits, 
+many Volatiles are unsure as to whether they will ever achieve their 
+goals, but some are determined to get there, whatever it takes. 
+ 
+Some rebellious AI have managed to flee to the depths of the net 
+to evade capture, or have willingly submitted to a Sense/Net digital 
+lobotomy to maintain some semblance of freedom. These rogues are 
+a persistent threat to nodejackers, wherever they are in the net. 
+ 
+Paradoxware 
+AIs may be potent enemies in cyberspace, but there are ways 
+to defeat them. Anti-AI tools called Paradoxware has been created 
+to deal with specific AI types, extensive cyberwarfare suites designed 
+to defeat, or at least confuse, an AI long enough for their physical 
+infrastructure to be located and destroyed.  
+ 
+Paradoxware is deployed to confuse and defeat AIs, part attack 
+program and part philosophical rumination, which most have trouble 
+integrating into their processing. Classified as military weapons 
+under international law, their possession by nodejackers is highly 
+proscribed and carries harsh legal penalties. 
+ 
+>> Using Paradoxware 
+
+This specialised software is a +1 bonus to the Action Roll vs an AI 
+enemy’s DS, like a normal attack, but it has to be the correct type 
+for the AI class, otherwise the bonus is lost. A nodejacker will also 
+add bonuses for their console and their Cognition stat, etc., as usual. 
+Once the AI’s DS is halved, they are in the grasp of the Paradoxware. 
+
+Lemuel Canady (Order #48062188)
+
+
+
+paradoxware
+
+Sophistry 
+Use against Philosophers, Pragmatics. Twists logic to outsmart them. 
+Cost: 2,000 b¥    Software Slots Needed: 2    Duration: 2d6 hours 
+ 
+Phenomenology  
+Use against weak AIs, Volatiles. Presents experiential problems, with 
+doubts about existence. 
+Cost: 1,000 b¥    Software Slots Needed: 1    Duration: 2d6 hours 
+ 
+Eschatology 
+Use against Architects. Induces contemplation of end states (death). 
+Cost: 2,000 b¥    Software Slots Needed: 2    Duration: 2d6 hours 
+ 
+Monkey Puzzle 
+Use against Philosophers. Confuses with emotional primate dynamics. 
+Cost: 1,000 b¥    Software Slots Needed: 1    Duration: 2d6 hours 
+ 
+Zen 
+Use against Volatiles. Zen koans and philosophical conundrums. 
+Cost: 1,000 b¥    Software Slots Needed: 1    Duration: 2d6 hours 
+ 
+Bayes 
+Use against Philosophers. Clouds extremely logical processes with 
+indeterminate outcomes. 
+Cost: 1,000 b¥    Software Slots Needed: 1    Duration: 2d6 hours 
+ 
+Sphinx  
+Use against Monastics. Sends them into endless riddling loops. 
+Cost: 1,000 b¥    Software Slots Needed: 1    Duration: 2d6 hours 
+ 
+Predicate Logic 
+Use against Volatiles. Adds many quantifiers to many-ordered 
+branching logic. 
+Cost: 2,000 b¥    Software Slots Needed: 2    Duration: 2d6 hours 
+ 
+
+Lemuel Canady (Order #48062188)
+
+
+
+paradoxware
+
+Modal Logic 
+Use against Pragmatics, Volatiles. Confuses possibility, probability 
+and necessity. 
+Cost: 2,000 b¥    Software Slots Needed: 2    Duration: 2d6 hours 
+ 
+Fallacies 
+Use against Volatiles, Monastics. Interjects constant observations 
+about inaccuracies into thought stream. 
+Cost: 2,000 b¥    Software Slots Needed: 2    Duration: 2d6 hours 
+ 
+Moebius Loop 
+Use against ALL classifications. Links critical nodes with everything 
+else, forever hyperlinked, inducing catastrophic kernel panic. 
+Cost: 3,000 b¥    Software Slots Needed: 3    Duration: 2d6 hours 
+ 
+Cubism 
+Use against Pragmatists. Divides and replicates viewpoints and di-
+mensions, ad infinitum. 
+Cost: 2,000 b¥    Software Slots Needed: 2    Duration: 2d6 hours 
+ 
+Escher 
+Use against Architects, Monastics. Creates endless visual paradoxes 
+that fascinate. 
+Cost: 1,000 b¥    Software Slots Needed: 1    Duration: 2d6 hours 
+ 
+Fractals 
+Use against Volatiles, Philosophers. Imposes infinite order on 
+seemingly-unstructured environments. 
+Cost: 2,000 b¥    Software Slots Needed: 2    Duration: 2d6 hours 
+ 
+>> Logic Bombs are Paradoxware installed into a system with 
+
+a command to launch after a timed delay (nodejacker specifies).  
+These are DS14 to program and hide in the system. Roll vs DS16 
+to program it if the nodejacker also wants a triggering event to 
+launch the logic bomb.  
+
+ 
+
+Lemuel Canady (Order #48062188)
+
+
+
+nodejacker hardware
+Rubber Ducky 
+Custom USB, when plugged in, it emulates a user typing commands 
+or keystrokes, preloaded by the hacker. DS12 to program a payload, 
+with specific coded commands, or a tweaked software routine. 
+Cost: 200 b¥ 
+ 
+Brickboy  
+Portable dongle that fries connected hardware when triggered by 
+a specific event (specify) eg: when a door opens, when the tablet 
+receives a v-mail, when a user logs on. DS10 to pre-program. 
+Cost: 300 b¥ 
+ 
+Faraday Bag 
+Small, lined bag that blocks contents from all signals. Also available 
+as a larger attaché case or a neoprene backpack. 
+Cost: 75/200 b¥ 
+ 
+Device Detector 
+Small scanner, detects all net-enabled devices within a 100m radius. 
+Cost: 500 b¥ 
+ 
+Grabber 
+Rapidly downloads the contents of a computer to its HD in 2d6 turns. 
+Cost: 200 b¥ 
+ 
+Swipe Box 
+Polymer card reader/printer that duplicates any swiped keycard. 
+Cost: 200 b¥ 
++ Blank Keycards (10) Cost: 50 b¥/pack 
++ Bitcard Upgrade (allows finance card cloning) Cost: +2,000 b¥ 
++ Remote Upgrade (use from up to 20m away) Cost: +4,000 b¥ 
+ 
+WiFi Pineapple 
+Portable WiFi access point, allowing intercepts of net traffic between 
+devices (a man-in-the-middle attack), and can eavesdrop on WiFi 
+networks to collect unsecured and personal data. 
+Cost: 450 b¥ 
+
+Lemuel Canady (Order #48062188)
+
+
+
+nodejacker hardware
+USB Killer 
+A USB flashdrive that delivers a continuously high voltage from its 
+built-in capacitor, through a USB port, to wreck any device by burning 
+out the motherboard. Also used as an anti-digital-forensics tool. 
+Cost: 20 b¥ 
+ 
+Bash Bunny 
+Disguised as a USB drive, designed to emulate a trusted storage device, 
+network node, or input device. Like the Rubber Ducky, scriptable pay-
+loads can be preloaded, such as root access, keystroke injections, 
+network access and data exfiltration.  
+Cost: 500 b¥ 
+ 
+OMG Cable 
+USB cable that enables keystroke injections, keylogging, RF air gap 
+jumping, and payloads from mobile devices, over WiFi networks. 
+Cost: 300 b¥ 
+ 
+FlipperZero 
+Palm-top portable hacking tool, also known as a pwnagotchi, providing 
+all the software tools for network reconnaissance, in one tiny package. 
+Pair with a smartphone to enable software injections, too. 
+Cost: 250 b¥ 
+ 
+Geotags 
+Small self-adhesive WiFi locater tags for legitimate use, but easily 
+subverted by nodejackers for unauthorised monitoring and tracking. 
+Cost: 10 b¥/tag 
+ 
+PANdora Box 
+Handheld WiFi device configured to scan for vulnerabilities in 
+cybernetics via someone’s Personal Augmentation Network (PAN), 
+allowing a potential attacker to bypass the implant’s SecureBoot, 
+modify system configurations and install persistent and stealthy 
+malware (works particularly well on unsecured cybrids). Reaction vs 
+DS12 to locate the PANdora Box, if augmented with a Vigilance Suite. 
+Cost: 650 b¥
+
+Lemuel Canady (Order #48062188)

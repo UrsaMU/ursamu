@@ -1,0 +1,169 @@
+{
+  "whisperwood": {
+    "slug": "whisperwood",
+    "name": "Whisperwood",
+    "rooms": [
+      "path",
+      "ruins",
+      "gate",
+      "camp"
+    ],
+    "chance": 0.45,
+    "book": "SRD 5.2",
+    "nothing": [
+      "The woods are quiet.",
+      "Only wind in the branches.",
+      "A deer bolts and is gone."
+    ],
+    "bands": [
+      {
+        "weight": 3,
+        "label": "goblin scouts",
+        "mobs": [
+          {
+            "template": "goblin",
+            "name": "Goblin Scout",
+            "count": [
+              1,
+              2
+            ]
+          }
+        ],
+        "xpBonus": 0
+      },
+      {
+        "weight": 2,
+        "label": "wolves",
+        "mobs": [
+          {
+            "template": "wolf",
+            "name": "Wolf",
+            "count": [
+              1,
+              3
+            ]
+          }
+        ]
+      },
+      {
+        "weight": 2,
+        "label": "bandit ambush",
+        "mobs": [
+          {
+            "template": "bandit",
+            "name": "Road Bandit",
+            "count": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      {
+        "weight": 1,
+        "label": "undead",
+        "mobs": [
+          {
+            "template": "skeleton",
+            "name": "Rattling Skeleton",
+            "count": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      {
+        "weight": 1,
+        "label": "spider",
+        "mobs": [
+          {
+            "template": "giant_wolf_spider",
+            "name": "Wolf Spider",
+            "count": [
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "hills": {
+    "slug": "hills",
+    "name": "Ashford Hills",
+    "rooms": ["switchback", "overlook"],
+    "chance": 0.4,
+    "book": "SRD 5.2",
+    "nothing": [
+      "Wind over chalk. Quiet.",
+      "A goat stares, then flees."
+    ],
+    "bands": [
+      {
+        "weight": 2,
+        "label": "bandits",
+        "mobs": [
+          {
+            "template": "bandit",
+            "name": "Hill Bandit",
+            "count": [1, 2]
+          }
+        ]
+      },
+      {
+        "weight": 1,
+        "label": "wolves",
+        "mobs": [
+          {
+            "template": "wolf",
+            "name": "Ridge Wolf",
+            "count": [1, 2]
+          }
+        ]
+      },
+      {
+        "weight": 1,
+        "label": "prospectors",
+        "mobs": [],
+        "flavor": "Prospectors wave from a cut. No fight."
+      }
+    ]
+  },
+  "road": {
+    "slug": "road",
+    "name": "North Gate Road",
+    "rooms": [
+      "gate",
+      "barracks"
+    ],
+    "chance": 0.25,
+    "book": "SRD 5.2",
+    "nothing": [
+      "Merchants nod as they pass.",
+      "Dust and quiet road."
+    ],
+    "bands": [
+      {
+        "weight": 2,
+        "label": "bandits",
+        "mobs": [
+          {
+            "template": "bandit",
+            "name": "Highwayman",
+            "count": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      {
+        "weight": 1,
+        "label": "refugees",
+        "mobs": [],
+        "flavor": "Tired travelers ask directions to Havenbrook. No fight."
+      }
+    ]
+  }
+}

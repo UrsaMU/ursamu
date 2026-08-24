@@ -173,7 +173,29 @@ const DEFAULT_CSP =
   "connect-src 'self' ws: wss:; " +
   "frame-ancestors 'none'; form-action 'self'; base-uri 'self'";
 
-function addSecurityHeaders(res: Response): Response {
+function corsAllowOrigin(req: Request): string {
+  const configured = (Deno.env.get("CORS_ORIGINS") ??
+    getConfig<string>("server.corsOrigins", "*")).trim() || "*";
+  const origin = req.headers.get("origin") ?? "";
+  if (configured === "*") return origin || "*";
+  const allowed = configured.split(",").map((item) => item.trim()).filter(Boolean);
+  if (origin && allowed.includes(origin)) return origin;
+  return allowed[0] ?? "*";
+}
+
+function applyCors(req: Request, h: Headers): void {
+  const allow = corsAllowOrigin(req);
+  h.set("access-control-allow-origin", allow);
+  h.set("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+  h.set("access-control-allow-headers", "Content-Type, Authorization, X-Socket-Id");
+  h.set("access-control-max-age", "86400");
+  if (allow !== "*") {
+    const vary = h.get("vary");
+    h.set("vary", vary ? `${vary}, Origin` : "Origin");
+  }
+}
+
+function addSecurityHeaders(req: Request, res: Response): Response {
   const h = new Headers(res.headers);
   h.set("x-content-type-options", "nosniff");
   h.set("x-frame-options", "DENY");
@@ -183,6 +205,7 @@ function addSecurityHeaders(res: Response): Response {
     h.set("content-security-policy", DEFAULT_CSP);
   }
   h.set("referrer-policy", "no-referrer");
+  applyCors(req, h);
   return new Response(res.body, {
     status: res.status,
     statusText: res.statusText,
@@ -197,6 +220,8 @@ async function requestHandler(
   const url = new URL(req.url);
   const pathname = url.pathname;
   const method = req.method.toUpperCase();
+
+  if (method === "OPTIONS") return new Response(null, { status: 204 });
 
   if (method === "GET" && pathname === "/health") return handleHealth();
 
@@ -255,7 +280,7 @@ async function secureRequestHandler(
   // SSE streams and WebSocket upgrades must not be rewrapped
   // (body/status are special; Deno.upgradeWebSocket response is opaque).
   if (shouldSkipSecurityRewrap(res)) return res;
-  return addSecurityHeaders(res);
+  return addSecurityHeaders(req, res);
 }
 
 // Exported for unit testing only — uses the secured wrapper.

@@ -69,9 +69,10 @@ Deno.test("applySkinDefaults: no brand auto-fill", OPTS, () => {
   const d = applySkinDefaults({ skin: "court" });
   assertEquals(d.title, undefined);
   assertEquals(d.bannerImage, undefined);
-  assertEquals(d.nav?.length, 3);
+  assertEquals(d.nav?.length, 5);
   assertEquals(d.nav?.[2]?.label, "Help");
   assertEquals(d.nav?.[2]?.href, "/site/help/");
+  assertEquals(d.nav?.[4]?.id, "play");
 });
 
 Deno.test("applySkinDefaults: default untouched", OPTS, () => {

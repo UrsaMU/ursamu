@@ -3,6 +3,13 @@
 All notable changes to `@ursamu/channels` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- Staff locks help suite: `staff/locks`, `locks/keys`,
+  `locks/examples` (join/speak keys, rank ladder, recipes)
+
 ## [1.2.4] - 2026-08-09
 
 ### Changed

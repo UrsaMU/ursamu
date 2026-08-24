@@ -1,52 +1,73 @@
-import { addCmd, dbojs } from "@ursamu/mush";
+import { addCmd } from "@ursamu/mush";
 import type { IUrsamuSDK } from "@ursamu/mush";
+import { eventRsvps, formatDateTime } from "./db.ts";
 import {
-  eventRsvps,
-  formatDateTime,
-  gameEvents,
-  getNextEventNumber,
-  parseDateTime,
-} from "./db.ts";
-import type { IEventRSVP, IGameEvent } from "./types.ts";
+  formatCapacity,
+  groupByEventId,
+  isStaffFlags,
+  parseCreateArg,
+  rsvpColor,
+  statusColor,
+  summarizeRsvps,
+} from "./helpers.ts";
+import {
+  cancelEvent,
+  cancelRsvp,
+  createEvent,
+  deleteEvent,
+  editEventField,
+  getEventByNumber,
+  listEvents,
+  setEventStatus,
+  upsertRsvp,
+} from "./service.ts";
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
+// ─── local wrappers ───────────────────────────────────────────────────────────
 
 function isStaff(u: IUrsamuSDK): boolean {
-  return u.me.flags.has("admin") || u.me.flags.has("wizard") ||
-    u.me.flags.has("superuser");
+  return isStaffFlags(u.me.flags);
 }
 
-function statusColor(s: IGameEvent["status"]): string {
-  switch (s) {
-    case "upcoming":
-      return "%ch%cg";
-    case "active":
-      return "%ch%cy";
-    case "completed":
-      return "%cn";
-    case "cancelled":
-      return "%ch%cr";
+async function sendEventList(u: IUrsamuSDK): Promise<void> {
+  const visible = await listEvents({ staff: isStaff(u) });
+
+  if (!visible.length) {
+    u.send("%ch+events:%cn No upcoming events.");
+    return;
   }
-}
 
-function rsvpColor(s: IEventRSVP["status"]): string {
-  switch (s) {
-    case "attending":
-      return "%ch%cg";
-    case "maybe":
-      return "%cy";
-    case "declined":
-      return "%cr";
+  u.send("%ch%cy+events%cn");
+  u.send(
+    "%ch" +
+      u.util.rjust("#", 4) + "  " +
+      u.util.ljust("Title", 28) +
+      u.util.ljust("Date", 20) +
+      u.util.rjust("RSVPs", 6) + "  " +
+      "Status" +
+      "%cn",
+  );
+  u.send("%ch" + "-".repeat(68) + "%cn");
+
+  const visibleIds = visible.map((e) => e.id);
+  const allRsvps = await eventRsvps.find({
+    eventId: { $in: visibleIds },
+    status: "attending",
+  });
+  const rsvpsByEventId = groupByEventId(allRsvps);
+
+  for (const e of visible) {
+    const rsvps = rsvpsByEventId.get(e.id) || [];
+    const cap = formatCapacity(rsvps.length, e.maxAttendees);
+    const sc = statusColor(e.status);
+    u.send(
+      u.util.rjust(String(e.number), 4) + "  " +
+        u.util.ljust(e.title.slice(0, 27), 28) +
+        u.util.ljust(formatDateTime(e.startTime), 20) +
+        u.util.rjust(cap, 6) + "  " +
+        sc + e.status + "%cn",
+    );
   }
-}
-
-async function getEventByNumber(n: number): Promise<IGameEvent | null> {
-  return await gameEvents.queryOne({ number: n }) || null;
-}
-
-async function getPlayerName(id: string): Promise<string> {
-  const p = await dbojs.queryOne({ id });
-  return (p && p.data?.name) || id;
+  u.send('Use "+event/view <#>" to see details and RSVP.');
 }
 
 // ─── +event ──────────────────────────────────────────────────────────────────
@@ -81,61 +102,11 @@ Examples:
     const sw = (u.cmd.args[0] || "").toLowerCase().trim();
     const arg = (u.cmd.args[1] || "").trim();
 
-    // ── list (default) ─────────────────────────────────────────────────────
     if (!sw || sw === "list") {
-      const all = await gameEvents.find({});
-      const visible = all
-        .filter((e) => e.status !== "cancelled" || isStaff(u))
-        .sort((a, b) => a.startTime - b.startTime);
-
-      if (!visible.length) {
-        u.send("%ch+events:%cn No upcoming events.");
-        return;
-      }
-
-      u.send("%ch%cy+events%cn");
-      u.send(
-        "%ch" +
-          u.util.rjust("#", 4) + "  " +
-          u.util.ljust("Title", 28) +
-          u.util.ljust("Date", 20) +
-          u.util.rjust("RSVPs", 6) + "  " +
-          "Status" +
-          "%cn",
-      );
-      u.send("%ch" + "-".repeat(68) + "%cn");
-
-      const visibleIds = visible.map((e) => e.id);
-      const allRsvps = await eventRsvps.find({
-        eventId: { $in: visibleIds },
-        status: "attending",
-      });
-      const rsvpsByEventId = new Map<string, typeof allRsvps>();
-      for (const rsvp of allRsvps) {
-        const arr = rsvpsByEventId.get(rsvp.eventId) || [];
-        arr.push(rsvp);
-        rsvpsByEventId.set(rsvp.eventId, arr);
-      }
-
-      for (const e of visible) {
-        const rsvps = rsvpsByEventId.get(e.id) || [];
-        const cap = e.maxAttendees > 0
-          ? `${rsvps.length}/${e.maxAttendees}`
-          : String(rsvps.length);
-        const sc = statusColor(e.status);
-        u.send(
-          u.util.rjust(String(e.number), 4) + "  " +
-            u.util.ljust(e.title.slice(0, 27), 28) +
-            u.util.ljust(formatDateTime(e.startTime), 20) +
-            u.util.rjust(cap, 6) + "  " +
-            sc + e.status + "%cn",
-        );
-      }
-      u.send('Use "+event/view <#>" to see details and RSVP.');
+      await sendEventList(u);
       return;
     }
 
-    // ── view <#> ───────────────────────────────────────────────────────────
     if (sw === "view") {
       const num = parseInt(arg, 10);
       if (isNaN(num)) {
@@ -144,6 +115,10 @@ Examples:
       }
       const ev = await getEventByNumber(num);
       if (!ev) {
+        u.send(`%ch+event:%cn No event #${num} found.`);
+        return;
+      }
+      if (!isStaff(u) && ev.status === "cancelled") {
         u.send(`%ch+event:%cn No event #${num} found.`);
         return;
       }
@@ -161,29 +136,27 @@ Examples:
       u.send(`  Host    : ${ev.createdByName}`);
       u.send(`  Desc    : ${ev.description}`);
 
-      const attending = await eventRsvps.find({
-        eventId: ev.id,
-        status: "attending",
-      });
-      const maybe = await eventRsvps.find({ eventId: ev.id, status: "maybe" });
+      const allRsvps = await eventRsvps.find({ eventId: ev.id });
+      const summary = summarizeRsvps(allRsvps);
       const cap = ev.maxAttendees > 0 ? `/${ev.maxAttendees}` : "";
 
       u.send(
-        `%ch  RSVPs:%cn ${attending.length}${cap} attending, ${maybe.length} maybe`,
+        `%ch  RSVPs:%cn ${summary.attendingCount}${cap} attending, ${summary.maybeCount} maybe`,
       );
-      if (attending.length) {
+      if (summary.attending.length) {
         u.send(
-          `    Attending: ${attending.map((r) => r.playerName).join(", ")}`,
+          `    Attending: ${
+            summary.attending.map((r) => r.playerName).join(", ")
+          }`,
         );
       }
-      if (maybe.length) {
-        u.send(`    Maybe    : ${maybe.map((r) => r.playerName).join(", ")}`);
+      if (summary.maybe.length) {
+        u.send(
+          `    Maybe    : ${summary.maybe.map((r) => r.playerName).join(", ")}`,
+        );
       }
 
-      const myRsvp = await eventRsvps.queryOne({
-        eventId: ev.id,
-        playerId: u.me.id,
-      });
+      const myRsvp = allRsvps.find((r) => r.playerId === u.me.id);
       if (myRsvp) {
         u.send(`  Your RSVP: ${rsvpColor(myRsvp.status)}${myRsvp.status}%cn`);
       } else {
@@ -194,79 +167,54 @@ Examples:
       return;
     }
 
-    // ── rsvp <#>[=maybe|decline] ───────────────────────────────────────────
     if (sw === "rsvp") {
       const eqIdx = arg.indexOf("=");
       const numStr = eqIdx !== -1 ? arg.slice(0, eqIdx).trim() : arg;
-      const choice = (eqIdx !== -1 ? arg.slice(eqIdx + 1).trim() : "attending")
-        .toLowerCase();
+      const choice = eqIdx !== -1 ? arg.slice(eqIdx + 1).trim() : "attending";
       const num = parseInt(numStr, 10);
 
       if (isNaN(num)) {
         u.send("Usage: +event/rsvp <#>[=attending|maybe|decline]");
         return;
       }
-      if (!["attending", "maybe", "declined", "decline"].includes(choice)) {
-        u.send("RSVP status must be: attending, maybe, or decline");
-        return;
-      }
-      const status =
-        (choice === "decline" ? "declined" : choice) as IEventRSVP["status"];
 
       const ev = await getEventByNumber(num);
       if (!ev) {
         u.send(`%ch+event:%cn No event #${num} found.`);
         return;
       }
-      if (ev.status === "cancelled") {
-        u.send("%ch+event:%cn That event has been cancelled.");
-        return;
-      }
-      if (ev.status === "completed") {
-        u.send("%ch+event:%cn That event has already occurred.");
-        return;
-      }
 
-      if (status === "attending" && ev.maxAttendees > 0) {
-        const attending = await eventRsvps.find({
-          eventId: ev.id,
-          status: "attending",
-        });
-        const myRsvp = await eventRsvps.queryOne({
-          eventId: ev.id,
-          playerId: u.me.id,
-        });
-        const alreadyAttending = myRsvp?.status === "attending";
-        if (!alreadyAttending && attending.length >= ev.maxAttendees) {
+      const result = await upsertRsvp({
+        event: ev,
+        playerId: u.me.id,
+        playerName: u.me.name || u.me.id,
+        statusRaw: choice,
+      });
+      if (!result.ok) {
+        if (result.error === "Event is cancelled") {
+          u.send("%ch+event:%cn That event has been cancelled.");
+        } else if (result.error === "Event has already occurred") {
+          u.send("%ch+event:%cn That event has already occurred.");
+        } else if (result.error === "Event is at capacity") {
           u.send(
             `%ch+event:%cn Sorry, event #${num} is full (${ev.maxAttendees}/${ev.maxAttendees}).`,
           );
-          return;
+        } else {
+          u.send(`%ch+event:%cn ${result.error}`);
         }
+        return;
       }
 
-      const existing = await eventRsvps.queryOne({
-        eventId: ev.id,
-        playerId: u.me.id,
-      });
-      if (existing) {
-        await eventRsvps.update({ id: existing.id }, { ...existing, status });
+      const status = result.value.rsvp.status;
+      if (result.value.created) {
         u.send(
-          `%ch+event:%cn RSVP updated to ${
+          `%ch+event:%cn RSVP'd ${
             rsvpColor(status)
           }${status}%cn for "${ev.title}".`,
         );
       } else {
-        await eventRsvps.create({
-          id: crypto.randomUUID(),
-          eventId: ev.id,
-          playerId: u.me.id,
-          playerName: await getPlayerName(u.me.id),
-          status,
-          createdAt: Date.now(),
-        });
         u.send(
-          `%ch+event:%cn RSVP'd ${
+          `%ch+event:%cn RSVP updated to ${
             rsvpColor(status)
           }${status}%cn for "${ev.title}".`,
         );
@@ -274,7 +222,6 @@ Examples:
       return;
     }
 
-    // ── unrsvp <#> ─────────────────────────────────────────────────────────
     if (sw === "unrsvp") {
       const num = parseInt(arg, 10);
       if (isNaN(num)) {
@@ -288,82 +235,50 @@ Examples:
         return;
       }
 
-      const existing = await eventRsvps.queryOne({
-        eventId: ev.id,
-        playerId: u.me.id,
-      });
-      if (!existing) {
+      const result = await cancelRsvp({ event: ev, playerId: u.me.id });
+      if (!result.ok) {
         u.send("%ch+event:%cn You have no RSVP to cancel.");
         return;
       }
-
-      await eventRsvps.delete({ id: existing.id });
       u.send(`%ch+event:%cn RSVP cancelled for "${ev.title}".`);
       return;
     }
 
-    // ── create (staff) ────────────────────────────────────────────────────
     if (sw === "create") {
       if (!isStaff(u)) {
         u.send("%ch+event:%cn Permission denied.");
         return;
       }
 
-      const eqIdx = arg.indexOf("=");
-      if (eqIdx === -1) {
-        u.send("Usage: +event/create <title>=<YYYY-MM-DD HH:MM>/<description>");
-        return;
-      }
-      const title = arg.slice(0, eqIdx).trim();
-      const rest = arg.slice(eqIdx + 1);
-      const slash = rest.indexOf("/");
-      if (slash === -1) {
-        u.send("Usage: +event/create <title>=<YYYY-MM-DD HH:MM>/<description>");
-        return;
-      }
-      const dateStr = rest.slice(0, slash).trim();
-      const desc = rest.slice(slash + 1).trim();
-
-      if (!title || !desc) {
-        u.send("Usage: +event/create <title>=<YYYY-MM-DD HH:MM>/<description>");
-        return;
-      }
-
-      const startTime = parseDateTime(dateStr);
-      if (!startTime) {
+      const parsed = parseCreateArg(arg);
+      if (!parsed.ok) {
         u.send(
-          `%ch+event:%cn Invalid date "${dateStr}". Use format: YYYY-MM-DD or YYYY-MM-DD HH:MM`,
+          parsed.error.startsWith("Invalid")
+            ? `%ch+event:%cn ${parsed.error}`
+            : parsed.error,
         );
         return;
       }
 
-      const num = await getNextEventNumber();
-      const now = Date.now();
-      const ev: IGameEvent = {
-        id: `ev-${num}`,
-        number: num,
-        title,
-        description: desc,
-        startTime,
+      const created = await createEvent({
+        title: parsed.title,
+        description: parsed.description,
+        startTime: parsed.startTime,
         createdBy: u.me.id,
         createdByName: u.me.name || u.me.id,
-        status: "upcoming",
-        tags: [],
-        maxAttendees: 0,
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      await gameEvents.create(ev);
+      });
+      if (!created.ok) {
+        u.send(`%ch+event:%cn ${created.error}`);
+        return;
+      }
       u.send(
-        `%ch+event:%cn Event #${num} "${title}" created for ${
-          formatDateTime(startTime)
+        `%ch+event:%cn Event #${created.value.number} "${parsed.title}" created for ${
+          formatDateTime(parsed.startTime)
         }.`,
       );
       return;
     }
 
-    // ── edit <#>/<field>=<value> (staff) ──────────────────────────────────
     if (sw === "edit") {
       if (!isStaff(u)) {
         u.send("%ch+event:%cn Permission denied.");
@@ -391,63 +306,15 @@ Examples:
         return;
       }
 
-      const update: Partial<IGameEvent> = { updatedAt: Date.now() };
-
-      switch (field) {
-        case "title":
-          update.title = value;
-          break;
-        case "description":
-          update.description = value;
-          break;
-        case "location":
-          update.location = value;
-          break;
-        case "starttime": {
-          const t = parseDateTime(value);
-          if (!t) {
-            u.send(`%ch+event:%cn Invalid date "${value}".`);
-            return;
-          }
-          update.startTime = t;
-          break;
-        }
-        case "endtime": {
-          const t = parseDateTime(value);
-          if (!t) {
-            u.send(`%ch+event:%cn Invalid date "${value}".`);
-            return;
-          }
-          update.endTime = t;
-          break;
-        }
-        case "maxattendees": {
-          const n = parseInt(value, 10);
-          if (isNaN(n) || n < 0) {
-            u.send(
-              "%ch+event:%cn maxattendees must be a non-negative integer.",
-            );
-            return;
-          }
-          update.maxAttendees = n;
-          break;
-        }
-        case "tags":
-          update.tags = value.split(",").map((t) => t.trim()).filter(Boolean);
-          break;
-        default:
-          u.send(
-            `%ch+event:%cn Unknown field "${field}". Valid: title, description, location, starttime, endtime, maxattendees, tags`,
-          );
-          return;
+      const result = await editEventField(ev, field, value);
+      if (!result.ok) {
+        u.send(`%ch+event:%cn ${result.error}`);
+        return;
       }
-
-      await gameEvents.update({ id: ev.id }, { ...ev, ...update });
       u.send(`%ch+event:%cn Event #${num} updated (${field}).`);
       return;
     }
 
-    // ── status <#>=<status> (staff) ───────────────────────────────────────
     if (sw === "status") {
       if (!isStaff(u)) {
         u.send("%ch+event:%cn Permission denied.");
@@ -462,15 +329,10 @@ Examples:
         return;
       }
       const num = parseInt(arg.slice(0, eqIdx).trim(), 10);
-      const status = arg.slice(eqIdx + 1).trim()
-        .toLowerCase() as IGameEvent["status"];
+      const statusRaw = arg.slice(eqIdx + 1).trim();
 
       if (isNaN(num)) {
         u.send("Usage: +event/status <#>=<status>");
-        return;
-      }
-      if (!["upcoming", "active", "completed", "cancelled"].includes(status)) {
-        u.send("Status must be: upcoming, active, completed, cancelled");
         return;
       }
 
@@ -480,11 +342,12 @@ Examples:
         return;
       }
 
-      await gameEvents.update({ id: ev.id }, {
-        ...ev,
-        status,
-        updatedAt: Date.now(),
-      });
+      const result = await setEventStatus(ev, statusRaw);
+      if (!result.ok) {
+        u.send(`%ch+event:%cn ${result.error}`);
+        return;
+      }
+      const status = result.value.status;
       u.send(
         `%ch+event:%cn Event #${num} status set to ${
           statusColor(status)
@@ -493,7 +356,6 @@ Examples:
       return;
     }
 
-    // ── cancel <#> (staff) ────────────────────────────────────────────────
     if (sw === "cancel") {
       if (!isStaff(u)) {
         u.send("%ch+event:%cn Permission denied.");
@@ -511,18 +373,13 @@ Examples:
         return;
       }
 
-      await gameEvents.update({ id: ev.id }, {
-        ...ev,
-        status: "cancelled",
-        updatedAt: Date.now(),
-      });
+      await cancelEvent(ev);
       u.send(
         `%ch+event:%cn Event #${num} "${ev.title}" has been %ch%crcancelled%cn.`,
       );
       return;
     }
 
-    // ── delete <#> (staff) ────────────────────────────────────────────────
     if (sw === "delete") {
       if (!isStaff(u)) {
         u.send("%ch+event:%cn Permission denied.");
@@ -540,13 +397,11 @@ Examples:
         return;
       }
 
-      await gameEvents.delete({ id: ev.id });
-      await eventRsvps.delete({ eventId: ev.id });
+      await deleteEvent(ev);
       u.send(`%ch+event:%cn Event #${num} deleted.`);
       return;
     }
 
-    // ── help ──────────────────────────────────────────────────────────────
     u.send("%ch+event usage:%cn");
     u.send("  +event [/list]                           — list upcoming events");
     u.send(
@@ -576,56 +431,7 @@ addCmd({
 Examples:
   +events    Show the event calendar.`,
   exec: async (u: IUrsamuSDK) => {
-    const all = await gameEvents.find({});
-    const visible = all
-      .filter((e) =>
-        e.status !== "cancelled" || u.me.flags.has("admin") ||
-        u.me.flags.has("wizard") || u.me.flags.has("superuser")
-      )
-      .sort((a, b) => a.startTime - b.startTime);
-
-    if (!visible.length) {
-      u.send("%ch+events:%cn No upcoming events.");
-      return;
-    }
-
-    u.send("%ch%cy+events%cn");
-    u.send(
-      "%ch" +
-        u.util.rjust("#", 4) + "  " +
-        u.util.ljust("Title", 28) +
-        u.util.ljust("Date", 20) +
-        u.util.rjust("RSVPs", 6) + "  " +
-        "Status%cn",
-    );
-    u.send("%ch" + "-".repeat(68) + "%cn");
-
-    const visibleIds = visible.map((e) => e.id);
-    const allRsvps = await eventRsvps.find({
-      eventId: { $in: visibleIds },
-      status: "attending",
-    });
-    const rsvpsByEventId = new Map<string, typeof allRsvps>();
-    for (const rsvp of allRsvps) {
-      const arr = rsvpsByEventId.get(rsvp.eventId) || [];
-      arr.push(rsvp);
-      rsvpsByEventId.set(rsvp.eventId, arr);
-    }
-
-    for (const e of visible) {
-      const rsvps = rsvpsByEventId.get(e.id) || [];
-      const cap = e.maxAttendees > 0
-        ? `${rsvps.length}/${e.maxAttendees}`
-        : String(rsvps.length);
-      const sc = statusColor(e.status);
-      u.send(
-        u.util.rjust(String(e.number), 4) + "  " +
-          u.util.ljust(e.title.slice(0, 27), 28) +
-          u.util.ljust(formatDateTime(e.startTime), 20) +
-          u.util.rjust(cap, 6) + "  " +
-          sc + e.status + "%cn",
-      );
-    }
-    u.send('Use "+event/view <#>" for details.');
+    await sendEventList(u);
   },
 });
+

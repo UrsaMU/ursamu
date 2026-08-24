@@ -1,7 +1,13 @@
 import { assertEquals } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
-import { type CombatantInfo } from "../src/commands/combat.ts";
 import { migrateSheet, defaultSheet } from "../src/stats/dnd_sheet.ts";
+
+type CombatantInfo = {
+  id: string;
+  name: string;
+  initiative: number;
+  dexMod: number;
+};
 
 describe("Combat Initiative Sorting", () => {
   it("sorts combatants by initiative descending", () => {

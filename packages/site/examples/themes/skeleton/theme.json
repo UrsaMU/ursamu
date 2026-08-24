@@ -1,0 +1,9 @@
+{
+  "id": "skeleton",
+  "label": "FE Wireframe Skeleton",
+  "version": "1.0.0",
+  "description": "Blank greyscale wireframe — layout, type scale, and spacing only. No brand color or art. Fork to measure structure before skinning.",
+  "css": "site.css",
+  "title": "Wireframe",
+  "plainBg": true
+}
