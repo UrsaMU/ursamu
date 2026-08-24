@@ -1,0 +1,9 @@
+{
+  "tasks": {
+    "preview": "deno run -A preview.ts",
+    "preview:open": "deno run -A preview.ts --open",
+    "preview:refresh": "deno run -A preview.ts --refresh-shell --open",
+    "studio": "deno run -A studio.ts",
+    "pack": "deno run -A pack.ts"
+  }
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>Theme preview</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 36rem;
+        margin: 3rem auto;
+        padding: 0 1rem;
+        line-height: 1.5;
+        color: #222;
+        background: #f5f5f5;
+      }
+      code, pre {
+        background: #e8e8e8;
+      }
+      code { padding: 0.1em 0.35em; }
+      pre {
+        padding: 0.75rem 1rem;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Standalone theme preview</h1>
+    <p>From this repository root (Deno required):</p>
+    <pre>deno task preview
+# or
+deno task preview:open
+# → http://127.0.0.1:4173/site/</pre>
+    <p>
+      First run may download the <code>@ursamu/site</code> shell
+      into <code>.preview-shell/</code> (cached). No monorepo
+      checkout needed.
+    </p>
+  </body>
+</html>

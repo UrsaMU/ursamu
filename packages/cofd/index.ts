@@ -52,7 +52,7 @@ import {
   cofdConformatHandler,
   cofdDescformatHandler,
 } from "./src/support/index.ts";
-import { registerHelpDir } from "@ursamu/help";
+import { registerHelpDir } from "@ursamu/help/register";
 import { registerJobBuckets } from "@ursamu/jobs";
 import { routeHandler } from "./routes.ts";
 import { getEncounterForRoom, setMoved } from "./src/combat/encounter.ts";

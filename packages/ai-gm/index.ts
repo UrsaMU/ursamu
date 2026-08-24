@@ -4,18 +4,34 @@
 
 // Load .env if present — secrets must not live in the DB or softcode.
 // examplePath: null skips .env.example key enforcement (CI / tests).
+// Order: package-local → game cwd → sibling beltway-events (dev keys).
 import { loadSync } from "@std/dotenv";
-try {
-  loadSync({
-    export: true,
-    allowEmptyValues: true,
-    examplePath: null,
-  });
-} catch {
-  /* no .env in this cwd — fine for tests and JSR consumers */
+import { fromFileUrl, join } from "@std/path";
+function loadEnvFile(path: string): void {
+  try {
+    loadSync({
+      envPath: path,
+      export: true,
+      allowEmptyValues: true,
+      examplePath: null,
+    });
+  } catch {
+    /* missing file is fine */
+  }
 }
+const _pkgDir = fromFileUrl(new URL(".", import.meta.url));
+loadEnvFile(join(_pkgDir, ".env"));
+loadEnvFile(".env");
+// ../beltway-events from monorepo root (cwd is often games/<name>)
+loadEnvFile(
+  join(Deno.cwd(), "..", "..", "beltway-events", ".env.local"),
+);
+loadEnvFile(
+  join(Deno.cwd(), "..", "..", "beltway-events", ".env.dev"),
+);
+loadEnvFile(join(Deno.cwd(), "..", "beltway-events", ".env.local"));
 
-import { dbojs, mu, send } from "ursamu";
+import { dbojs, send, sessions } from "@ursamu/mush";
 
 // Minimal plugin descriptor — ursamu does not export IPlugin from its public API
 interface IPlugin {
@@ -28,11 +44,15 @@ interface IPlugin {
 }
 import "./commands.ts";
 
-import { createModel, loadConfig } from "./providers.ts";
+import {
+  createModel,
+  loadConfig,
+  requireModel,
+} from "./providers.ts";
 import { loadCustomSystems } from "./systems/index.ts";
 import { embedText } from "./rag.ts";
 import { seedBoards } from "@ursamu/bbs";
-import { registerJobBuckets } from "ursamu/jobs";
+import { registerJobBuckets } from "@ursamu/jobs";
 import { startWatcher } from "./ingestion/watcher.ts";
 import { runIngestionPipeline } from "./ingestion/pipeline.ts";
 import { registerIngestCallback, registerModelFactory } from "./commands.ts";
@@ -75,7 +95,7 @@ import {
 import { sessionCache } from "./context/cache.ts";
 import { loadRoomContext } from "./context/loader.ts";
 import { getGameSystem as getSystem } from "./systems/index.ts";
-import { gmExchanges } from "./db.ts";
+import { gmExchanges, gmSessions } from "./db.ts";
 import type { IGMExchange } from "./schema.ts";
 import { runPoseGraph } from "./graphs/pose.ts";
 import type { IInjectOptions } from "./context/injector.ts";
@@ -98,18 +118,75 @@ const gmPlugin: IPlugin = {
     let config = await loadConfig();
 
     // Sync character collection to the live cache.
-    // Priority: persisted config value → active system's declared collection → default.
+    // Priority: persisted config → active system's collection → default.
     {
       const activeSystem = getSystem(config.systemId);
-      const col = config.charCollection ??
-        activeSystem.charCollection ??
+      const col = config.charCollection ||
+        activeSystem.charCollection ||
         "server.playbooks";
       sessionCache.setCharCollection(col);
+      // If CPR is registered but config still generic, flip now
+      if (
+        config.systemId === "generic" &&
+        getSystem("cyberpunk-red").id === "cyberpunk-red" &&
+        getSystem("cyberpunk-red").name === "Cyberpunk RED"
+      ) {
+        // only if actually registered (not generic fallback)
+        const cpr = getSystem("cyberpunk-red");
+        if (cpr.charCollection === "cpr.players") {
+          config = await (await import("./providers.ts")).saveConfig({
+            systemId: "cyberpunk-red",
+            charCollection: "cpr.players",
+            persona: {
+              name: "Night City",
+              tone:
+                "gritty cyberpunk noir, chrome and blood, Night City 2045",
+              style:
+                "terse, visceral, present tense, second person, " +
+                "fiction-first, Cyberpunk RED core rules",
+              oocBrackets: true,
+            },
+          });
+          sessionCache.setCharCollection("cpr.players");
+          console.log(
+            "[GM] Boot: activated cyberpunk-red + cpr.players",
+          );
+        }
+      }
     }
-    const model = createModel(config);
-    const graphs = buildAllGraphs(model);
+    // ── Player helpers (available even without an API key) ───────────────────
 
-    // ── Player helpers ─────────────────────────────────────────────────────────
+    /** core send() takes socketIds — never raw player dbrefs. */
+    function socketsForActor(actorId: string): string[] {
+      const id = String(actorId ?? "").replace(/^#/, "");
+      if (!id) return [];
+      return sessions.list()
+        .filter((s) => {
+          const a = String(
+            (s as { actorId?: string }).actorId ??
+              s.sessionId ??
+              "",
+          ).replace(/^#/, "");
+          return a === id || a === actorId;
+        })
+        .map((s) => s.socketId)
+        .filter(Boolean);
+    }
+
+    function socketsForActors(actorIds: string[]): string[] {
+      const out = new Set<string>();
+      for (const aid of actorIds) {
+        for (const sid of socketsForActor(aid)) out.add(sid);
+      }
+      return [...out];
+    }
+
+    function isStaffFlags(flags: unknown): boolean {
+      const f = flags instanceof Set
+        ? [...flags].join(" ")
+        : String(flags ?? "");
+      return /\b(wizard|admin|superuser|god)\b/i.test(f);
+    }
 
     async function getPlayersInRoom(
       roomId: string,
@@ -123,6 +200,8 @@ const gmPlugin: IPlugin = {
       });
       const map = new Map<string, string>();
       for (const p of players) {
+        // Staff in the room should not block solo rounds
+        if (isStaffFlags(p.flags)) continue;
         const name = (p.data as { name?: string })?.name ?? p.id;
         map.set(p.id, name);
       }
@@ -131,22 +210,96 @@ const gmPlugin: IPlugin = {
 
     function page(playerId: string, message: string): void {
       try {
-        send([playerId], `[GM Page] ${message}`);
-      } catch (_err) {
-        // Ignore send errors
+        const socks = socketsForActor(playerId);
+        if (!socks.length) {
+          console.warn(
+            `[GM] page: no socket for player ${playerId}`,
+          );
+          return;
+        }
+        send(socks, `[GM Page] ${message}`);
+      } catch (err) {
+        console.error("[GM] page error:", err);
       }
     }
 
-    async function broadcast(roomId: string, message: string): Promise<void> {
-      const playerMap = await getPlayersInRoom(roomId);
-      if (playerMap.size) {
-        const game = await mu();
-        game.broadcast(message);
+    /**
+     * Room narration — socket IDs only (never player dbrefs).
+     * NEVER call mu()/initializeEngine here.
+     */
+    async function broadcast(
+      roomId: string,
+      message: string,
+    ): Promise<void> {
+      try {
+        const playerMap = await getPlayersInRoom(roomId);
+        // Also include staff so they hear GM narration
+        const allHere = await dbojs.query({
+          $and: [
+            { location: roomId },
+            { flags: /connected/i },
+            { flags: /player/i },
+          ],
+        });
+        const actorIds = [
+          ...new Set([
+            ...playerMap.keys(),
+            ...allHere.map((p: { id: string }) => p.id),
+          ]),
+        ];
+        const socks = socketsForActors(actorIds);
+        if (!socks.length) {
+          console.warn(
+            `[GM] broadcast: no sockets in room ${roomId}`,
+          );
+          return;
+        }
+        const text = message.startsWith("[GM]")
+          ? message
+          : `[GM] ${message}`;
+        send(socks, text);
+        console.log(
+          `[GM] broadcast → ${socks.length} socket(s) in ${roomId}`,
+        );
+      } catch (err) {
+        console.error("[GM] broadcast error:", err);
       }
     }
 
-    function getSessionId(): string | null {
-      return null; // resolved asynchronously in hooks; null is a safe default
+    // Config / watch / session commands register at import time and do not
+    // need a model. Soft-fail LLM wiring so a missing API key cannot
+    // take down the whole game server.
+    const model = createModel(config);
+    if (!model) {
+      console.warn(
+        "[GM] No LLM API key — +gm/watch and config work; " +
+          "set ANTHROPIC_API_KEY (or GOOGLE_API_KEY) in " +
+          "games/<name>/.env or packages/ai-gm/.env.",
+      );
+      registerPaymentAdapter(
+        createStripeAdapterFromEnv() ?? nullPaymentAdapter,
+      );
+      registerScenePublishCallback(async (roomId, message) => {
+        await broadcast(roomId, message);
+      });
+      console.log("[GM] Plugin initialised (degraded — no API key).");
+      return true;
+    }
+
+    const graphs = buildAllGraphs(model);
+
+    async function getSessionId(): Promise<string | null> {
+      try {
+        const open = await gmSessions.queryOne(
+          { status: "open" } as Parameters<
+            typeof gmSessions.queryOne
+          >[0],
+        );
+        return open?.id ?? null;
+      } catch (err) {
+        console.error("[GM] getSessionId error:", err);
+        return null;
+      }
     }
 
     // ── Shared IInjectOptions builder ─────────────────────────────────────────
@@ -194,6 +347,11 @@ const gmPlugin: IPlugin = {
 
     const hookCtx: IHookContext = {
       config,
+      getConfig: async () => {
+        // Always re-read so +gm/watch and mode changes apply live
+        config = await loadConfig();
+        return config;
+      },
       graphs,
       page,
       broadcast,
@@ -369,7 +527,7 @@ const gmPlugin: IPlugin = {
       async (sessionId: string, sessionLabel: string) => {
         if (discordEnabled()) await postSessionEvent(sessionLabel, "closed");
         try {
-          const freshModel = createModel(await loadConfig());
+          const freshModel = requireModel(await loadConfig());
           const exchanges = (
             (await gmExchanges.query(
               {} as Parameters<typeof gmExchanges.query>[0],
@@ -398,22 +556,31 @@ const gmPlugin: IPlugin = {
 
     // ── Ingestion pipeline ──────────────────────────────────────────────────────
 
-    // Page all GOD/WIZARD-flagged players and post to AI-GM board
+    // Page GOD/WIZARD staff — never re-init the engine to broadcast
     async function notifyAdmins(msg: string): Promise<void> {
-      const game = await mu();
-      game.broadcast(msg);
+      try {
+        const ids = await getAdminIds();
+        const socks = socketsForActors(ids);
+        if (socks.length) send(socks, `[GM] ${msg}`);
+        else console.log(`[GM admin] ${msg}`);
+      } catch (err) {
+        console.error("[GM] notifyAdmins error:", err);
+      }
     }
 
     async function getAdminIds(): Promise<string[]> {
       const admins = await dbojs.query({
-        $and: [{ "flags": { $regex: "GOD|WIZARD" } }, { type: "player" }],
+        $and: [
+          { "flags": { $regex: "GOD|WIZARD|wizard|admin" } },
+          { flags: /player/i },
+        ],
       });
       return admins.map((a: { id: string }) => a.id);
     }
 
     const triggerIngestion = async () => {
       const freshConfig = await loadConfig();
-      const freshModel = createModel(freshConfig);
+      const freshModel = requireModel(freshConfig);
       const adminIds = await getAdminIds();
       await runIngestionPipeline({
         model: freshModel,
@@ -424,11 +591,11 @@ const gmPlugin: IPlugin = {
     };
 
     registerIngestCallback(triggerIngestion);
-    registerModelFactory(() => createModel(config));
+    registerModelFactory(() => requireModel(config));
 
     startWatcher(async () => {
       const freshConfig = await loadConfig();
-      const freshModel = createModel(freshConfig);
+      const freshModel = requireModel(freshConfig);
       const adminIds = await getAdminIds();
       return {
         model: freshModel,

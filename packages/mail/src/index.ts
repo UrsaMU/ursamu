@@ -9,7 +9,7 @@ import {
   sessions,
   send,
 } from "@ursamu/mush";
-import { registerHelpDir } from "@ursamu/help-plugin";
+import { registerHelpDir } from "@ursamu/help/register";
 import { getMyMail, runExpirySweep } from "./mailHelpers.ts";
 import { mailRouteHandler } from "./routes.ts";
 import { EXPIRY_SWEEP_MS } from "./mailDbo.ts";

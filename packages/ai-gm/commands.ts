@@ -28,12 +28,18 @@
 // +gm/ingest/reject  <jobId> — cancel ingestion
 // +gm/config/booksdir <path> — set books folder path
 
-import { addCmd } from "ursamu/app";
-import { loadConfig, saveConfig } from "./providers.ts";
+import { addCmd } from "@ursamu/mush";
+import {
+  hasApiKey,
+  loadConfig,
+  resolveProvider,
+  saveConfig,
+} from "./providers.ts";
 import { sessionCache } from "./context/cache.ts";
 import { isValidChaosLevel, isValidMode } from "./schema.ts";
 import { gmSessions } from "./db.ts";
 import type { IGMSession } from "./schema.ts";
+import { nanoid } from "./ingestion/util.ts";
 import { getGameSystem, getGameSystemNames } from "./systems/index.ts";
 import { gmIngestionJobs } from "./ingestion/db.ts";
 import { commitSystem, resolveItem } from "./ingestion/reviewer.ts";
@@ -83,7 +89,7 @@ export function registerSessionCloseCallback(fn: SessionCloseFn): void {
 }
 
 type ModelFactory = () =>
-  import("@langchain/google-genai").ChatGoogleGenerativeAI;
+  import("@langchain/core/language_models/chat_models").BaseChatModel;
 let _modelFactory: ModelFactory | null = null;
 export function registerModelFactory(fn: ModelFactory): void {
   _modelFactory = fn;
@@ -92,7 +98,12 @@ export function registerModelFactory(fn: ModelFactory): void {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 type UC = {
-  me: { id: string; flags: Set<string>; name?: string };
+  me: {
+    id: string;
+    flags: Set<string>;
+    name?: string;
+    location?: string;
+  };
   here: unknown;
   send: (msg: string) => void;
   cmd: { args: string[]; switches?: string[] };
@@ -107,7 +118,11 @@ function isStaff(u: UC): boolean {
 }
 
 function roomId(u: UC): string {
-  return ((u.here as { id?: string })?.id) ?? "";
+  // Prefer here.id; web /play often only has me.location set.
+  const hereId = ((u.here as { id?: string } | null)?.id) ?? "";
+  if (hereId) return String(hereId);
+  const loc = (u.me as { location?: string }).location;
+  return loc ? String(loc) : "";
 }
 
 const H = "%ch";
@@ -131,9 +146,18 @@ addCmd({
     }
     const cached = sessionCache.isLoaded();
     const loadedAt = sessionCache.loadedAt();
+    const provider = resolveProvider(cfg);
+    const keyOk = hasApiKey(provider);
+    const keyEnv = provider === "google"
+      ? "GOOGLE_API_KEY"
+      : "ANTHROPIC_API_KEY";
     const lines = [
       `${H}--- AI GM Status ---${N}`,
+      `  Provider:  ${provider}`,
       `  Model:     ${cfg.model}`,
+      `  API Key:   ${
+        keyOk ? "set" : `MISSING — set ${keyEnv} in .env`
+      }`,
       `  System:    ${cfg.systemId}`,
       `  Mode:      ${cfg.mode}`,
       `  Chaos:     ${cfg.chaosLevel}`,
@@ -172,11 +196,52 @@ addCmd({
       return;
     }
     const cfg = await loadConfig();
-    const apiKeyStatus = Deno.env.get("GOOGLE_API_KEY")
+    const provider = resolveProvider(cfg);
+    const keyEnv = provider === "google"
+      ? "GOOGLE_API_KEY"
+      : "ANTHROPIC_API_KEY";
+    const apiKeyStatus = hasApiKey(provider)
       ? "***set***"
-      : "(not set — add GOOGLE_API_KEY to .env)";
-    const display = { ...cfg, GOOGLE_API_KEY: apiKeyStatus };
+      : `(not set — add ${keyEnv} to .env)`;
+    const display = {
+      ...cfg,
+      provider,
+      API_KEY: apiKeyStatus,
+    };
     u.send(`${H}--- GM Config ---${N}\n${JSON.stringify(display, null, 2)}`);
+  },
+});
+
+addCmd({
+  name: "+gm/config/provider",
+  category: "GM",
+  help:
+    "+gm/config/provider <anthropic|google>  --  Set the LLM provider.",
+  pattern: /^\+gm\/config\/provider\s+(\w+)$/i,
+  exec: async (u: UC) => {
+    if (!isStaff(u)) {
+      u.send(`${H}+gm/config/provider:${N}  Staff only.`);
+      return;
+    }
+    const raw = (u.cmd.args[0] ?? "").trim().toLowerCase();
+    const provider = raw === "gemini" ? "google" : raw;
+    if (provider !== "anthropic" && provider !== "google") {
+      u.send(
+        `${H}+gm/config/provider:${N}  Must be ` +
+          `'anthropic' or 'google'.`,
+      );
+      return;
+    }
+    const model = provider === "anthropic"
+      ? (Deno.env.get("ANTHROPIC_MODEL")?.trim() ||
+        "claude-haiku-4-5-20251001")
+      : (Deno.env.get("GOOGLE_MODEL")?.trim() ||
+        "gemini-2.0-flash-latest");
+    await saveConfig({ provider, model });
+    u.send(
+      `${H}+gm/config/provider:${N}  Provider set to ` +
+        `${provider} (model ${model}). Restart recommended.`,
+    );
   },
 });
 
@@ -184,7 +249,8 @@ addCmd({
   name: "+gm/config/model",
   category: "GM",
   help:
-    "+gm/config/model <model>  --  Set the Gemini model (e.g. gemini-2.0-flash-latest).",
+    "+gm/config/model <model>  --  Set the LLM model " +
+    "(e.g. claude-haiku-4-5-20251001).",
   pattern: /^\+gm\/config\/model\s+(.+)$/i,
   exec: async (u: UC) => {
     if (!isStaff(u)) {
@@ -471,7 +537,8 @@ addCmd({
       );
     }
 
-    const sess: Omit<IGMSession, "id"> = {
+    const sess: IGMSession = {
+      id: nanoid(),
       label,
       status: "open",
       openedBy: u.me.id,

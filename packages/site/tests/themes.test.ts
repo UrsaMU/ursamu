@@ -6,7 +6,7 @@ import {
   assertExists,
   assertStringIncludes,
 } from "@std/assert";
-import { join } from "@std/path";
+import { dirname, fromFileUrl, join } from "@std/path";
 import { zipSync } from "npm:fflate@0.8.2";
 import {
   clearRegisteredThemes,
@@ -19,6 +19,7 @@ import {
 } from "../src/themes.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
+const HERE = dirname(fromFileUrl(import.meta.url));
 
 function makeZip(
   files: Record<string, string | Uint8Array>,
@@ -31,6 +32,55 @@ function makeZip(
   }
   return zipSync(body);
 }
+
+Deno.test("utopia theme pack has id and tokens", OPTS, () => {
+  const raw = Deno.readTextFileSync(
+    join(HERE, "../examples/themes/utopia/theme.json"),
+  );
+  const theme = JSON.parse(raw) as { id: string; css: string };
+  assertEquals(theme.id, "utopia");
+  const css = Deno.readTextFileSync(
+    join(HERE, "../examples/themes/utopia/site.css"),
+  );
+  assertStringIncludes(css, "--site-accent:");
+  assertStringIncludes(css, "#ff006e");
+  assertStringIncludes(css, "Bebas Neue");
+});
+
+Deno.test("cyber-d6 theme maps every source token", OPTS, () => {
+  const raw = Deno.readTextFileSync(
+    join(HERE, "../examples/themes/cyber-d6/theme.json"),
+  );
+  const theme = JSON.parse(raw) as {
+    id: string;
+    css: string;
+    plainBg?: boolean;
+  };
+  assertEquals(theme.id, "cyber-d6");
+  assertEquals(theme.plainBg, true);
+  const css = Deno.readTextFileSync(
+    join(HERE, "../examples/themes/cyber-d6/site.css"),
+  );
+  const source = [
+    "#04090a",
+    "#08191a",
+    "#14514c",
+    "#0e3230",
+    "#31ded2",
+    "#c9fffa",
+    "#5fc9c2",
+    "#2f9c95",
+    "#ff4d7d",
+    "#7a2038",
+  ];
+  for (const hex of source) {
+    assertStringIncludes(css, hex);
+  }
+  assertStringIncludes(css, "Courier New");
+  assertStringIncludes(css, "--site-accent: #31ded2");
+  assertStringIncludes(css, "--site-btn-fg: #04090a");
+  assertEquals(css.includes("#a78bfa"), false);
+});
 
 Deno.test("isThemeId validates ids", OPTS, () => {
   assertEquals(isThemeId("court"), true);

@@ -15,6 +15,7 @@ import {
   gameStopSh,
   gameRestartSh,
   gameStatusSh,
+  gamePortsSh,
   gameSafeUpdateSh,
   gameEnvFile,
   gameConnectTxt,
@@ -177,11 +178,12 @@ export async function scaffoldProject(
   await Deno.writeTextFile(join(targetDir, "src", "telnet.ts"), gameTelnetTs());
   console.log("Created src/telnet.ts");
   const shellScripts: Array<[string, string]> = [
-    ["run.sh", gameRunSh(name)],
-    ["daemon.sh", gameDaemonSh()],
-    ["stop.sh", gameStopSh()],
-    ["restart.sh", gameRestartSh()],
-    ["status.sh", gameStatusSh()],
+    ["_ports.sh", await gamePortsSh()],
+    ["run.sh", await gameRunSh(name)],
+    ["daemon.sh", await gameDaemonSh()],
+    ["stop.sh", await gameStopSh()],
+    ["restart.sh", await gameRestartSh()],
+    ["status.sh", await gameStatusSh()],
     ["safe-update.sh", gameSafeUpdateSh()],
   ];
   for (const [file, content] of shellScripts) {

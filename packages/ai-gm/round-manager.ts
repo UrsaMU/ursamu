@@ -11,6 +11,7 @@
 
 import type { IGMContribution, IGMRound } from "./schema.ts";
 import { gmRounds } from "./db.ts";
+import { nanoid } from "./ingestion/util.ts";
 
 // ─── Open a new round ─────────────────────────────────────────────────────────
 
@@ -45,7 +46,8 @@ export async function openRound(
     ready: false,
   }));
 
-  const round: Omit<IGMRound, "id"> = {
+  const round: IGMRound = {
+    id: nanoid(),
     sessionId,
     roomId,
     status: "open",
@@ -66,6 +68,7 @@ export async function addPose(
   roomId: string,
   playerId: string,
   poseText: string,
+  playerName?: string,
 ): Promise<{ round: IGMRound | null; allReady: boolean }> {
   const round = await gmRounds.queryOne(
     {
@@ -76,19 +79,37 @@ export async function addPose(
 
   if (!round) return { round: null, allReady: false };
 
+  let found = false;
   const contribs = round.contributions.map((c): IGMContribution => {
     if (c.playerId !== playerId) return c;
+    found = true;
     return { ...c, poses: [...c.poses, poseText], ready: true };
   });
+  // Late joiner / staff-excluded opener: still count this pose
+  if (!found) {
+    contribs.push({
+      playerId,
+      playerName: playerName ?? playerId,
+      poses: [poseText],
+      ready: true,
+    });
+  }
 
   await gmRounds.modify(
     { id: round.id } as Parameters<typeof gmRounds.modify>[0],
     "$set",
-    { contributions: contribs },
+    {
+      contributions: contribs,
+      expectedPlayers: found
+        ? round.expectedPlayers
+        : [...new Set([...round.expectedPlayers, playerId])],
+    },
   );
 
   const updated: IGMRound = { ...round, contributions: contribs };
-  const allReady = contribs.every((c) => c.ready);
+  // Ready when every listed contribution has posed. Empty list → false.
+  const allReady = contribs.length > 0 &&
+    contribs.every((c) => c.ready);
   return { round: updated, allReady };
 }
 

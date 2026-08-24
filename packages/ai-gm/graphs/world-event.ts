@@ -4,13 +4,13 @@
 // NPC states, and player consequences. Proposes events as jobs for staff review
 // before they become canon.
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { buildGraph, invokeGraph } from "./base.ts";
 import type { IInjectOptions } from "../context/injector.ts";
 import { buildInjectedPrompt } from "../context/injector.ts";
 import { WORLD_EVENT_SYSTEM_SUFFIX } from "../prompts/templates.ts";
 
-export function buildWorldEventGraph(model: ChatGoogleGenerativeAI) {
+export function buildWorldEventGraph(model: BaseChatModel) {
   return buildGraph(model);
 }
 

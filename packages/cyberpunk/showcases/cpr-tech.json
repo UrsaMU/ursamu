@@ -1,0 +1,128 @@
+{
+  "key": "cpr-tech",
+  "label": "Cyberpunk RED — Tech: Crafting, Pharma & Chop Shop",
+  "vars": { "player": "T-Bug" },
+  "setup": {
+    "character": {
+      "stats": { "int": 6, "ref": 5, "dex": 5, "tech": 9, "cool": 5, "will": 6, "luck": 5, "move": 5, "body": 5, "emp": 6, "empBase": 7 },
+      "hp": { "max": 40, "current": 40 },
+      "swThreshold": 20,
+      "deathSave": 5,
+      "deathSavePenalty": 0,
+      "role": "tech",
+      "roleRank": 4,
+      "roleData": { "makerSpecialties": { "fabrication": 4, "upgrade": 2, "field": 2 } },
+      "skills": { "athletics": 3, "basic_tech": 7, "brawling": 2, "concentration": 4, "conversation": 3, "cybertech": 7, "education": 6, "electronics": 7, "evasion": 3, "fabrication": 7, "first_aid": 5, "handgun": 3, "human_perception": 3, "local_expert": 3, "perception": 5, "persuasion": 2, "stealth": 3, "streetwise": 3, "weaponstech": 6 },
+      "luckRemaining": 5,
+      "woundState": "healthy",
+      "criticalInjuries": [],
+      "armorBody": { "name": "Kevlar", "sp": 7, "currentSp": 7, "penalty": 0 },
+      "armorHead": null,
+      "cyberware": [
+        { "id": "cw1", "name": "neural_link", "category": "neuralware", "hl": 7, "installType": "clinic", "installedAt": 0 }
+      ],
+      "humanityLoss": 7,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 2,
+      "reputationDeeds": ["Built the railgun that ended the Maelstrom siege"],
+      "eurodollars": 6000,
+      "lifestyle": { "tier": "moderate", "nextDueDate": 9999999999999 },
+      "lifepath": { "culturalOrigin": "Asian", "language": "Japanese" },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": []
+    },
+    "targets": {
+      "Ganger": {
+        "stats": { "int": 4, "ref": 6, "dex": 5, "tech": 3, "cool": 5, "will": 5, "luck": 3, "move": 6, "body": 5, "emp": 4, "empBase": 4 },
+        "hp": { "max": 30, "current": 30 },
+        "swThreshold": 15, "deathSave": 5, "deathSavePenalty": 0,
+        "role": "solo", "roleRank": 1, "roleData": {},
+        "skills": { "athletics": 3, "brawling": 3, "handgun": 4, "evasion": 3, "perception": 3 },
+        "luckRemaining": 3, "woundState": "healthy", "criticalInjuries": [],
+        "armorBody": { "name": "Kevlar", "sp": 7, "currentSp": 7, "penalty": 0 }, "armorHead": null,
+        "cyberware": [
+          { "id": "cw1", "name": "cybereye", "category": "cyberoptics", "hl": 7, "installType": "clinic", "installedAt": 0 }
+        ],
+        "humanityLoss": 7, "bodysculpt": [], "activeEffects": [],
+        "reputation": 0, "reputationDeeds": [], "eurodollars": 200,
+        "lifestyle": null, "lifepath": {},
+        "chargenComplete": true, "chargenStage": "complete", "chargenMethod": "streetrat",
+        "restTimer": null, "humanityGainedAt": null, "locationEffects": []
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Maker Points (Tech Currency)"
+    },
+    {
+      "note": "Maker Points represent materials and workshop access. Role rank determines total. Specialties (fabrication, upgrade, field, invention) are set by admin via +cpr/setmaker."
+    },
+    {
+      "cmd": "+craft/makerpoints",
+      "label": "view current Maker Point balance and specialty distribution"
+    },
+    {
+      "sub": "Crafting Projects"
+    },
+    {
+      "note": "Tech characters fabricate weapons, gadgets, cyberware, and armor. Format: +craft/start <item>=<priceCategory>. Valid categories: cheap, everyday, costly, premium, expensive, very_expensive."
+    },
+    {
+      "cmd": "+craft/list",
+      "label": "view all in-progress crafting projects"
+    },
+    {
+      "cmd": "+craft/start Militech Avenger=costly",
+      "label": "start fabricating a costly weapon (Militech Avenger)"
+    },
+    {
+      "sub": "Blueprints"
+    },
+    {
+      "note": "Blueprints are reusable plans that reduce future fabrication DV and time. Format: +craft/blueprint <item>=<category>."
+    },
+    {
+      "cmd": "+craft/blueprint custom-grip=cheap",
+      "label": "log a blueprint for a cheap custom-grip modification"
+    },
+    {
+      "sub": "Field Repair"
+    },
+    {
+      "note": "Field repair is available to all roles (not just Tech). It restores SP to damaged armor using TECH+basic_tech. Format: +craft/fieldrepair <item> <DV>."
+    },
+    {
+      "cmd": "+craft/fieldrepair body armor 13",
+      "label": "field-repair body armor (TECH+basic_tech vs DV 13)"
+    },
+    {
+      "sub": "Pharmaceutical Synthesis (Medtech only)"
+    },
+    {
+      "note": "+pharma commands require the Medtech role. A Medtech character uses +pharma/synth <drug> to start synthesis, +pharma/queue to view in-progress jobs, and +pharma/check <id> to collect. See +drug/list for available drugs."
+    },
+    {
+      "sub": "Chop Shop — Cyberware Surgery (Medtech only)"
+    },
+    {
+      "note": "+chopshop commands require the Medtech role. Prices and queue are viewable by anyone. Install and harvest require Medtech. Format: +chopshop/install <target>=<cyberware>, +chopshop/harvest <target>=<cyberware>."
+    },
+    {
+      "cmd": "+chopshop/prices",
+      "label": "view service cost list for install and harvest"
+    },
+    {
+      "cmd": "+chopshop/queue",
+      "label": "view the surgery queue for this chop shop"
+    },
+    {
+      "reset": true
+    }
+  ]
+}

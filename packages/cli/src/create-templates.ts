@@ -3,7 +3,33 @@
  *
  * Pure template string functions for the `ursamu create` scaffolding CLI.
  * All functions accept parameters and return file content ready to write to disk.
+ *
+ * Game shell scripts (daemon/run/stop/…) live in
+ * `packages/cli/templates/game-scripts/` and are loaded from disk so every
+ * game + `ursamu create` share one source of truth.
  */
+
+import { fromFileUrl } from "@std/path";
+
+const GAME_SCRIPTS_BASE = new URL(
+  "../templates/game-scripts/",
+  import.meta.url,
+);
+
+/** Load a game shell script from disk or JSR (https). */
+export async function loadGameScript(name: string): Promise<string> {
+  const url = new URL(name, GAME_SCRIPTS_BASE);
+  if (url.protocol === "file:") {
+    return await Deno.readTextFile(fromFileUrl(url));
+  }
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(
+      `Failed to load game script ${name} (${res.status})`,
+    );
+  }
+  return await res.text();
+}
 
 // ─── standalone plugin templates ──────────────────────────────────────────────
 
@@ -656,184 +682,34 @@ console.log("Telnet server is running!");
 `;
 }
 
-export function gameRunSh(name: string): string {
-  return `#!/bin/bash
-# Run script for ${name}
-
-cd "\$(dirname "\$0")/.." || exit
-
-# Free bound ports (4201 4202 4203 4211 4212 4213)
-for port in 4201 4202 4203 4211 4212 4213; do
-  pids=\$(lsof -ti ":\$port" 2>/dev/null)
-  if [ -n "\$pids" ]; then
-    echo "Freeing port \$port (PIDs: \$pids)..."
-    echo "\$pids" | xargs kill -9 2>/dev/null
-  fi
-done
-
-cleanup() {
-  echo "Shutting down servers..."
-  kill \$MAIN_PID \$TELNET_PID 2>/dev/null
-  exit 0
-}
-trap cleanup SIGINT SIGTERM
-
-echo "Starting main server in watch mode..."
-deno run --allow-all --unstable-detect-cjs --unstable-kv --unstable-net --watch src/main.ts &
-MAIN_PID=\$!
-
-# Local-link projects (\`ursamu create --local\`) have the engine checkout
-# somewhere above this directory; walk upward looking for mod.ts + telnet.ts.
-# Falls back to JSR when no engine checkout is found.
-TELNET_ENTRY="jsr:@ursamu/ursamu/telnet"
-probe="\$(pwd)"
-while [ "\$probe" != "/" ]; do
-  if [ -f "\$probe/mod.ts" ] && [ -f "\$probe/packages/mush/src/telnet.ts" ]; then
-    TELNET_ENTRY="\$probe/packages/mush/src/telnet.ts"
-    break
-  fi
-  probe="\$(dirname "\$probe")"
-done
-
-echo "Starting telnet server..."
-deno run --allow-all --unstable-detect-cjs --unstable-kv --unstable-net "\$TELNET_ENTRY" &
-TELNET_PID=\$!
-
-echo "Servers are running. Press Ctrl+C to stop."
-wait \$MAIN_PID \$TELNET_PID
-cleanup
-`;
+/** Foreground supervisor (ports from config/config.json). */
+export function gameRunSh(_name = "game"): Promise<string> {
+  return loadGameScript("run.sh");
 }
 
-export function gameDaemonSh(): string {
-  return `#!/bin/bash
-# Start the UrsaMU supervisor (start.ts) in the background. The supervisor
-# spawns the telnet sidecar and the main server, and re-spawns main on
-# exit code 75 — so in-game @reboot just works. SIGUSR2 also triggers a
-# no-disconnect restart (scripts/restart.sh).
-set -e
-cd "\$(dirname "\$0")/.."
-
-mkdir -p run logs
-
-if [ -f run/supervisor.pid ] && kill -0 "\$(cat run/supervisor.pid)" 2>/dev/null; then
-  echo "supervisor already running (pid \$(cat run/supervisor.pid))"
-  exit 1
-fi
-
-for port in 4201 4202 4203 4211 4212 4213; do
-  pids=\$(lsof -ti ":\$port" 2>/dev/null || true)
-  [ -n "\$pids" ] && echo "\$pids" | xargs kill -9 2>/dev/null || true
-done
-
-DENO_FLAGS="--allow-all --unstable-detect-cjs --unstable-kv --unstable-net"
-
-# Local-link projects (\`ursamu create --local\`) have the engine checkout
-# somewhere above this directory; walk upward looking for mod.ts + start.ts.
-# Falls back to JSR when no engine checkout is found.
-ENTRY="jsr:@ursamu/ursamu/start"
-probe="\$(pwd)"
-while [ "\$probe" != "/" ]; do
-  if [ -f "\$probe/mod.ts" ] && [ -f "\$probe/packages/cli/src/start.ts" ]; then
-    ENTRY="\$probe/packages/cli/src/start.ts"
-    break
-  fi
-  probe="\$(dirname "\$probe")"
-done
-
-echo "Starting UrsaMU supervisor (\$ENTRY)..."
-nohup deno run \$DENO_FLAGS "\$ENTRY" >>logs/main.log 2>&1 &
-echo \$! > run/supervisor.pid
-
-sleep 1
-echo "supervisor pid: \$(cat run/supervisor.pid)"
-echo "logs:           logs/main.log"
-echo "@reboot in-game (or scripts/restart.sh) respawns main without dropping telnet."
-`;
+/** Background supervisor daemon. */
+export function gameDaemonSh(): Promise<string> {
+  return loadGameScript("daemon.sh");
 }
 
-export function gameStopSh(): string {
-  return `#!/bin/bash
-# Stop the supervisor (and with it, main + telnet). Disconnects all telnet
-# clients. For a no-disconnect restart, use scripts/restart.sh or @reboot.
-cd "\$(dirname "\$0")/.."
-
-pidfile="run/supervisor.pid"
-if [ ! -f "\$pidfile" ]; then
-  echo "Nothing to stop."
-  exit 0
-fi
-
-pid=\$(cat "\$pidfile")
-if kill -0 "\$pid" 2>/dev/null; then
-  echo "Stopping supervisor (pid \$pid)..."
-  kill "\$pid" 2>/dev/null || true
-  for _ in 1 2 3 4 5 6 7 8 9 10; do
-    kill -0 "\$pid" 2>/dev/null || break
-    sleep 0.5
-  done
-  kill -0 "\$pid" 2>/dev/null && kill -9 "\$pid" 2>/dev/null || true
-fi
-rm -f "\$pidfile"
-
-for port in 4201 4202 4203; do
-  pids=\$(lsof -ti ":\$port" 2>/dev/null || true)
-  [ -n "\$pids" ] && echo "\$pids" | xargs kill -9 2>/dev/null || true
-done
-`;
+/** Stop supervisor + free ports from config. */
+export function gameStopSh(): Promise<string> {
+  return loadGameScript("stop.sh");
 }
 
-export function gameRestartSh(): string {
-  return `#!/bin/bash
-# No-disconnect restart. Tells the supervisor to re-spawn main; telnet stays up
-# and connected players auto-reauth via their JWT session token. Equivalent to
-# typing @reboot in-game. For a full stop (disconnect everyone), use stop.sh
-# or @shutdown.
-cd "\$(dirname "\$0")/.."
-
-if [ ! -f run/supervisor.pid ]; then
-  echo "Supervisor not running — start with scripts/daemon.sh."
-  exit 1
-fi
-
-pid=\$(cat run/supervisor.pid)
-if ! kill -0 "\$pid" 2>/dev/null; then
-  echo "Stale supervisor pidfile (pid \$pid). Run scripts/daemon.sh."
-  exit 1
-fi
-
-echo "Signaling supervisor (pid \$pid) — main will respawn, telnet stays up."
-kill -USR2 "\$pid"
-`;
+/** SIGUSR2 soft-reboot (telnet stays up). */
+export function gameRestartSh(): Promise<string> {
+  return loadGameScript("restart.sh");
 }
 
-export function gameStatusSh(): string {
-  return `#!/bin/bash
-# Report supervisor status and port bindings.
-cd "\$(dirname "\$0")/.."
+/** Supervisor + port status from config. */
+export function gameStatusSh(): Promise<string> {
+  return loadGameScript("status.sh");
+}
 
-pidfile="run/supervisor.pid"
-if [ ! -f "\$pidfile" ]; then
-  echo "supervisor  not running"
-else
-  pid=\$(cat "\$pidfile")
-  if kill -0 "\$pid" 2>/dev/null; then
-    echo "supervisor  running (pid \$pid)"
-  else
-    echo "supervisor  stale pidfile (pid \$pid, no process)"
-  fi
-fi
-
-for port in 4201:telnet 4202:ws 4203:http; do
-  p=\${port%:*}; label=\${port#*:}
-  bound=\$(lsof -ti ":\$p" 2>/dev/null || true)
-  if [ -n "\$bound" ]; then
-    printf "%-11s bound on :%s (pid %s)\\n" "\$label" "\$p" "\$bound"
-  else
-    printf "%-11s :%s free\\n" "\$label" "\$p"
-  fi
-done
-`;
+/** Shared port helpers — must be written next to the other scripts. */
+export function gamePortsSh(): Promise<string> {
+  return loadGameScript("_ports.sh");
 }
 
 /**
@@ -990,15 +866,25 @@ if [ "\$REBOOT" = "1" ]; then
     log "no supervisor — start with: bash scripts/daemon.sh"
   fi
   ok=0
-  for i in \$(seq 1 60); do
-    if curl -sf -m 2 http://127.0.0.1:4203/ >/dev/null 2>&1 \\
-       || curl -sf -m 2 http://127.0.0.1:4203/api/v1/help >/dev/null 2>&1; then
-      log "ready at \${i}s"
+  if [ -f scripts/_ports.sh ]; then
+    # shellcheck source=scripts/_ports.sh
+    . scripts/_ports.sh
+    ursamu_read_ports
+    if ursamu_wait_ready 60; then
+      log "ready"
       ok=1
-      break
     fi
-    sleep 1
-  done
+  else
+    for i in \$(seq 1 60); do
+      if curl -sf -m 2 "http://127.0.0.1:\${API_PORT:-4203}/" >/dev/null 2>&1 \\
+         || curl -sf -m 2 "http://127.0.0.1:\${HTTP_PORT:-4202}/" >/dev/null 2>&1; then
+        log "ready at \${i}s"
+        ok=1
+        break
+      fi
+      sleep 1
+    done
+  fi
   [ -x scripts/status.sh ] && bash scripts/status.sh || true
   if [ "\$ok" != "1" ]; then
     log "WARNING: health check did not pass"
@@ -1258,9 +1144,9 @@ A modern MU* game built with the [UrsaMU](https://github.com/ursamu/ursamu) engi
 
 | Protocol | Port |
 |----------|------|
-| Telnet   | 4201 |
-| WebSocket | 4202 |
-| HTTP API | 4203 |
+| Telnet   | \`server.telnet\` (default 4201) |
+| WebSocket | \`server.ws\` / \`wsPort\` (default 4202) |
+| HTTP     | \`server.http\` / \`apiPort\` (default 4203) |
 
 ## Getting Started
 

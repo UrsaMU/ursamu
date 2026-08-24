@@ -73,6 +73,8 @@ const ALLOWED_EXT = new Set([
   ".otf",
   ".md",
   ".txt",
+  // Element gallery / local docs shipped with a theme
+  ".html",
 ]);
 
 const MAX_ZIP_BYTES = 20 * 1024 * 1024;

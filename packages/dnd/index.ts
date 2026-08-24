@@ -11,7 +11,7 @@
 import "./commands.ts";
 
 import type { IPlugin } from "@ursamu/ursamu";
-import { registerHelpDir } from "@ursamu/help";
+import { registerHelpDir } from "@ursamu/help/register";
 import { registerJobBuckets } from "@ursamu/jobs";
 import { registerPluginRoute, gameHooks } from
   "@ursamu/ursamu";

@@ -69,6 +69,34 @@ export function isHomePath(path?: string): boolean {
 }
 
 /**
+ * Public shell mode from request path — must match site.js detectMode().
+ * Used so first paint already has is-mode-* (no layout thrash on login).
+ */
+export function siteModeFromPath(path?: string): string {
+  if (path == null || path === "" || isHomePath(path)) return "home";
+  let p = path.split("?")[0].split("#")[0].trim();
+  if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1);
+  if (
+    p === "/login" || p === "/site/login" || p === "/site/login.html"
+  ) {
+    return "login";
+  }
+  if (
+    p === "/profile" || p === "/site/profile" ||
+    p === "/site/profile.html"
+  ) {
+    return "profile";
+  }
+  if (p.startsWith("/wiki") || p.startsWith("/site/wiki")) return "wiki";
+  if (p.startsWith("/help") || p.startsWith("/site/help")) return "help";
+  if (p.startsWith("/chargen") || p.startsWith("/site/chargen")) {
+    return "chargen";
+  }
+  if (p.startsWith("/play") || p.startsWith("/site/play")) return "play";
+  return "generic";
+}
+
+/**
  * Apply cfg into the shipped index.html template.
  * Pure string rewrite — keep markers stable in public/index.html.
  */
@@ -275,15 +303,59 @@ export function injectSiteHtml(
     );
   }
 
-  // Shell modifiers: plainBg + compact (wiki/help = compact)
-  if (cfg.plainBg || compact) {
+  // Shell modifiers: plainBg + compact + page mode (login/wiki/…)
+  // Mode classes must land in first HTML — site.js is defer, so without
+  // them login paints as a 3-col home skeleton then jumps (theme FOUC).
+  const mode = siteModeFromPath(opts.path);
+  const modeClass = mode !== "home" && mode !== "generic"
+    ? `is-mode-${mode}`
+    : "";
+  const needsPlain = cfg.plainBg || compact ||
+    mode === "login" || mode === "profile" || mode === "wiki" ||
+    mode === "help" || mode === "chargen" || mode === "play";
+  const needsCompact = compact ||
+    mode === "login" || mode === "profile" || mode === "wiki" ||
+    mode === "help" || mode === "chargen" || mode === "play";
+  if (needsPlain || needsCompact || modeClass) {
     out = out.replace(
       /(<div\b)([^>]*\bdata-site-shell\b[^>]*)(>)/i,
       (_m, open: string, mid: string, close: string) => {
         let m = String(mid);
-        if (cfg.plainBg || compact) m = ensureClass(m, "is-plain");
-        if (compact) m = ensureClass(m, "is-compact");
+        if (needsPlain) m = ensureClass(m, "is-plain");
+        if (needsCompact) {
+          m = ensureClass(m, "is-compact");
+          m = ensureClass(m, "is-mode-no-hero");
+        }
+        if (modeClass) m = ensureClass(m, modeClass);
         return `${open}${m}${close}`;
+      },
+    );
+  }
+
+  // Login/profile: hide rails + banner in first paint (JS also sets hidden)
+  if (mode === "login" || mode === "profile") {
+    out = out.replace(
+      /(<aside\b[^>]*\bdata-site-left\b[^>]*)(>)/i,
+      (_m, open: string, gt: string) => {
+        let o = String(open);
+        if (!/\bhidden\b/i.test(o)) o += " hidden";
+        return `${o}${gt}`;
+      },
+    );
+    out = out.replace(
+      /(<aside\b[^>]*\bdata-site-right\b[^>]*)(>)/i,
+      (_m, open: string, gt: string) => {
+        let o = String(open);
+        if (!/\bhidden\b/i.test(o)) o += " hidden";
+        return `${o}${gt}`;
+      },
+    );
+    out = out.replace(
+      /(<header\b[^>]*\bdata-site-banner\b[^>]*)(>)/i,
+      (_m, open: string, gt: string) => {
+        let o = String(open);
+        if (!/\bhidden\b/i.test(o)) o += " hidden";
+        return `${o}${gt}`;
       },
     );
   }

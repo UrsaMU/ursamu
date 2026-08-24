@@ -1,38 +1,32 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@std/assert@*": "1.0.19",
     "jsr:@std/assert@0.224": "0.224.0",
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/assert@^1.0.19": "1.0.19",
+    "jsr:@std/cli@1.0.0": "1.0.0",
     "jsr:@std/dotenv@0.224": "0.224.2",
     "jsr:@std/encoding@0.224.0": "0.224.0",
     "jsr:@std/flags@0.224": "0.224.0",
     "jsr:@std/fmt@0.224": "0.224.0",
     "jsr:@std/fs@0.224": "0.224.0",
-    "jsr:@std/fs@0.224.0": "0.224.0",
     "jsr:@std/fs@1": "1.0.24",
     "jsr:@std/internal@0.224": "0.224.0",
     "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/internal@^1.0.14": "1.0.14",
     "jsr:@std/path@0.224": "0.224.0",
-    "jsr:@std/path@0.224.0": "0.224.0",
     "jsr:@std/path@^1.1.5": "1.1.6",
     "jsr:@std/semver@1": "1.0.8",
+    "jsr:@std/testing@*": "1.0.19",
     "jsr:@std/testing@0.224": "0.224.0",
     "jsr:@std/testing@^1.0.17": "1.0.19",
-    "jsr:@ursamu/cli@0.1.1": "0.1.1",
     "jsr:@ursamu/core@1.0.0": "1.0.0",
-    "jsr:@ursamu/core@1.0.1": "1.0.1",
-    "jsr:@ursamu/help@1.0.0": "1.0.0",
-    "jsr:@ursamu/help@~0.1.9": "0.1.9",
-    "jsr:@ursamu/mail@2.6.0": "2.6.0",
-    "jsr:@ursamu/mush@1.0.9": "1.0.9",
-    "jsr:@ursamu/mush@~0.1.3": "0.1.30",
     "jsr:@ursamu/mushcode@0.7": "0.7.0",
-    "jsr:@ursamu/mushcode@0.7.0": "0.7.0",
     "jsr:@zaubrik/djwt@^3.0.2": "3.0.2",
     "npm:@digibear/tags@1.0.0": "1.0.0",
     "npm:@electric-sql/pglite@~0.5.2": "0.5.4",
+    "npm:@langchain/anthropic@0.3": "0.3.34_@langchain+core@0.3.80_zod@4.4.3",
     "npm:@langchain/core@0.3": "0.3.80",
     "npm:@langchain/google-genai@0.2": "0.2.18_@langchain+core@0.3.80",
     "npm:@langchain/langgraph@0.2": "0.2.74_@langchain+core@0.3.80",
@@ -47,6 +41,7 @@
     "npm:quickjs-emscripten@0.29.0": "0.29.0",
     "npm:stripe@17": "17.7.0",
     "npm:sucrase@3.35.0": "3.35.0",
+    "npm:sucrase@^3.35.0": "3.35.0",
     "npm:tweetnacl@1.0.3": "1.0.3",
     "npm:unpdf@0.11": "0.11.0",
     "npm:zod@4.4.3": "4.4.3",
@@ -65,6 +60,9 @@
       "dependencies": [
         "jsr:@std/internal@^1.0.12"
       ]
+    },
+    "@std/cli@1.0.0": {
+      "integrity": "3c38f1da21bff0d25a9e6d97139ef2eb9ba334b5910da92c0169b44f38655f08"
     },
     "@std/dotenv@0.224.2": {
       "integrity": "29081695357e4534696c9e986b2560be29c141ccf52daa32b6c20ff5b5c64ab9"
@@ -129,14 +127,6 @@
         "jsr:@std/internal@^1.0.14"
       ]
     },
-    "@ursamu/cli@0.1.1": {
-      "integrity": "eb644f51cfe012697ba0c7d52bad5a67c449ef7d1f412270aa837f53ffab4c40",
-      "dependencies": [
-        "jsr:@std/flags",
-        "jsr:@std/fs@0.224",
-        "jsr:@std/path@0.224"
-      ]
-    },
     "@ursamu/core@1.0.0": {
       "integrity": "b1bfb7712982a00a259425699dcdd9b32ed9d6e2b32f9728bd6185e7becfb743",
       "dependencies": [
@@ -145,60 +135,6 @@
         "jsr:@zaubrik/djwt",
         "npm:@nicia-ai/typegraph",
         "npm:zod@4.4.3"
-      ]
-    },
-    "@ursamu/core@1.0.1": {
-      "integrity": "4842bb97d86d99ec9dde3154f1425d596893c67c29c7e9e85d00fefc5664e37b",
-      "dependencies": [
-        "jsr:@std/path@0.224",
-        "jsr:@std/semver",
-        "jsr:@zaubrik/djwt",
-        "npm:@nicia-ai/typegraph",
-        "npm:zod@4.4.3"
-      ]
-    },
-    "@ursamu/help@0.1.9": {
-      "integrity": "746c56af6d6ff7ace3d808ea25fbcf20684a9339646fcee560850ad89ad5dae9",
-      "dependencies": [
-        "jsr:@ursamu/mush@1.0.9"
-      ]
-    },
-    "@ursamu/help@1.0.0": {
-      "integrity": "57c0f30602ebe74a7caa676d794f64ff6623837c7200566287565731a55fa10a"
-    },
-    "@ursamu/mail@2.6.0": {
-      "integrity": "8f7d3ee8b252bb88e0098e6fe59f44e0b50faf9ef1b9b889e6555743d6f393f1",
-      "dependencies": [
-        "jsr:@ursamu/help@1.0.0"
-      ]
-    },
-    "@ursamu/mush@0.1.30": {
-      "integrity": "97411714828810f0ff9067a6fc5292b57ce238123a2916aa2875e7da239c9811",
-      "dependencies": [
-        "jsr:@std/dotenv",
-        "jsr:@std/fs@0.224",
-        "jsr:@std/path@0.224",
-        "jsr:@ursamu/core@1.0.1",
-        "jsr:@ursamu/mushcode@0.7",
-        "npm:@digibear/tags",
-        "npm:@ursamu/parser",
-        "npm:bcryptjs",
-        "npm:quickjs-emscripten"
-      ]
-    },
-    "@ursamu/mush@1.0.9": {
-      "integrity": "4f1de7144b4b65461e3debc8e69885f8e9beb2c89c54cbf36a10112f9c13afba",
-      "dependencies": [
-        "jsr:@std/dotenv",
-        "jsr:@std/fs@0.224",
-        "jsr:@std/path@0.224",
-        "jsr:@ursamu/core@1.0.0",
-        "jsr:@ursamu/mushcode@0.7",
-        "npm:@digibear/tags",
-        "npm:@ursamu/parser",
-        "npm:bcryptjs",
-        "npm:quickjs-emscripten",
-        "npm:sucrase"
       ]
     },
     "@ursamu/mushcode@0.7.0": {
@@ -212,6 +148,20 @@
     }
   },
   "npm": {
+    "@anthropic-ai/sdk@0.65.0_zod@4.4.3": {
+      "integrity": "sha512-zIdPOcrCVEI8t3Di40nH4z9EoeyGZfXbYSvWdDLsB/KkaSYMnEgC7gmcgWu83g2NTn1ZTpbMvpdttWDGGIk6zw==",
+      "dependencies": [
+        "json-schema-to-ts",
+        "zod@4.4.3"
+      ],
+      "optionalPeers": [
+        "zod@4.4.3"
+      ],
+      "bin": true
+    },
+    "@babel/runtime@7.29.7": {
+      "integrity": "sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw=="
+    },
     "@cfworker/json-schema@4.1.1": {
       "integrity": "sha512-gAmrUZSGtKc3AiBL71iNWxDsyUC5uMaKKGdvzYsBoTW/xi42JQHl7eKV2OYzCUqvc+D2RCcf7EXY2iCyFIk6og=="
     },
@@ -280,6 +230,14 @@
       "dependencies": [
         "@jridgewell/resolve-uri",
         "@jridgewell/sourcemap-codec"
+      ]
+    },
+    "@langchain/anthropic@0.3.34_@langchain+core@0.3.80_zod@4.4.3": {
+      "integrity": "sha512-8bOW1A2VHRCjbzdYElrjxutKNs9NSIxYRGtR+OJWVzluMqoKKh2NmmFrpPizEyqCUEG2tTq5xt6XA1lwfqMJRA==",
+      "dependencies": [
+        "@anthropic-ai/sdk",
+        "@langchain/core",
+        "fast-xml-parser"
       ]
     },
     "@langchain/core@0.3.80": {
@@ -585,6 +543,13 @@
     "eventemitter3@4.0.7": {
       "integrity": "sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw=="
     },
+    "fast-xml-parser@4.5.7": {
+      "integrity": "sha512-a6Qh1RMCNbSrU1+sAyAAZH3rTe+OaWJbNZIq0S+ifZciUUOQtlVxBJwoTUE2bYhysmG/RYyI5WJFIKdBahJdrQ==",
+      "dependencies": [
+        "strnum"
+      ],
+      "bin": true
+    },
     "fflate@0.8.2": {
       "integrity": "sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A=="
     },
@@ -732,6 +697,13 @@
       "integrity": "sha512-biOj/6M5qdgx5TKjDnFT1ymSpM5tbd3ylwDtrQvFQSu0Z7bBYko2dF+W/aUkXUPuk6IVpRxk/3Q2sHOzGlS36g==",
       "dependencies": [
         "base64-js"
+      ]
+    },
+    "json-schema-to-ts@3.1.1": {
+      "integrity": "sha512-+DWg8jCJG2TEnpy7kOm/7/AxaYoaRbjVB4LFZLySZlWn8exGs3A4OLJR966cVvU26N7X9TWxl+Jsw7dzAqKT6g==",
+      "dependencies": [
+        "@babel/runtime",
+        "ts-algebra"
       ]
     },
     "langsmith@0.3.87": {
@@ -1083,6 +1055,9 @@
         "qs"
       ]
     },
+    "strnum@1.1.2": {
+      "integrity": "sha512-vrN+B7DBIoTTZjnPNewwhx6cBA/H+IS7rfW68n7XxC1y7uoiGQBxaKzqucGUgavX15dJgiGztLJ8vxuEzwqBdA=="
+    },
     "sucrase@3.35.0": {
       "integrity": "sha512-8EbVDiu9iN/nESwxeSxDKe0dunta1GOlHufmSSXxMD2z2/tMZpDMpvXQGsc+ajGo8y2uYUmixaSRUc/QPoQ0GA==",
       "dependencies": [
@@ -1128,6 +1103,9 @@
     },
     "tr46@0.0.3": {
       "integrity": "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw=="
+    },
+    "ts-algebra@2.0.0": {
+      "integrity": "sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw=="
     },
     "ts-interface-checker@0.1.13": {
       "integrity": "sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA=="
@@ -1284,7 +1262,12 @@
     "https://deno.land/std@0.224.0/fmt/colors.ts": "508563c0659dd7198ba4bbf87e97f654af3c34eb56ba790260f252ad8012e1c5",
     "https://deno.land/std@0.224.0/internal/diff.ts": "6234a4b493ebe65dc67a18a0eb97ef683626a1166a1906232ce186ae9f65f4e6",
     "https://deno.land/std@0.224.0/internal/format.ts": "0a98ee226fd3d43450245b1844b47003419d34d210fa989900861c79820d21c2",
-    "https://deno.land/std@0.224.0/internal/mod.ts": "534125398c8e7426183e12dc255bb635d94e06d0f93c60a297723abe69d3b22e"
+    "https://deno.land/std@0.224.0/internal/mod.ts": "534125398c8e7426183e12dc255bb635d94e06d0f93c60a297723abe69d3b22e",
+    "https://deno.land/x/bcrypt@v0.4.1/mod.ts": "ff09bdae282583cf5f7d87efe37ddcecef7f14f6d12e8b8066a3058db8c6c2f7",
+    "https://deno.land/x/bcrypt@v0.4.1/src/bcrypt/base64.ts": "b8266450a4f1eb6960f60f2f7986afc4dde6b45bd2d7ee7ba10789e67e17b9f7",
+    "https://deno.land/x/bcrypt@v0.4.1/src/bcrypt/bcrypt.ts": "ec221648cc6453ea5e3803bc817c01157dada06aa6f7a0ba6b9f87aae32b21e2",
+    "https://deno.land/x/bcrypt@v0.4.1/src/main.ts": "08d201b289c8d9c46f8839c69cd6625b213863db29775c7a200afc3b540e64f8",
+    "https://deno.land/x/bcrypt@v0.4.1/src/worker.ts": "5a73bdfee9c9e622f47c9733d374b627dce52fb3ec1e74c8226698b3fc57ffac"
   },
   "workspace": {
     "dependencies": [
@@ -1299,8 +1282,6 @@
       "jsr:@std/testing@^1.0.17",
       "jsr:@ursamu/core@1.0.0",
       "jsr:@ursamu/core@1.0.1",
-      "jsr:@ursamu/help@1.0.0",
-      "jsr:@ursamu/help@1.0.2",
       "jsr:@ursamu/mush@1.0.1",
       "jsr:@ursamu/mush@1.0.3",
       "jsr:@ursamu/mush@1.0.9",
@@ -1308,6 +1289,7 @@
       "jsr:@zaubrik/djwt@^3.0.2",
       "npm:@digibear/tags@1.0.0",
       "npm:@electric-sql/pglite@~0.5.2",
+      "npm:@langchain/anthropic@0.3",
       "npm:@langchain/core@0.3",
       "npm:@langchain/google-genai@0.2",
       "npm:@langchain/langgraph@0.2",
@@ -1343,6 +1325,38 @@
           "npm:quickjs-emscripten@0.29.0"
         ]
       },
+      "games/cpr": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/dotenv@0.224",
+          "jsr:@std/flags@0.224",
+          "jsr:@std/fmt@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@std/semver@1",
+          "jsr:@std/testing@^1.0.17",
+          "jsr:@ursamu/core@1.0.4",
+          "jsr:@ursamu/help@1.2.1",
+          "jsr:@ursamu/mush@1.0.35",
+          "jsr:@ursamu/mushcode@0.7.0",
+          "jsr:@zaubrik/djwt@^3.0.2",
+          "npm:@digibear/tags@1.0.0",
+          "npm:@electric-sql/pglite@~0.5.2",
+          "npm:@langchain/anthropic@0.3",
+          "npm:@langchain/core@0.3",
+          "npm:@langchain/google-genai@0.2",
+          "npm:@langchain/langgraph@0.2",
+          "npm:@nicia-ai/typegraph@0.31",
+          "npm:@ursamu/parser@1.2.4",
+          "npm:bcryptjs@2.4.3",
+          "npm:lodash@^4.18.1",
+          "npm:quickjs-emscripten@0.29.0",
+          "npm:stripe@17",
+          "npm:sucrase@^3.35.0",
+          "npm:unpdf@0.11",
+          "npm:zod@4.4.3"
+        ]
+      },
       "games/roses": {
         "dependencies": [
           "jsr:@std/assert@0.224",
@@ -1360,6 +1374,33 @@
           "npm:quickjs-emscripten@0.29.0"
         ]
       },
+      "games/utopia-local": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/dotenv@0.224",
+          "jsr:@std/flags@0.224",
+          "jsr:@std/fmt@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@std/semver@1",
+          "jsr:@ursamu/mushcode@0.6",
+          "jsr:@zaubrik/djwt@^3.0.2",
+          "npm:@digibear/tags@1.0.0",
+          "npm:@electric-sql/pglite@~0.5.2",
+          "npm:@langchain/anthropic@0.3",
+          "npm:@langchain/core@0.3",
+          "npm:@langchain/google-genai@0.2",
+          "npm:@langchain/langgraph@0.2",
+          "npm:@nicia-ai/typegraph@0.31",
+          "npm:@ursamu/parser@1.2.4",
+          "npm:bcryptjs@2.4.3",
+          "npm:lodash@^4.18.1",
+          "npm:quickjs-emscripten@0.29.0",
+          "npm:stripe@17",
+          "npm:sucrase@^3.35.0",
+          "npm:zod@4.4.3"
+        ]
+      },
       "packages/ai-gm": {
         "dependencies": [
           "jsr:@std/assert@0.224",
@@ -1367,9 +1408,10 @@
           "jsr:@std/fs@0.224",
           "jsr:@std/path@0.224",
           "jsr:@std/testing@^1.0.17",
-          "jsr:@ursamu/bbs@0.1",
-          "jsr:@ursamu/jobs@0.1",
-          "jsr:@ursamu/mush@~0.1.3",
+          "jsr:@ursamu/bbs@1",
+          "jsr:@ursamu/jobs@1",
+          "jsr:@ursamu/mush@1",
+          "npm:@langchain/anthropic@0.3",
           "npm:@langchain/core@0.3",
           "npm:@langchain/google-genai@0.2",
           "npm:@langchain/langgraph@0.2",
@@ -1382,7 +1424,6 @@
         "dependencies": [
           "jsr:@std/assert@0.224",
           "jsr:@std/testing@^1.0.17",
-          "jsr:@ursamu/help@^1.0.1",
           "jsr:@ursamu/jobs@^1.1.2",
           "jsr:@ursamu/mush@1"
         ]
@@ -1390,7 +1431,6 @@
       "packages/builder": {
         "dependencies": [
           "jsr:@std/assert@0.224",
-          "jsr:@ursamu/help@~0.1.9",
           "jsr:@ursamu/mush@1"
         ]
       },
@@ -1398,7 +1438,6 @@
         "dependencies": [
           "jsr:@std/assert@0.224",
           "jsr:@ursamu/core@1",
-          "jsr:@ursamu/help@~0.1.9",
           "jsr:@ursamu/mush@1"
         ]
       },
@@ -1422,6 +1461,11 @@
           "jsr:@std/path@0.224",
           "jsr:@std/semver@1",
           "jsr:@std/testing@0.224",
+          "jsr:@ursamu/combat@0.8",
+          "jsr:@ursamu/core@1",
+          "jsr:@ursamu/jobs@1",
+          "jsr:@ursamu/mail@^2.5.0",
+          "jsr:@ursamu/mush@1",
           "jsr:@ursamu/mushcode@0.7",
           "jsr:@zaubrik/djwt@^3.0.2",
           "npm:@digibear/tags@1.0.0",
@@ -1433,9 +1477,7 @@
       "packages/combat": {
         "dependencies": [
           "jsr:@std/assert@0.224",
-          "jsr:@std/path@0.224",
-          "jsr:@ursamu/core@0.1",
-          "jsr:@ursamu/mush@~0.1.3"
+          "jsr:@std/path@0.224"
         ]
       },
       "packages/core": {
@@ -1450,13 +1492,30 @@
           "npm:zod@4.4.3"
         ]
       },
+      "packages/cyberpunk": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/dotenv@0.224",
+          "jsr:@std/flags@0.224",
+          "jsr:@std/fmt@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@std/semver@1",
+          "jsr:@std/testing@0.224",
+          "jsr:@ursamu/mushcode@0.7",
+          "jsr:@zaubrik/djwt@^3.0.2",
+          "npm:@digibear/tags@1.0.0",
+          "npm:@ursamu/parser@1.2.4",
+          "npm:bcryptjs@2.4.3",
+          "npm:quickjs-emscripten@0.29.0"
+        ]
+      },
       "packages/discord": {
         "dependencies": [
           "jsr:@std/assert@0.224",
           "jsr:@std/testing@^1.0.17",
           "jsr:@ursamu/channels@1",
           "jsr:@ursamu/core@1",
-          "jsr:@ursamu/help@1",
           "jsr:@ursamu/jobs@~0.1.1",
           "jsr:@ursamu/mush@1",
           "npm:tweetnacl@1.0.3"
@@ -1472,7 +1531,6 @@
           "jsr:@std/path@0.224",
           "jsr:@std/semver@1",
           "jsr:@std/testing@0.224",
-          "jsr:@ursamu/help@~0.1.2",
           "jsr:@ursamu/mushcode@0.7",
           "jsr:@zaubrik/djwt@^3.0.2",
           "npm:@digibear/tags@1.0.0",
@@ -1483,7 +1541,9 @@
       },
       "packages/events": {
         "dependencies": [
-          "jsr:@std/assert@0.224"
+          "jsr:@std/assert@0.224",
+          "jsr:@ursamu/core@1",
+          "jsr:@ursamu/mush@1"
         ]
       },
       "packages/help": {
@@ -1499,7 +1559,6 @@
           "jsr:@std/assert@0.224",
           "jsr:@std/testing@^1.0.17",
           "jsr:@ursamu/core@1",
-          "jsr:@ursamu/help@1",
           "jsr:@ursamu/mail@^2.5.0",
           "jsr:@ursamu/mush@1"
         ]
@@ -1510,7 +1569,6 @@
           "jsr:@std/fs@0.224",
           "jsr:@std/path@0.224",
           "jsr:@std/testing@0.224",
-          "jsr:@ursamu/help@~0.1.2",
           "jsr:@ursamu/mush@~0.1.3"
         ]
       },
@@ -1519,22 +1577,19 @@
           "jsr:@std/assert@0.224",
           "jsr:@std/testing@^1.0.17",
           "jsr:@ursamu/core@1",
-          "jsr:@ursamu/help@1",
           "jsr:@ursamu/mush@1"
         ]
       },
       "packages/map": {
         "dependencies": [
           "jsr:@std/assert@1",
-          "jsr:@ursamu/help@1",
           "jsr:@ursamu/mush@^1.0.4"
         ]
       },
       "packages/mekton": {
         "dependencies": [
           "jsr:@std/assert@0.224",
-          "jsr:@std/testing@0.224",
-          "jsr:@ursamu/help@~0.1.2"
+          "jsr:@std/testing@0.224"
         ]
       },
       "packages/mush": {
@@ -1563,6 +1618,17 @@
           "npm:fflate@0.8.2"
         ]
       },
+      "packages/sprawl": {
+        "dependencies": [
+          "jsr:@std/assert@0.224"
+        ]
+      },
+      "packages/utopia": {
+        "dependencies": [
+          "jsr:@std/assert@1",
+          "jsr:@ursamu/mush@1"
+        ]
+      },
       "packages/vendor": {
         "dependencies": [
           "jsr:@std/assert@0.224",
@@ -1586,6 +1652,16 @@
         "dependencies": [
           "jsr:@std/assert@0.224",
           "jsr:@std/testing@^1.0.17"
+        ]
+      },
+      "jsr:@ursamu/web@0.2.73": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@ursamu/jobs@^1.1.2",
+          "jsr:@ursamu/mush@1",
+          "jsr:@ursamu/site@~0.1.5",
+          "jsr:@ursamu/wiki@~0.2.2"
         ]
       }
     }

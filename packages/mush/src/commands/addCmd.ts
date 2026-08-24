@@ -104,7 +104,13 @@ function ensureHandlersRegistered(): void {
       // 6. Bare speech → say (after commands / $patterns / exits).
       //    Pose/say shortcuts (":" ";" "\"" "'") and say/pose words already
       //    matched above when registered. Staff-style @ + / stay Huh.
-      if (shouldDefaultToSay(rawMsg)) {
+      //    Never rewrite a registered command verb into speech (web UX:
+      //    "wield x" must not become 'Alice says, "wield x"' when the
+      //    cmd missed lock/pattern — Huh instead).
+      if (
+        shouldDefaultToSay(rawMsg) &&
+        !isRegisteredCmdVerb(rawMsg, cmds)
+      ) {
         if (
           await matchNativeCmd(
             socketId,
@@ -147,6 +153,29 @@ export function shouldDefaultToSay(msg: string): boolean {
   // Staff / channel / path-style commands stay explicit
   if (/^[@+/\\]/.test(t)) return false;
   return true;
+}
+
+/**
+ * First token matches a registered addCmd name (with or without +).
+ * Used so failed/missed commands do not fall through to IC say.
+ */
+export function isRegisteredCmdVerb(
+  msg: string,
+  cmdList: ICmd[],
+): boolean {
+  const first = String(msg ?? "").trim().split(/\s+/)[0] ?? "";
+  if (!first) return false;
+  const w = first.toLowerCase();
+  const bare = w.startsWith("+") ? w.slice(1) : w;
+  if (!bare) return false;
+  for (const c of cmdList) {
+    const n = String(c.name ?? "").toLowerCase();
+    if (!n) continue;
+    if (n === w || n === bare) return true;
+    const nBare = n.startsWith("+") ? n.slice(1) : n;
+    if (nBare === bare) return true;
+  }
+  return false;
 }
 
 let _defaultsLoaded = false;

@@ -12,10 +12,12 @@ export interface IGMPersona {
   oocBrackets: boolean; // whether to use [OOC: ...] notation
 }
 
+export type GMProvider = "anthropic" | "google";
+
 export interface IGMConfig {
   id: "singleton"; // only one config record
-  provider: "google"; // only google for now
-  model: string; // "gemini-2.0-flash-latest"
+  provider: GMProvider; // anthropic (default) | google
+  model: string; // e.g. claude-haiku-4-5-20251001
   temperature: number; // 0.0–1.0, default 0.8
   systemId: string; // "urban-shadows" — active game system
   mode: GMMode; // "auto" | "hybrid"
@@ -43,8 +45,8 @@ export const DEFAULT_PERSONA: IGMPersona = {
 
 export const DEFAULT_CONFIG: IGMConfig = {
   id: "singleton",
-  provider: "google",
-  model: "gemini-2.0-flash-latest",
+  provider: "anthropic",
+  model: "claude-haiku-4-5-20251001",
   temperature: 0.8,
   systemId: "generic",
   mode: "auto",
@@ -54,7 +56,8 @@ export const DEFAULT_CONFIG: IGMConfig = {
   autoframe: true,
   greet: true,
   lateJoins: "include",
-  roundTimeoutSeconds: 300,
+  // Solo scenes shouldn't wait 5 minutes for a reply
+  roundTimeoutSeconds: 45,
   autoPublishLore: false,
   chaosLevel: 5,
   booksDir: "./books",

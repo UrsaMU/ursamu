@@ -1,0 +1,8 @@
+.DS_Store
+*.zip
+.preview-shell/
+.theme-studio/
+deno.lock
+.idea/
+.vscode/
+node_modules/

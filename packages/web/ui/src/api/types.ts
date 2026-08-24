@@ -64,6 +64,11 @@ export type WikiStub = {
   draft?: boolean;
   featured?: boolean;
   bgImage?: boolean;
+  home?: boolean;
+  /** Auto H1 on public site; default true. */
+  heading?: boolean;
+  /** Sep under auto H1; default true. */
+  rule?: boolean;
   author?: string;
   date?: string;
   readLock?: string;

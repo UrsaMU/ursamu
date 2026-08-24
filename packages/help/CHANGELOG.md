@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.0] - 2026-08-09
+
+### Added
+
+- In-game web UI for `help` on /play: multi-column clickable
+  topic chips (classic column layout), section browse, and
+  markdown topic pages — uses design.md play-action tokens
+- Telnet output unchanged (classic renderer)
+
 All notable changes to `@ursamu/help` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 

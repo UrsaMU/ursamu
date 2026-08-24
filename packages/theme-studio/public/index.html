@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>UrsaMU Theme Studio</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/grapesjs@0.22.5/dist/css/grapes.min.css"
+    />
+    <link rel="stylesheet" href="/css/studio.css" />
+  </head>
+  <body class="ts-app">
+    <header class="ts-top">
+      <div class="ts-brand">
+        <strong>UrsaMU Theme Studio</strong>
+        <span class="ts-muted">tokens · layouts · live · GrapesJS</span>
+      </div>
+      <div class="ts-manifest">
+        <label>
+          id
+          <input id="m-id" type="text" value="my-theme" spellcheck="false" />
+        </label>
+        <label>
+          label
+          <input id="m-label" type="text" value="My Theme" />
+        </label>
+        <label>
+          title
+          <input id="m-title" type="text" value="My Game" />
+        </label>
+        <label class="ts-check">
+          <input id="m-plain" type="checkbox" checked />
+          plainBg
+        </label>
+      </div>
+      <div class="ts-toolbar" role="group" aria-label="Preview controls">
+        <div class="ts-field-stack">
+          <span class="ts-field-stack__label">Mode</span>
+          <div class="ts-view-toggle" role="group" aria-label="Canvas mode">
+            <button
+              type="button"
+              class="ts-btn is-active"
+              id="btn-mode-grapes"
+            >
+              Grapes
+            </button>
+            <button type="button" class="ts-btn" id="btn-mode-live">
+              Live
+            </button>
+          </div>
+        </div>
+        <label class="ts-field-stack" for="layout-select">
+          <span class="ts-field-stack__label">Layout</span>
+          <select id="layout-select" aria-label="Shell layout">
+            <option value="home">Home</option>
+            <option value="wiki">Wiki index</option>
+            <option value="article">Wiki article</option>
+            <option value="help">Help</option>
+            <option value="login">Login</option>
+          </select>
+        </label>
+      </div>
+      <div class="ts-actions">
+        <span id="ts-workspace" class="ts-muted ts-workspace" hidden></span>
+        <button type="button" id="btn-reset" class="ts-btn" title="Reset draft">
+          Reset
+        </button>
+        <label class="ts-btn ts-file-btn">
+          Import zip
+          <input id="import-file" type="file" accept=".zip,application/zip" hidden />
+        </label>
+        <label class="ts-btn ts-file-btn">
+          Import CSS
+          <input id="import-css" type="file" accept=".css,text/css" hidden />
+        </label>
+        <label class="ts-btn ts-file-btn">
+          Import draft
+          <input
+            id="import-draft"
+            type="file"
+            accept=".json,application/json"
+            hidden
+          />
+        </label>
+        <button type="button" id="btn-export-draft" class="ts-btn">
+          Share draft
+        </button>
+        <button type="button" id="btn-tokens" class="ts-btn">
+          Apply
+        </button>
+        <button
+          type="button"
+          id="btn-save"
+          class="ts-btn"
+          hidden
+          title="Write theme.json + site.css to workspace"
+        >
+          Save theme
+        </button>
+        <button type="button" id="btn-export" class="ts-btn ts-btn--primary">
+          Export zip
+        </button>
+      </div>
+    </header>
+
+    <div class="ts-body">
+      <aside class="ts-side ts-side--left" aria-label="Tokens">
+        <div class="ts-side__head">
+          <h2>Tokens</h2>
+          <p class="ts-muted">
+            <code>:root { --site-* }</code> · structure locked
+          </p>
+          <label class="ts-field-stack ts-preset-row">
+            <span class="ts-field-stack__label">Preset</span>
+            <select id="preset-select" aria-label="Token preset">
+              <option value="">— custom —</option>
+            </select>
+          </label>
+          <div class="ts-mode-row" role="group" aria-label="Color mode">
+            <button type="button" class="ts-btn is-active" data-color-mode="light" id="btn-mode-light">
+              Light
+            </button>
+            <button type="button" class="ts-btn" data-color-mode="dark" id="btn-mode-dark">
+              Dark
+            </button>
+          </div>
+          <label class="ts-check">
+            <input id="export-dual" type="checkbox" />
+            Export dual light/dark CSS
+          </label>
+          <div id="contrast-panel" class="ts-contrast" aria-live="polite"></div>
+        </div>
+        <div id="token-panels" class="ts-token-panels"></div>
+
+        <div class="ts-media">
+          <div class="ts-media-tabs" role="tablist" aria-label="Media">
+            <button
+              type="button"
+              class="ts-media-tab is-active"
+              data-media="images"
+              role="tab"
+              aria-selected="true"
+            >
+              Images
+            </button>
+            <button
+              type="button"
+              class="ts-media-tab"
+              data-media="fonts"
+              role="tab"
+              aria-selected="false"
+            >
+              Fonts
+            </button>
+          </div>
+
+          <div
+            id="media-images"
+            class="ts-media-pane is-active"
+            role="tabpanel"
+          >
+            <div class="ts-media-row">
+              <label class="ts-btn ts-file-btn ts-media-upload">
+                + Image
+                <input
+                  id="asset-file"
+                  type="file"
+                  accept="image/*,.svg"
+                  hidden
+                />
+              </label>
+              <select
+                id="asset-token"
+                class="ts-media-select"
+                aria-label="Assign image to token"
+                title="Assign to token"
+              >
+                <option value="">No token</option>
+                <option value="--site-bg-image-top">BG top</option>
+                <option value="--site-bg-image-bottom">BG bottom</option>
+                <option value="--site-rule-image">Rule</option>
+                <option value="--site-search-icon">Search icon</option>
+              </select>
+            </div>
+            <label class="ts-check ts-media-opt">
+              <input id="asset-as-banner" type="checkbox" />
+              Use as banner
+            </label>
+            <ul id="asset-list" class="ts-media-list"></ul>
+          </div>
+
+          <div
+            id="media-fonts"
+            class="ts-media-pane"
+            role="tabpanel"
+            hidden
+          >
+            <div class="ts-media-row">
+              <label class="ts-btn ts-file-btn ts-media-upload">
+                + Font
+                <input
+                  id="font-file"
+                  type="file"
+                  accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf,application/font-woff,application/font-woff2"
+                  multiple
+                  hidden
+                />
+              </label>
+            </div>
+            <input
+              id="font-family"
+              class="ts-media-input"
+              type="text"
+              spellcheck="false"
+              placeholder="Rename selected family…"
+              aria-label="Font family name"
+            />
+            <ul
+              id="font-list"
+              class="ts-media-list ts-media-list--fonts"
+              role="listbox"
+              aria-label="Uploaded fonts"
+            ></ul>
+            <div class="ts-media-apply" id="font-apply-bar" hidden>
+              <button type="button" class="ts-btn" id="font-apply-ui">
+                UI
+              </button>
+              <button type="button" class="ts-btn" id="font-apply-display">
+                Display
+              </button>
+              <button
+                type="button"
+                class="ts-btn ts-btn--primary"
+                id="font-apply-both"
+              >
+                Both
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="ts-canvas-wrap">
+        <div id="gjs" class="ts-pane is-active"></div>
+        <iframe
+          id="live-frame"
+          class="ts-pane"
+          title="Live site.js preview"
+          src="about:blank"
+        ></iframe>
+      </main>
+
+      <aside class="ts-side ts-side--right" aria-label="Grapes panels">
+        <div class="ts-tabs" role="tablist">
+          <button
+            type="button"
+            class="ts-tab is-active"
+            data-panel="styles"
+          >
+            Styles
+          </button>
+          <button type="button" class="ts-tab" data-panel="layers">
+            Layers
+          </button>
+          <button type="button" class="ts-tab" data-panel="css">
+            CSS
+          </button>
+        </div>
+        <div id="blocks" class="ts-gjs-host" hidden></div>
+        <div id="styles-container" class="ts-gjs-host"></div>
+        <div id="layers-container" class="ts-gjs-host" hidden></div>
+        <div id="css-panel" class="ts-gjs-host" hidden>
+          <label class="ts-css-label" for="css-extras">
+            Extra CSS (exported with theme)
+          </label>
+          <textarea
+            id="css-extras"
+            class="ts-css-extras"
+            spellcheck="false"
+            placeholder="/* optional rules — prefer tokens */"
+          ></textarea>
+          <p class="ts-muted ts-hint">
+            Live preview uses real site.js (wiki / help / login).
+            Grapes is for locked-shell styling.
+          </p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="ts-foot">
+      <span id="ts-status" class="ts-muted">Loading…</span>
+      <span class="ts-muted">
+        Export → Admin → Public site ·
+        <a href="https://github.com/UrsaMU/web-template">web-template</a>
+      </span>
+    </footer>
+
+    <script src="https://unpkg.com/grapesjs@0.22.5"></script>
+    <script src="/js/studio.js" type="module"></script>
+  </body>
+</html>

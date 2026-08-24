@@ -1,0 +1,295 @@
+{
+  "key": "cpr-combat",
+  "label": "Cyberpunk RED — Combat",
+  "vars": { "player": "V", "target": "Rogue" },
+  "setup": {
+    "character": {
+      "stats": { "int": 6, "ref": 8, "dex": 7, "tech": 5, "cool": 7, "will": 6, "luck": 6, "move": 6, "body": 7, "emp": 6, "empBase": 7 },
+      "hp": { "max": 45, "current": 45 },
+      "swThreshold": 23,
+      "deathSave": 7,
+      "deathSavePenalty": 0,
+      "role": "solo",
+      "roleRank": 4,
+      "roleData": {},
+      "skills": { "athletics": 6, "brawling": 4, "concentration": 3, "conversation": 2, "education": 2, "evasion": 6, "handgun": 6, "human_perception": 3, "interrogation": 4, "local_expert": 2, "perception": 6, "persuasion": 2, "shoulder_arms": 6, "stealth": 4, "streetwise": 4, "tactics": 4, "tracking": 2 },
+      "luckRemaining": 6,
+      "woundState": "healthy",
+      "criticalInjuries": [],
+      "armorBody": { "name": "Light Armorjack", "sp": 11, "currentSp": 11, "penalty": 0 },
+      "armorHead": null,
+      "cyberware": [],
+      "humanityLoss": 0,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 3,
+      "reputationDeeds": [],
+      "eurodollars": 2550,
+      "lifestyle": { "tier": "low", "nextDueDate": 0 },
+      "lifepath": { "culturalOrigin": "North American", "language": "English" },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": []
+    },
+    "targets": {
+      "Ganger": {
+        "stats": { "int": 4, "ref": 6, "dex": 6, "tech": 3, "cool": 5, "will": 5, "luck": 3, "move": 6, "body": 6, "emp": 4, "empBase": 4 },
+        "hp": { "max": 35, "current": 35 },
+        "swThreshold": 18,
+        "deathSave": 6,
+        "deathSavePenalty": 0,
+        "role": "solo",
+        "roleRank": 1,
+        "roleData": {},
+        "skills": { "athletics": 3, "brawling": 3, "handgun": 4, "evasion": 3, "perception": 3 },
+        "luckRemaining": 3,
+        "woundState": "healthy",
+        "criticalInjuries": [],
+        "armorBody": { "name": "Kevlar", "sp": 7, "currentSp": 7, "penalty": 0 },
+        "armorHead": null,
+        "cyberware": [],
+        "humanityLoss": 0,
+        "bodysculpt": [],
+        "activeEffects": [],
+        "reputation": 0,
+        "reputationDeeds": [],
+        "eurodollars": 200,
+        "lifestyle": null,
+        "lifepath": {},
+        "chargenComplete": true,
+        "chargenStage": "complete",
+        "chargenMethod": "streetrat",
+        "restTimer": null,
+        "humanityGainedAt": null,
+        "locationEffects": []
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Initiative"
+    },
+    {
+      "note": "+init rolls REF + 1d10 for initiative. All participants roll; the GM tracks turn order."
+    },
+    {
+      "cmd": "+init",
+      "label": "roll initiative"
+    },
+    {
+      "cmd": "+combat/queue",
+      "label": "display initiative order"
+    },
+    {
+      "sub": "Attacking"
+    },
+    {
+      "note": "+attack rolls the appropriate weapon skill + REF vs the target's DV. Specify target by name."
+    },
+    {
+      "cmd": "+attack Ganger",
+      "label": "standard ranged attack"
+    },
+    {
+      "cmd": "+attack/melee Ganger",
+      "label": "melee attack (Brawling or Melee Weapon)"
+    },
+    {
+      "cmd": "+attack/aimed Ganger",
+      "label": "aimed shot — -8 to attack, +1 damage on hit (errata)"
+    },
+    {
+      "cmd": "+attack/auto Ganger with smg at medium",
+      "label": "autofire SMG at medium range — DV from errata p.173 table"
+    },
+    {
+      "sub": "Called Shots (Ranged)"
+    },
+    {
+      "note": "Called shots take -8 to attack. Head shots double damage AFTER armor (CPR Core p.180). Limb/eye shots apply a location effect on any hit."
+    },
+    {
+      "cmd": "+attack/called Ganger/head",
+      "label": "head shot — head SP, ×2 damage after armor"
+    },
+    {
+      "cmd": "+attack/called Ganger/arm",
+      "label": "called shot to arm — disarm on hit"
+    },
+    {
+      "cmd": "+attack/called Ganger/leg",
+      "label": "called shot to leg — -4 MOVE on hit"
+    },
+    {
+      "cmd": "+attack/called Ganger/eye",
+      "label": "called shot to eye — blind on hit"
+    },
+    {
+      "cmd": "+suppress The alley entrance",
+      "label": "suppressive fire — pin everyone in the area (WILL DV15)"
+    },
+    {
+      "sub": "Ammunition (CPR Core p.344-347 / errata p.345-347)"
+    },
+    {
+      "note": "+ammo lists your loadout and lets you switch the loaded ammo for each weapon. AP halves SP and halves damage vs Light/Medium armor. Expansive doubles damage vs unarmored but cannot harm armored targets. Rubber routes damage to the stun pool instead of HP. Smart ammo requires a Smartgun Link cyberware."
+    },
+    {
+      "cmd": "+ammo",
+      "label": "view current ammo loadout"
+    },
+    {
+      "cmd": "+ammo/types",
+      "label": "list every ammo type and effect"
+    },
+    {
+      "cmd": "+ammo/load handgun=armor_piercing",
+      "label": "load AP rounds — halves SP, halves damage vs Light/Medium"
+    },
+    {
+      "cmd": "+attack Ganger",
+      "label": "attack with AP loaded — note the [ARMOR_PIERCING] tag on output"
+    },
+    {
+      "cmd": "+ammo/load handgun=rubber",
+      "label": "swap to rubber — non-lethal, routes to stun pool"
+    },
+    {
+      "cmd": "+attack Ganger",
+      "label": "rubber attack — damage hits STUN, [KO] when stun ≤ 0"
+    },
+    {
+      "cmd": "+ammo/load handgun=incendiary",
+      "label": "swap to incendiary — 1 ongoing burn damage on hit"
+    },
+    {
+      "cmd": "+attack Ganger",
+      "label": "incendiary attack — target gains a burn effect"
+    },
+    {
+      "sub": "Ongoing Ammo Effects"
+    },
+    {
+      "note": "+effects shows active on-hit conditions (burn, poison, sleep, EMP, biotoxin). Effects tick on the target's +pass action and apply damage / save DV as appropriate. /snuff puts out fires."
+    },
+    {
+      "cmd": "+effects",
+      "label": "list any active ammo effects on you"
+    },
+    {
+      "cmd": "+effects/snuff",
+      "label": "spend an action to extinguish a burn effect"
+    },
+    {
+      "sub": "Grenades & Rockets"
+    },
+    {
+      "note": "+throw <grenade>=<target> lobs a grenade. AoE defaults to AP (errata p.345). Damage grenades roll Xd6 vs every target in the area; save-based grenades (flashbang/teargas/sonic) trigger a save instead of damage."
+    },
+    {
+      "cmd": "+throw frag_grenade=Ganger",
+      "label": "frag — 6d6 AP vs everyone in the room"
+    },
+    {
+      "cmd": "+throw flashbang=Ganger",
+      "label": "flashbang — DV15 BODY save or blinded"
+    },
+    {
+      "cmd": "+throw smoke_grenade=Ganger",
+      "label": "smoke — creates a smoke zone, -4 to targeted actions"
+    },
+    {
+      "sub": "Brawl Moves"
+    },
+    {
+      "note": "Brawl moves use Brawling skill. Most are opposed rolls (attacker vs defender). Grab must succeed before throw/pin/choke."
+    },
+    {
+      "cmd": "+brawl/grab Ganger",
+      "label": "attempt to grab — Brawling vs Brawling"
+    },
+    {
+      "cmd": "+brawl/throw Ganger",
+      "label": "throw a grabbed target — 1d6 damage + prone"
+    },
+    {
+      "cmd": "+brawl/pin Ganger",
+      "label": "pin a grabbed target — immobilized until escape"
+    },
+    {
+      "cmd": "+brawl/choke Ganger",
+      "label": "choke a grabbed target — STUN damage, possible unconscious"
+    },
+    {
+      "cmd": "+brawl/disarm Ganger",
+      "label": "disarm — no grab needed, BOD+Brawling vs defender"
+    },
+    {
+      "sub": "Passing a Turn"
+    },
+    {
+      "cmd": "+pass",
+      "label": "pass your turn this round"
+    },
+    {
+      "sub": "Wounds"
+    },
+    {
+      "note": "+wound applies direct damage. Admin/medtech use. Player-facing wound tracking is handled by attack resolution."
+    },
+    {
+      "cmd": "+wound V 15",
+      "label": "apply 15 damage to V (admin)",
+      "as": "admin"
+    },
+    {
+      "cmd": "+crit",
+      "label": "roll a critical injury to body (2d6 on table)"
+    },
+    {
+      "cmd": "+crit head",
+      "label": "roll a critical injury to head"
+    },
+    {
+      "sub": "Stabilization & Healing"
+    },
+    {
+      "note": "+stabilize <target> stabilizes a Mortally Wounded character (requires First Aid roll). +deathsave is used automatically when at 0 HP — BODY vs threshold."
+    },
+    {
+      "cmd": "+firstaid Ganger",
+      "label": "apply first aid to a target character — TECH+first_aid vs DV15 for 1d6 HP"
+    },
+    {
+      "cmd": "+heal 10",
+      "label": "apply 10 healing to self (admin/medtech direct HP grant)"
+    },
+    {
+      "cmd": "+heal Ganger 10",
+      "label": "apply 10 healing to another character (admin only)",
+      "as": "admin"
+    },
+    {
+      "cmd": "+stim",
+      "label": "use a Speedheal stim — restore 10 HP instantly"
+    },
+    {
+      "sub": "Combat Log & End"
+    },
+    {
+      "cmd": "+combat/log",
+      "label": "view the combat log for this encounter"
+    },
+    {
+      "cmd": "+combat/end",
+      "label": "end the combat encounter (admin)",
+      "as": "admin"
+    },
+    {
+      "reset": true
+    }
+  ]
+}

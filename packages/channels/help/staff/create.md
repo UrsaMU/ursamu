@@ -10,14 +10,16 @@ See also: +help staff (overview)
 SYNTAX
   @chancreate <name>[=<header>]
   @chancreate/hidden <name>[=<header>]
-  @chancreate/lock <name>=<lock>
+  @chancreate/lock <name>=<key>
   @chandestroy <name>
 
-  Aliases: @ccreate, @cdestroy. Destroy removes history.
+  Aliases: @ccreate, @cdestroy.
+  Lock keys: +help staff/locks
 
 EXAMPLES
   @ccreate Staff
-  @ccreate/hidden Admin=[ADMIN]
+  @ccreate/lock Admin=connected admin+
+  @ccreate/hidden OOC=[OOC]
   @cdestroy temp-ooc
 
-SEE ALSO: +help staff/chanset, +help staff/locks
+SEE ALSO: +help staff/locks, +help staff/chanset

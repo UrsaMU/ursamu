@@ -73,6 +73,12 @@
   --site-bg-image-bottom: url("/site/skins/court/imgs/footer.png");
   --site-rule-image: url("/site/skins/court/imgs/hr.svg");
   --site-search-icon: url("/site/skins/court/imgs/search.png");
+
+  /* Termv media rails (optional) — sep-top + sep-bottom caps */
+  /* --site-sep-top: url("…/sep-top.svg"); */
+  /* --site-sep-bottom: url("…/sep-bottom.svg"); */
+  /* --site-sep-h: 15px; */
+  /* --site-sep-inset-end: 25px; */
 }
 
 /* Optional: local fonts */

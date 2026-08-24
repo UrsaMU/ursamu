@@ -20,6 +20,12 @@ import {
   renderIndex,
   renderSection,
 } from "./renderer.ts";
+import {
+  sendHelpIndexUi,
+  sendHelpSectionUi,
+  sendHelpTopicUi,
+} from "./help-ui.ts";
+import { filterTopicsForViewer } from "./visibility.ts";
 
 // ── help ────────────────────────────────────────────────────────────────────
 
@@ -55,27 +61,43 @@ Examples:
   },
 });
 
+function viewerIsStaff(u: IUrsamuSDK): boolean {
+  const f = u.me.flags;
+  return f.has("admin") || f.has("wizard") ||
+    f.has("superuser") || f.has("staff");
+}
+
 async function showIndex(u: IUrsamuSDK): Promise<void> {
   const all = await helpRegistry.all();
-  const visible = all.filter((e) => !e.hidden);
+  if (sendHelpIndexUi(u, all)) return;
+
+  const staff = viewerIsStaff(u);
+  const visible = filterTopicsForViewer(all, staff);
   const sections = await helpRegistry.sections();
   const filteredSections = sections.filter((s) => s !== "general");
   const generalTopics = visible
     .filter((e) => e.section === "general")
     .map((e) => e.name);
-  const combined = [...filteredSections, ...generalTopics].sort((a, b) =>
-    a.localeCompare(b)
+  const combined = [...filteredSections, ...generalTopics].sort(
+    (a, b) => a.localeCompare(b),
   );
   u.send(renderIndex(combined, visible.length));
 }
 
-async function showSection(u: IUrsamuSDK, section: string): Promise<void> {
+async function showSection(
+  u: IUrsamuSDK,
+  section: string,
+): Promise<void> {
   if (!section) {
     await showIndex(u);
     return;
   }
   const entries = await helpRegistry.inSection(section);
-  u.send(renderSection(section, entries));
+  if (sendHelpSectionUi(u, section, entries)) return;
+  const staff = viewerIsStaff(u);
+  u.send(
+    renderSection(section, filterTopicsForViewer(entries, staff)),
+  );
 }
 
 async function showTopic(u: IUrsamuSDK, topic: string): Promise<void> {
@@ -95,6 +117,7 @@ async function showTopic(u: IUrsamuSDK, topic: string): Promise<void> {
     return;
   }
 
+  if (sendHelpTopicUi(u, entry)) return;
   u.send(renderEntry(entry));
 }
 

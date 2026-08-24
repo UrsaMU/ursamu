@@ -1,0 +1,253 @@
+{
+  "key": "sg-sheet-rolls",
+  "label": "Sprawl Goons \u2014 Sheet & Action Rolls",
+  "vars": {
+    "player": "Neon"
+  },
+  "setup": {
+    "character": {
+      "version": 1,
+      "chargenStatus": "approved",
+      "chargenComplete": true,
+      "name": "Neon",
+      "stats": {
+        "morphology": 1,
+        "equilibrium": 0,
+        "reaction": 2,
+        "cognition": 1,
+        "affinity": 0
+      },
+      "resilience": 12,
+      "resilienceMax": 12,
+      "loadoutMax": 10,
+      "bityuan": 800,
+      "background": "nodejacker",
+      "backgroundName": "Nodejacker",
+      "edge": "nodejacker-edge",
+      "edgeName": "Feedwise",
+      "affectations": [
+        "Neonpunk"
+      ],
+      "quirks": [],
+      "loadout": [],
+      "augs": [
+        {
+          "slug": "neural-lattice",
+          "name": "Neural Lattice",
+          "modStat": "cognition",
+          "mod": 1
+        }
+      ],
+      "shards": [],
+      "software": [
+        "neuroshield"
+      ],
+      "console": "npod",
+      "ap": 25,
+      "level": 0,
+      "missionReady": true,
+      "notes": ""
+    },
+    "items": [
+      {
+        "slug": "pkd-45",
+        "name": "Charon PKD-45",
+        "kind": "firearm",
+        "category": "handgun",
+        "load": 1,
+        "bonus": 1
+      },
+      {
+        "slug": "motorcycle-leathers",
+        "name": "Motorcycle Leathers",
+        "kind": "armor",
+        "load": 1,
+        "bonus": 1
+      }
+    ]
+  },
+  "steps": [
+    {
+      "sub": "Character sheet"
+    },
+    {
+      "cmd": "+sheet",
+      "label": "full sheet"
+    },
+    {
+      "expect": "Nodejacker"
+    },
+    {
+      "cmd": "+sheet/stats",
+      "label": "stats panel"
+    },
+    {
+      "cmd": "+sheet/loadout",
+      "label": "loadout panel"
+    },
+    {
+      "cmd": "inv",
+      "label": "builtin inventory"
+    },
+    {
+      "cmd": "+sheet/augs",
+      "label": "augs panel"
+    },
+    {
+      "cmd": "+sheet/combat",
+      "label": "combat panel"
+    },
+    {
+      "cmd": "+sheet/edge",
+      "label": "edge panel"
+    },
+    {
+      "expect": "Feedwise"
+    },
+    {
+      "sub": "Action rolls (2d6)"
+    },
+    {
+      "note": "Stat + bonuses vs DS. Glitch/Upgrade cancel."
+    },
+    {
+      "cmd": "+roll reaction/10",
+      "label": "REA vs DS10"
+    },
+    {
+      "expect": "REA"
+    },
+    {
+      "cmd": "+roll cognition/hard +upgrade",
+      "label": "COG hard +Upgrade"
+    },
+    {
+      "expect": "COG"
+    },
+    {
+      "cmd": "+roll affinity/10 +bg +1",
+      "label": "AFF +bg +1"
+    },
+    {
+      "expect": "AFF"
+    },
+    {
+      "cmd": "+roll morphology/easy",
+      "label": "MOR easy"
+    },
+    {
+      "expect": "MOR"
+    },
+    {
+      "sub": "Score track"
+    },
+    {
+      "cmd": "+score",
+      "label": "show scores"
+    },
+    {
+      "sub": "Dangerous attack (compact + mag)"
+    },
+    {
+      "cmd": "+gear/wield pkd-45",
+      "label": "wield revolver"
+    },
+    {
+      "cmd": "+attack 10",
+      "label": "gun vs DS10"
+    },
+    {
+      "expect": "REA"
+    },
+    {
+      "expect": "Mag"
+    },
+    {
+      "cmd": "+attack/burst 12",
+      "label": "burst +2"
+    },
+    {
+      "expect": "burst+2"
+    },
+    {
+      "cmd": "+reload",
+      "label": "reload revolver"
+    },
+    {
+      "expect": "Reloaded"
+    },
+    {
+      "cmd": "+attack/melee 10",
+      "label": "melee (MOR)"
+    },
+    {
+      "expect": "MOR"
+    },
+    {
+      "cmd": "+gear/wield pkd-45",
+      "label": "gun again"
+    },
+    {
+      "cmd": "+attack/aim 10",
+      "label": "aimed shot"
+    },
+    {
+      "expect": "aim+1"
+    },
+    {
+      "sub": "Auto fire DoT on hit"
+    },
+    {
+      "cmd": "+gear/load pkd-45=hellfires",
+      "label": "load hellfires"
+    },
+    {
+      "expect": "Loaded"
+    },
+    {
+      "cmd": "+reload",
+      "label": "top mag"
+    },
+    {
+      "cmd": "+attack 8",
+      "label": "hellfire auto burn"
+    },
+    {
+      "expect": "FIRE/ACID"
+    },
+    {
+      "expect": "burns"
+    },
+    {
+      "sub": "Advancement (mission or AP)"
+    },
+    {
+      "cmd": "+advance",
+      "label": "advance status"
+    },
+    {
+      "expect": "mission credit"
+    },
+    {
+      "cmd": "+advance/reaction",
+      "label": "mission pick REA+1"
+    },
+    {
+      "expect": "mission"
+    },
+    {
+      "cmd": "+ap/add 100",
+      "label": "bank 100 AP"
+    },
+    {
+      "expect": "AP now"
+    },
+    {
+      "cmd": "+advance/loadout",
+      "label": "AP pick loadout+1"
+    },
+    {
+      "expect": "Loadout"
+    }
+  ]
+}

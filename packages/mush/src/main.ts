@@ -164,7 +164,9 @@ export const initializeEngine = async (
 
   // Soft-register packaged help (optional @ursamu/help)
   try {
-    const { registerHelpDir } = await import("@ursamu/help");
+    const { registerHelpDir } = await import(
+      "@ursamu/help/register"
+    );
     for (const sec of ["social", "info", "staff", "building"]) {
       registerHelpDir(
         new URL(`../help/${sec}`, import.meta.url),

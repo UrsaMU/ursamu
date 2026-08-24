@@ -12,7 +12,7 @@ import {
   HumanMessage,
   SystemMessage,
 } from "@langchain/core/messages";
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { ALL_TOOLS } from "../tools.ts";
 
 // ─── Shared state ─────────────────────────────────────────────────────────────
@@ -70,7 +70,10 @@ export function extractOutputNode(state: GMState): Partial<GMState> {
 // messages. The system prompt is expected to already be in state.messages[0]
 // as a SystemMessage when the graph is first invoked.
 
-export function makeAgentNode(model: ChatGoogleGenerativeAI) {
+export function makeAgentNode(model: BaseChatModel) {
+  if (typeof model.bindTools !== "function") {
+    throw new Error("GM model does not support bindTools");
+  }
   const bound = model.bindTools(ALL_TOOLS);
   return async (state: GMState): Promise<Partial<GMState>> => {
     const response = await bound.invoke(state.messages);
@@ -80,7 +83,7 @@ export function makeAgentNode(model: ChatGoogleGenerativeAI) {
 
 // ─── Graph factory ────────────────────────────────────────────────────────────
 
-export function buildGraph(model: ChatGoogleGenerativeAI) {
+export function buildGraph(model: BaseChatModel) {
   const agentNode = makeAgentNode(model);
 
   const graph = new StateGraph(GMStateAnnotation)

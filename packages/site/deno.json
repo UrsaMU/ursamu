@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/site",
-  "version": "0.1.93",
+  "version": "0.1.96",
   "description": "Public UrsaMU front-end shell \u2014 layout framing, design tokens, swappable skins.",
   "license": "MIT",
   "exports": {
@@ -21,6 +21,7 @@
       "src",
       "public",
       "examples",
+      "docs",
       "scripts",
       "deno.json",
       "README.md",
@@ -34,7 +35,8 @@
     "check": "deno check mod.ts --unstable-kv",
     "lint": "deno lint src/ mod.ts tests/",
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",
-    "pack-theme": "deno run -A ./scripts/pack-theme.ts"
+    "pack-theme": "deno run -A ./scripts/pack-theme.ts",
+    "preview-theme": "deno run -A ./scripts/preview-theme.ts"
   },
   "lint": {
     "exclude": [

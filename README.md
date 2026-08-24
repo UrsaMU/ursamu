@@ -4,589 +4,114 @@
 ![ursamu header](https://raw.githubusercontent.com/ursamu/ursamu/main/ursamu_github_banner.png)
 
 [![JSR](https://jsr.io/badges/@ursamu/mush)](https://jsr.io/@ursamu/mush)
-[![Version](https://img.shields.io/badge/mush-1.0.30-blue)](https://jsr.io/@ursamu/mush)
-[![CLI](https://img.shields.io/badge/cli-0.1.2-blue)](https://jsr.io/@ursamu/cli)
+[![CLI](https://img.shields.io/badge/cli-0.1.4-blue)](https://jsr.io/@ursamu/cli)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Deno](https://img.shields.io/badge/deno-2.x-black)](https://deno.land)
 
-A modern MUSH-like server in TypeScript/Deno. Full TinyMUX 2.x softcode,
-versioned REST API, public portal (`@ursamu/site`) and staff console
-(`@ursamu/web`), and zero external database dependencies — TypeGraph with
-PGlite (local/in-memory PostgreSQL) by default, Deno KV as a fallback.
+A TypeScript/Deno MUSH server. You scaffold a **game project**, pin the
+engine from JSR, and run it. TinyMUX-style softcode, a public site,
+staff console, and `/play` are included.
+
+Need Deno 2.x: <https://deno.land>
 
 ---
 
-## Table of Contents
-
-- [Quick Start](#quick-start)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Configuration](#configuration)
-- [Tasks](#tasks)
-- [Plugins](#plugins)
-- [Plugin Development](#plugin-development)
-- [REST API](#rest-api)
-- [Stdlib (v2.5.1+)](#stdlib-v251)
-- [Docker](#docker)
-- [Production Deployment](#production-deployment)
-- [Testing](#testing)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
-## Quick Start
-
-Prerequisite: [Deno](https://deno.land) 2.x.
+## Make a game
 
 ```bash
-# Scaffold a new game (engine + portal stack) from JSR
-deno run -A jsr:@ursamu/cli@0.1.2/create my-game
+deno run -A jsr:@ursamu/cli@0.1.4/create my-game
 cd my-game
-
-# Start the supervised server
 deno task start
 ```
 
-Default listeners (scaffolded games):
+If Deno refuses a just-published CLI version, add
+`--minimum-dependency-age=0` to the `deno run` line.
 
-| Port | Protocol | Purpose |
-|------|----------|---------|
-| `4201` | Telnet | Legacy MU* clients |
-| `4202` | WebSocket | Game WS hub |
-| `4203` | HTTP | REST API + static portal |
+| Open this | What it is |
+|-----------|------------|
+| <http://localhost:4203/> | Public site |
+| <http://localhost:4203/play> | Browser client |
+| <http://localhost:4203/admin/> | Staff console |
+| `telnet localhost 4201` | Classic MU* client |
 
-Open the public site at `http://localhost:4203/` (when `@ursamu/site` is
-installed with `plugins.site.serveRoot: true`). Staff console:
-`http://localhost:4203/admin/`. Play client: `/play`. Telnet:
-`telnet localhost 4201`.
+Port `4202` is the WebSocket hub. Do not open it in a browser.
 
-**First staff account:** with an empty database, register via the web
-UI (`/register` or site login). The first web registrant receives
-`superuser`. Telnet `create <name> <password>` still works for the
-first player when no accounts exist.
+**First character:** on telnet, type
+`create <name> <password>`. The first player becomes superuser.
 
-### From source (engine monorepo)
+Day-to-day in that game folder:
+
+```bash
+deno task start      # foreground
+deno task daemon     # background
+deno task status
+deno task stop
+```
+
+More: [docs/guides/installation.md](docs/guides/installation.md),
+[docs/guides/cli.md](docs/guides/cli.md).
+
+---
+
+## What you get
+
+A new game is a small folder (`config/`, `src/`, `scripts/`, `.env`)
+that imports the engine. Default plugins: help, channels, builder, bbs,
+mail, wiki, staff web, public site.
+
+| Package | Role |
+|---------|------|
+| `@ursamu/mush` | Engine (world, commands, softcode) |
+| `@ursamu/core` | Transports + database |
+| `@ursamu/cli` | `create` / `plugin` / `update` |
+| `@ursamu/site` | Public site + `/play` |
+| `@ursamu/web` | Staff console at `/admin/` |
+
+Games import `jsr:@ursamu/mush`. Older `jsr:@ursamu/ursamu` still
+works as a shim.
+
+Official plugins and TTRPG systems live under `packages/` and publish
+as `@ursamu/*`. Catalog:
+[docs/plugins/official-plugins.md](docs/plugins/official-plugins.md).
+
+---
+
+## Work on the engine
+
+This repo is the monorepo, not a playable game. Scaffold a **local**
+game that points at the checkout:
 
 ```bash
 git clone https://github.com/UrsaMU/ursamu.git
 cd ursamu
-# Prefer scaffolding a child game with --local for engine work:
 deno run -A packages/cli/src/create.ts my-game --local
 cd my-game && deno task start
 ```
 
----
-
-## Features
-
-**Engine**
-
-- **TinyMUX 2.x softcode** — full evaluator with ~250 stdlib functions
-  (math/string/list/logic/object/registers/output), action commands
-  (`@switch`, `@dolist`, `@if`, `@while`, `@break`, `@trigger`, `@wait`),
-  `$`-pattern command attrs and `^`-pattern listener attrs with `%0`–`%9`
-  capture groups, master-room routing, zones (`@zone`).
-- **Sandboxed scripting** — every script runs in an isolated Web Worker
-  with the full `IUrsamuSDK`. A bad script cannot crash the server.
-- **Native command surface** — 102 built-in commands (admin, building,
-  comms, channels, queries, status, auth) registered via `addCmd`.
-- **Zero external database dependencies** — TypeGraph (built on Postgres/PGlite)
-  running locally or in-memory is the default datastore, with a fallback Deno KV adapter
-  available. No external database server setup required.
-- **Hot reload** — `@reload` swaps commands, config, scripts, and
-  plugins without disconnecting players. `@reboot` and `@update` send
-  `SIGUSR2` to the supervised parent for no-disconnect restarts; the
-  Telnet sidecar persists and JWT clients auto-reauth.
-
-**Plugin system (v2.6.0)**
-
-- Manifest-driven installs with **semver-aware dependency resolution**
-  (`deps[].version` supports ranges like `^1.2.0` or `>=1.0.0 <2.0.0`).
-- **Fail-fast atomic installs** — a single failure anywhere in the
-  manifest (unsafe name/URL, clone failure, version mismatch, conflict
-  between requesters) aborts the run and rolls back every directory and
-  registry mutation. Previously installed plugins are untouched.
-- Typed error hierarchy: `PluginInstallError` base plus
-  `PluginDepNameError`, `PluginDepUrlError`, `PluginCloneError`,
-  `PluginRenameError`, `PluginVersionError`, `PluginSemverError`,
-  `PluginConflictError`.
-- 10 official plugins ship pre-wired; community plugins drop into
-  `plugins.manifest.json`.
-
-**Formatting pipeline (v2.3.x – v2.4.x)**
-
-- 8 format slots: `NAMEFORMAT`, `DESCFORMAT`, `CONFORMAT`, `EXITFORMAT`,
-  `WHOFORMAT`, `WHOROWFORMAT`, `PSFORMAT`, `PSROWFORMAT`, plus arbitrary
-  plugin-defined `UPPERCASE` slot names.
-- `registerFormatHandler` for TS handlers; **`registerFormatTemplate`**
-  for raw MUSH-softcode templates (v2.4.0).
-- `resolveFormat` / `resolveGlobalFormat` exposed on `u.util` for both
-  TS and softcode contexts.
-
-**Locks (v2.2.0+)**
-
-- Boolean expressions with `&&`, `||`, `!`, parentheses (legacy `&`/`|`
-  still parsed).
-- **`registerLockFunc`** for custom lockfuncs alongside built-ins
-  (`flag`, `attr`, `type`, `is`, `holds`, `perm`). Fail-closed parsing,
-  4096-char / 256-token caps.
-
-**Supervised game scaffold (v2.4.0+)**
-
-- `daemon.sh` / `stop.sh` / `restart.sh` / `status.sh` driven by
-  `src/cli/start.ts`. SIGUSR2 restart path keeps connections live.
-- Fresh `JWT_SECRET` written to `.env` on scaffold; loaded via
-  `@std/dotenv`.
-
-**Transport & auth**
-
-- WebSocket JWT pre-auth (`?token=<jwt>&client=web`), per-socket rate
-  limit (10 cmds/sec).
-- Telnet sidecar with byte-level IAC stripping (NAWS/option bytes no
-  longer leak into commands).
-- HTTP rate limit on `/auth/*` endpoints.
-- MXP negotiation and `%mxp[cmd|text]` substitutions.
-
-**Game systems**
-
-- GameClock — pluggable in-game calendar with `timeMultiplier`.
-- Channels — `@chancreate` / `@chandestroy` / `@chanset`, history,
-  aliases, auto-join.
-- Pluggable stat systems via `registerStatSystem`.
-- UI manifest (`/api/v1/ui-manifest`) for web-client component
-  registration.
-
----
-
-## Architecture
-
-### Packages (monorepo)
-
-| Package | JSR | Purpose |
-|---------|-----|---------|
-| `@ursamu/core` | `jsr:@ursamu/core` | Transport, DB (TypeGraph/PGlite or Deno KV), plugin lifecycle, events |
-| `@ursamu/mush` | `jsr:@ursamu/mush` | MUSH world — `IDBObj`, flags, locks, softcode, `addCmd`, `IUrsamuSDK` |
-| `@ursamu/cli` | `jsr:@ursamu/cli` | Project/plugin scaffold, update, package picker |
-| `@ursamu/site` | `jsr:@ursamu/site` | Public portal shell — nav, skins, `/play` client |
-| `@ursamu/web` | `jsr:@ursamu/web` | Staff console SPA at `/admin/` |
-| `@ursamu/ursamu` | `jsr:@ursamu/ursamu` | Back-compat shim re-exporting `@ursamu/mush` |
-
-**New projects** import from `jsr:@ursamu/mush`. Plugins still on
-`jsr:@ursamu/ursamu` keep working.
-
-```
-packages/
-├── core/     @ursamu/core
-├── mush/     @ursamu/mush   (engine)
-├── cli/      @ursamu/cli
-├── site/     @ursamu/site   (public FE)
-├── web/      @ursamu/web    (staff FE)
-├── help/ bbs/ mail/ wiki/ …
-└── …
-```
-
-Scaffolded games pin `@ursamu/mush` and declare plugins under
-`config/config.json` → `server.plugins`. Default portal stack:
-builder, channels, help, bbs, mail, wiki, web, site.
-
-### Design contracts (FE)
-
-| Surface | Contract |
-|---------|----------|
-| Public site + `/play` | [`packages/site/design.md`](packages/site/design.md) |
-| Staff console `/admin` | [`packages/web/design.md`](packages/web/design.md) |
-
-Both share the **UrsaMU violet night** token family
-(`tokens.css` / `staff-theme.css`). Skins remap site tokens only.
-
-### Request lifecycle
-
-```
-Player input
-  → WebSocket hub (rate limit)
-  → cmdParser middleware stack:
-      1. Interceptors (object/room scripts)
-      2. SCRIPT_NODE bypass (attached scripts)
-      3. addCmd() registrations (plugin + native)
-      4. registerScript overrides (local → plugin → engine)
-      5. Exit matching / channel alias dispatch
-  → Sandbox Worker (for scripts) receives `u` (IUrsamuSDK)
-  → Result posted back, broadcast to room/socket
-```
-
-### Persistence
-
-Everything lives in the database. Each plugin gets a namespaced `DBO<T>`
-instance keyed by `<plugin>.<collection>`. By default, UrsaMU uses `TypeGraphAdapter`
-(storing records inside a local/in-memory PGlite PostgreSQL database), with a fallback `DenoKvAdapter`.
-
-```ts
-const notes = new DBO<Note>("myplugin.notes");
-await notes.create({ title: "Hello", body: "World" });
-const all = await notes.query({});
-```
-
----
-
-## Configuration
-
-A scaffolded project writes `config/config.json` and `.env` for you.
-For source checkouts, copy `config.sample.json`:
-
-```json
-{
-  "server": {
-    "telnet": 4201,
-    "ws": 4202,
-    "http": 4203,
-    "db": "data/ursamu.db",
-    "corsOrigins": "*",
-    "maxConnectionsPerIp": 20
-  },
-  "game": {
-    "name": "My Game",
-    "description": "A UrsaMU-powered MUSH.",
-    "version": "0.0.1",
-    "playerStart": "1",
-    "timeMultiplier": 1
-  }
-}
-```
-
-### Environment variables
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `JWT_SECRET` | Recommended | random per restart | HMAC secret for JWT signing. Scaffolded projects write a fresh secret to `.env`. |
-| `URSAMU_HTTP_PORT` | No | `4203` | Override HTTP/WS hub port. |
-| `URSAMU_TELNET_PORT` | No | `4201` | Override Telnet sidecar port. |
-
-`.env` is auto-loaded via `@std/dotenv` from `src/main.ts`.
-
----
-
-## Tasks
-
-Run with `deno task <name>`.
-
-| Task | Description |
-|------|-------------|
-| `start` | First-run setup, then spawn game server + Telnet sidecar (supervised). |
-| `dev` | Development mode with live logs. |
-| `server` | Run game server only. |
-| `telnet` | Run Telnet sidecar only. |
-| `daemon` | Start both processes in background (managed restart loop). |
-| `stop` / `restart` / `status` | Daemon control. |
-| `logs` | Tail `logs/main.log` and `logs/telnet.log`. |
-| `test` | Run the full test suite (1464+ tests). |
-| `test:coverage` | Run tests with LCOV coverage. |
-| `config` | Interactive configuration tool. |
-| `create` | Scaffold a new game project or plugin. |
-| `cli` | Interactive CLI menu. |
-| `install-cli` | Install `ursamu` as a global command. |
-| `docker:build` / `:up` / `:down` / `:logs` | Docker Compose lifecycle. |
-
-CLI (from JSR):
-
-```bash
-deno run -A jsr:@ursamu/cli@0.1.2/create my-game
-deno run -A jsr:@ursamu/cli@0.1.2/create plugin my-feature
-deno run -A jsr:@ursamu/cli@0.1.2/ursamu   # interactive menu
-```
-
-Subcommands: `create`, `plugin list|install|update|remove|search|info`,
-`update`, `scripts list`, package picker.
-
----
-
-## Plugins
-
-All plugins are declared in `src/plugins/plugins.manifest.json` and
-installed on first startup via `ensurePlugins` — no manual steps.
-
-| Plugin | Min Engine | Description |
-|--------|-----------|-------------|
-| [channel](https://github.com/UrsaMU/channel-plugin) | `>=1.9.27` | Channel system — aliases, auto-join, history. |
-| [rhost-vision](https://github.com/chogan1981/ursamu-rhost-vision) | `>=1.8.0` | Rhost-style `look`, `who`, `score`, `+finger`, `+where`, `+staff`. |
-| [discord](https://github.com/UrsaMU/discord-plugin) | `>=1.9.0` | Webhook Discord bridge with reconnect/backoff. |
-| [jobs](https://github.com/UrsaMU/jobs-plugin) | `>=1.9.0` | Job/request tracking + REST API. |
-| [events](https://github.com/UrsaMU/events-plugin) | `>=1.9.2` | In-game event calendar with RSVP + REST API. |
-| [bbs](https://github.com/UrsaMU/bbs-plugin) | `>=1.9.0` | Bulletin boards — threading, IC/OOC tags, sticky posts. |
-| [wiki](https://github.com/UrsaMU/wiki-plugin) | `>=1.9.0` | Markdown wiki — pages, search, history, backlinks. |
-| [mail](https://github.com/UrsaMU/mail-plugin) | `>=1.9.3` | In-game mail — drafts, folders, quota, REST API. |
-| [builder](https://github.com/UrsaMU/builder-plugin) | `>=1.9.5` | World-building (`@dig`, `@open`, `@link`, `@describe`, …). |
-| [help](https://github.com/UrsaMU/help-plugin) | `>=1.9.0` | API-first help — file/DB/command providers. |
-
-### Adding a community plugin
-
-```json
-{
-  "name": "my-plugin",
-  "url": "https://github.com/example/my-plugin",
-  "ref": "v1.0.0",
-  "description": "What this plugin does.",
-  "ursamu": ">=2.6.0",
-  "deps": [
-    { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" },
-    { "name": "channel", "url": "https://github.com/UrsaMU/channel-plugin" }
-  ]
-}
-```
-
-Each `deps[]` entry may include an optional `version` semver range
-(e.g. `^1.2.0`, `>=1.0.0 <2.0.0`). When present, the installer reads
-the dependency's own `ursamu.plugin.json` `version` and verifies the
-range. Entries without `version` install unconditionally — older
-manifests keep working.
-
-**Atomic installs (v2.6.0).** `ensurePlugins` is fail-fast across the
-entire manifest. If any plugin or transitive dep fails to clone, has an
-unsafe name or URL, declares a version that violates a requested range,
-or has conflicting ranges from multiple requesters, the entire run
-aborts and rolls back. Nothing from the failed run is left on disk or
-in `src/plugins/.registry.json`.
-
----
-
-## Plugin Development
-
-Scaffold a plugin inside any project:
-
-```bash
-deno run -A jsr:@ursamu/cli@0.1.2/create plugin my-feature
-```
-
-Generated layout:
-
-```
-src/plugins/my-feature/
-├── index.ts      IPlugin lifecycle — init() and remove()
-├── commands.ts   addCmd() registrations
-├── router.ts     registerPluginRoute() REST endpoints
-└── db.ts         DBO<T> namespaced storage
-```
-
-Minimal plugin:
-
-```ts
-import type { IPlugin } from "jsr:@ursamu/mush";
-import { addCmd, gameHooks } from "jsr:@ursamu/mush";
-// Note: jsr:@ursamu/ursamu is a backwards-compat shim and still works.
-
-const onLogin = (e: { id: string }) => { /* … */ };
-
-export default {
-  name: "my-feature",
-  version: "1.0.0",
-  description: "Example plugin.",
-
-  init() {
-    addCmd({
-      name: "greet",
-      pattern: /^greet\s+(.+)/i,
-      category: "Social",
-      help: "greet <name>  — Wave at someone.",
-      exec: async (u) => {
-        const name = u.util.stripSubs(u.cmd.args[0] ?? "").trim();
-        u.send(`You wave at ${name}.`);
-        u.broadcast(`${u.util.displayName(u.me, u.me)} waves at ${name}.`);
-      },
-    });
-    gameHooks.on("player:login", onLogin);
-    return true;
-  },
-
-  remove() {
-    gameHooks.off("player:login", onLogin);
-  },
-} satisfies IPlugin;
-```
-
-See [docs/plugins/](docs/plugins/) for the full guide including REST
-routes, DB access, hooks, format handlers, lockfuncs, and publishing.
-
----
-
-## REST API
-
-The engine exposes a versioned REST API at `/api/v1/`.
-
-| Endpoint | Auth | Description |
-|----------|------|-------------|
-| `POST /api/v1/auth/login` | public | Authenticate, receive a JWT. |
-| `POST /api/v1/auth/connect` | public | Create + connect (scaffold). |
-| `POST /api/v1/auth/logout` | token | Invalidate session. |
-| `POST /api/v1/auth/reset-password` | public | Request a reset email. |
-| `POST /api/v1/auth/reset/:token` | public | Submit new password. |
-| `GET /api/v1/me` | token | Current player. |
-| `GET /api/v1/players/online` | token | Connected players. |
-| `GET /api/v1/channels` | token | List channels. |
-| `GET /api/v1/channels/:id/history` | token | Channel history. |
-| `GET /api/v1/dbos` | token | List DBO collections. |
-| `GET\|PUT\|DELETE /api/v1/dbobj/:id` | token | Object CRUD. |
-| `POST\|GET\|PUT\|DELETE /api/v1/dbobj/:id/attrs[/:name]` | token | Attribute CRUD. |
-| `GET\|POST /api/v1/scenes` | token | List / create scenes. |
-| `GET\|PUT\|DELETE /api/v1/scenes/:id` | token | Scene CRUD. |
-| `POST\|PUT\|DELETE /api/v1/scenes/:id/pose[/:poseId]` | token | Pose CRUD. |
-| `GET /api/v1/scenes/:id/export?format=markdown\|json` | token | Export scene. |
-| `GET /api/v1/scenes/locations` | token | Locations with scenes. |
-| `GET /api/v1/config` | public | Public config. |
-| `GET /api/v1/ui-manifest` | token | Registered UI components. |
-
-Plugin routes attach via `registerPluginRoute`. Full reference:
-[docs/api/rest.md](docs/api/rest.md).
-
----
-
-## Stdlib (v2.5.1+)
-
-Math/spatial/noise/physics primitives are re-exported from `mod.ts`
-for direct use in TypeScript plugins — no `npm:simplex-noise` or
-`npm:alea` needed.
-
-```ts
-import {
-  Rng, Noise,
-  lerp, smoothstep, clamp, remap,
-  dist2d, dist3d, angle2d, bearing,
-  vreflect, pointInAabb, rayAabb,
-  fbm2, ridged2, perlin2, simplex2, worley2,
-} from "jsr:@ursamu/mush";
-
-const rng = new Rng(12345);             // per-instance seedable mulberry32
-const noise = new Noise(rng.next());    // per-instance Perlin/Simplex/Worley
-const h = fbm2(noise, x, y, 6, 2.0, 0.5);
-```
-
-Full surface listed in [docs/api/core.md](docs/api/core.md).
-
----
-
-## Docker
-
-```bash
-deno task docker:build
-deno task docker:up
-deno task docker:logs
-deno task docker:down
-```
-
-The Compose stack mounts three volumes:
-
-```yaml
-volumes:
-  - ./data:/app/data      # Database storage directory (TypeGraph/PGlite or Deno KV)
-  - ./config:/app/config  # Game configuration
-  - ./logs:/app/logs      # Server logs
-```
-
-Set `JWT_SECRET` in `.env` before starting.
-
----
-
-## Production Deployment
-
-### Supervised daemon (recommended)
-
-```bash
-deno task daemon     # start
-deno task status     # check
-deno task logs       # tail
-deno task restart    # SIGUSR2 — no-disconnect restart
-deno task stop       # stop
-```
-
-The supervisor restarts the main process on exit code `75` (used by
-`@reboot` and `@update`); exit `0` (`@shutdown`) stops cleanly. The
-Telnet sidecar persists across `restart`/`@reboot`; JWT clients
-auto-reauth.
-
-### Nginx (TLS termination)
-
-```nginx
-server {
-    listen 443 ssl;
-    server_name yourdomain.com;
-
-    location / {
-        proxy_pass http://127.0.0.1:4203;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-    }
-}
-```
-
-Point Telnet clients directly at port `4201`.
-
-### In-game updates
-
-```
-@update          pull origin main, SIGUSR2 restart
-@update main     pull specific branch
-@reboot          SIGUSR2 restart (no git pull)
-@shutdown        clean stop
-```
-
----
-
-## Testing
-
 ```bash
 deno task test
-deno task test:coverage
-```
-
-Pre-commit checklist (mirrors CI):
-
-```bash
-deno check --unstable-kv mod.ts
 deno lint
-deno test tests/ --allow-all --unstable-kv --no-check
-deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check
 ```
 
-1464 tests, 0 failures; 480 files lint-clean.
+Contributing:
+[docs/development/contributing.md](docs/development/contributing.md).
 
 ---
 
-## Documentation
+## Docs
 
-| Topic | Link |
-|-------|------|
-| Installation | [docs/guides/installation.md](docs/guides/installation.md) |
-| CLI reference | [docs/guides/cli.md](docs/guides/cli.md) |
-| User guide | [docs/guides/user-guide.md](docs/guides/user-guide.md) |
-| Admin guide | [docs/guides/admin-guide.md](docs/guides/admin-guide.md) |
-| Deployment | [docs/guides/deployment.md](docs/guides/deployment.md) |
-| Plugin development | [docs/plugins/index.md](docs/plugins/index.md) |
-| REST API | [docs/api/rest.md](docs/api/rest.md) |
-| Public site design | [packages/site/design.md](packages/site/design.md) |
-| Staff console design | [packages/web/design.md](packages/web/design.md) |
-| Architecture | [docs/about.md](docs/about.md) |
-
----
-
-## Contributing
-
-Pull requests are welcome. For major changes please open an issue first
-to discuss your plan.
-
-```bash
-git clone https://github.com/YOUR-USERNAME/ursamu.git
-cd ursamu
-deno task test
-deno run -A packages/cli/src/create.ts plugin my-test-feature
-```
-
-See [docs/development/contributing.md](docs/development/contributing.md)
-for coding conventions and PR process.
+| I want to… | Read |
+|------------|------|
+| Install / first hour | [installation](docs/guides/installation.md) |
+| Run or deploy | [deployment](docs/guides/deployment.md) |
+| Write a plugin | [plugins](docs/plugins/index.md) |
+| Use the REST API | [REST](docs/api/rest.md) |
+| Theme the public site | [site design](packages/site/design.md) |
+| Theme staff `/admin` | [web design](packages/web/design.md) |
+| All guides | [docs/](docs/) |
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — [LICENSE](LICENSE).

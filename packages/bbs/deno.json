@@ -23,9 +23,10 @@
     "@std/testing": "jsr:@std/testing@^1.0.17",
     "@std/testing/bdd": "jsr:@std/testing@^1.0.17/bdd",
     "@ursamu/mush": "jsr:@ursamu/mush@^1.0.0",
-    "@ursamu/help": "jsr:@ursamu/help@^1.0.1",
-    "@ursamu/help-plugin": "jsr:@ursamu/help@^1.0.1",
-    "@ursamu/jobs": "jsr:@ursamu/jobs@^1.1.2"
+    "@ursamu/help": "../help/mod.ts",
+    "@ursamu/help-plugin": "../help/mod.ts",
+    "@ursamu/jobs": "jsr:@ursamu/jobs@^1.1.2",
+    "@ursamu/help/register": "../help/register.ts"
   },
   "publish": {
     "include": [

@@ -1,0 +1,133 @@
+{
+  "key": "cpr-economy",
+  "label": "Cyberpunk RED — Economy, Lifestyle & Jobs",
+  "vars": { "player": "V" },
+  "setup": {
+    "character": {
+      "stats": { "int": 6, "ref": 8, "dex": 7, "tech": 5, "cool": 7, "will": 6, "luck": 6, "move": 6, "body": 7, "emp": 6, "empBase": 7 },
+      "hp": { "max": 45, "current": 45 },
+      "swThreshold": 23,
+      "deathSave": 7,
+      "deathSavePenalty": 0,
+      "role": "solo",
+      "roleRank": 4,
+      "roleData": {},
+      "skills": { "athletics": 6, "brawling": 4, "concentration": 3, "conversation": 2, "education": 2, "evasion": 6, "handgun": 6, "human_perception": 3, "interrogation": 4, "local_expert": 2, "perception": 6, "persuasion": 2, "shoulder_arms": 6, "stealth": 4, "streetwise": 4, "tactics": 4, "tracking": 2 },
+      "luckRemaining": 6,
+      "woundState": "healthy",
+      "criticalInjuries": [],
+      "armorBody": { "name": "Light Armorjack", "sp": 11, "currentSp": 11, "penalty": 0 },
+      "armorHead": null,
+      "cyberware": [],
+      "humanityLoss": 0,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 3,
+      "reputationDeeds": [],
+      "eurodollars": 2550,
+      "lifestyle": { "tier": "streetrat", "nextDueDate": 9999999999999 },
+      "lifepath": { "culturalOrigin": "North American", "language": "English" },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": []
+    },
+    "targets": {
+      "Rogue": {
+        "stats": { "int": 7, "ref": 7, "dex": 6, "tech": 5, "cool": 8, "will": 7, "luck": 5, "move": 6, "body": 6, "emp": 6, "empBase": 7 },
+        "hp": { "max": 40, "current": 40 },
+        "swThreshold": 20, "deathSave": 6, "deathSavePenalty": 0,
+        "role": "fixer", "roleRank": 5, "roleData": {},
+        "skills": { "athletics": 3, "brawling": 3, "handgun": 4, "evasion": 3, "perception": 3 },
+        "luckRemaining": 5, "woundState": "healthy", "criticalInjuries": [],
+        "armorBody": { "name": "Kevlar", "sp": 7, "currentSp": 7, "penalty": 0 }, "armorHead": null,
+        "cyberware": [], "humanityLoss": 0, "bodysculpt": [], "activeEffects": [],
+        "reputation": 7, "reputationDeeds": [], "eurodollars": 15000,
+        "lifestyle": { "tier": "corporate", "nextDueDate": 9999999999999 }, "lifepath": {},
+        "chargenComplete": true, "chargenStage": "complete", "chargenMethod": "complete",
+        "restTimer": null, "humanityGainedAt": null, "locationEffects": []
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Eurodollars"
+    },
+    {
+      "note": "+eb with no switch shows your current balance. +eb/pay wires eddies to a nearby character."
+    },
+    {
+      "cmd": "+eb",
+      "label": "check EB balance"
+    },
+    {
+      "cmd": "+eb/pay Rogue=500",
+      "label": "wire 500 EB to Rogue (format: target=amount)"
+    },
+    {
+      "sub": "Lifestyle"
+    },
+    {
+      "note": "Lifestyle determines monthly upkeep costs. Failing to pay drops you a tier. Valid tiers: kibble, generic_prepak, streetrat, good_prepak, fresh_food, moderate, corporate, luxury."
+    },
+    {
+      "cmd": "+lifestyle",
+      "label": "view current lifestyle tier and next due date"
+    },
+    {
+      "cmd": "+lifestyle/set moderate",
+      "label": "upgrade lifestyle tier to moderate"
+    },
+    {
+      "sub": "Drugs"
+    },
+    {
+      "note": "Drugs provide temporary stat boosts or healing. Check +drug/list for all valid drug names."
+    },
+    {
+      "cmd": "+drug/list",
+      "label": "browse all available drugs and their effects"
+    },
+    {
+      "cmd": "+drug/active",
+      "label": "show currently active drug effects and time remaining"
+    },
+    {
+      "cmd": "+drug/use speedheal",
+      "label": "take Speedheal — heals BODY+WILL HP instantly (once per day)"
+    },
+    {
+      "cmd": "+drug/use synthcoke",
+      "label": "take Synthcoke — +1 REF for 4 hours"
+    },
+    {
+      "cmd": "+drug/use stim",
+      "label": "take Stim — ignore Seriously Wounded penalties for 1 hour"
+    },
+    {
+      "cmd": "+drug/purge",
+      "label": "force-clear all active drug effects (admin)"
+    },
+    {
+      "sub": "Jobs Board"
+    },
+    {
+      "note": "Fixers post jobs. Runners take them. Payout and rep scale with danger level. Jobs persist in the KV database between sessions."
+    },
+    {
+      "cmd": "+job/list",
+      "label": "view all open jobs on the board"
+    },
+    {
+      "sub": "Night Market"
+    },
+    {
+      "note": "Fixers (rank 5+) open Night Markets with +market/open. Anyone in the room can +market/browse. Sellers use +market/sell <item>=<price>=<category>. Buyers use +market/buy <id> or +market/haggle <id>=<offer>."
+    },
+    {
+      "reset": true
+    }
+  ]
+}

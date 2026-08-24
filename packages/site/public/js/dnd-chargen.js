@@ -967,14 +967,14 @@
       var link = document.createElement("link");
       link.id = "site-chargen-css";
       link.rel = "stylesheet";
-      link.href = "/site/css/chargen.css?v=20260809playmob";
+      link.href = "/site/css/chargen.css?v=20260809courtcss";
       document.head.appendChild(link);
     }
     if (!document.getElementById("site-dnd-chargen-css")) {
       var link2 = document.createElement("link");
       link2.id = "site-dnd-chargen-css";
       link2.rel = "stylesheet";
-      link2.href = "/site/css/dnd-chargen.css?v=20260809playmob";
+      link2.href = "/site/css/dnd-chargen.css?v=20260809courtcss";
       document.head.appendChild(link2);
     }
 

@@ -6,6 +6,53 @@ Public front-end shell for UrsaMU games.
 - **Tokens** from [`design.md`](./design.md) (same family as staff `design.md`)
 - **Skins** as one CSS file — ship Court look or your own
 
+## Make a FE theme (guide + example zip)
+
+Full walkthrough:
+
+- **[docs/fe-theme-guide.md](./docs/fe-theme-guide.md)** — package format,
+  tokens, install, troubleshooting
+- **Wireframe skeleton** — `examples/themes/skeleton/`
+  (greys + system sans; placement/sizing only —
+  `skeleton.zip`)
+- **Colored starter** — `examples/themes/starter/`
+  (`starter.zip`)
+- **CYBER d6** — `examples/themes/cyber-d6/`
+  (phosphor terminal; tokens from the React app)
+- **Full brand example** — `examples/themes/court/`
+  (`court.zip`)
+
+```bash
+cd packages/site
+
+# greyscale structure gallery (standalone theme folder)
+cd examples/themes/skeleton && deno task preview:open
+# → http://127.0.0.1:4173/site/
+# (or: deno task preview-theme examples/themes/skeleton)
+
+# colored starter gallery
+deno task preview-theme examples/themes/starter
+
+# pack
+deno task pack-theme examples/themes/skeleton
+deno task pack-theme examples/themes/starter
+```
+
+Both templates ship **`preview.html`** — markdown, wiki/help,
+auth, play samples, token swatches. After install:
+`/site/theme/installed/<id>/preview.html`.
+
+Upload the zip in **Admin → Settings → Public site**, or:
+
+```bash
+# game root
+mkdir -p theme/installed
+unzip path/to/starter.zip -d theme/installed/
+```
+
+Then set `plugins.site.skinCss` / `bannerImage` to
+`/site/theme/installed/starter/…` (or activate in Admin).
+
 ## Install
 
 ```json
@@ -38,16 +85,32 @@ Open **`/site/`** after start.
 | `default` | design.md violet night (no art) — only builtin |
 | `skinCss` URL | Installed or custom theme CSS |
 
-Brand looks (Court of Miracles, etc.) are **installable themes**,
-not builtins — so a fresh game stays neutral.
+Brand looks (Court of Miracles, Utopia RetroWave, CYBER d6)
+are **installable themes**, not builtins — so a fresh game
+stays neutral. Utopia: `examples/themes/utopia/`.
+CYBER d6: `examples/themes/cyber-d6/`.
 
 ### Install a theme zip (admin)
 
-Staff can upload a Court-style package in
-**Admin → Settings → Public site**:
+Staff can upload a theme package in
+**Admin → Settings → Public site**.
 
-1. Build a folder with `theme.json` + `site.css` (+ `imgs/`, `fonts/`).
-2. Pack it:
+**Easiest start:** use the starter zip (minimal tokens + SVG art):
+
+```
+examples/themes/starter/starter.zip
+```
+
+Or fork the folder and recolor:
+
+```bash
+cp -R examples/themes/starter ./my-theme
+# edit my-theme/theme.json (id, label, title)
+# edit my-theme/site.css   (--site-* tokens)
+deno task pack-theme ./my-theme --out ./my-theme.zip
+```
+
+**Production brand reference:** Court of Miracles
 
 ```bash
 cd path/to/@ursamu/site
@@ -55,8 +118,8 @@ deno task pack-theme examples/themes/court
 # → examples/themes/court/court.zip
 ```
 
-3. Upload the zip in the admin UI (or
-   `POST /api/v1/admin/site/theme` multipart `file=`).
+Upload the zip in the admin UI (or
+`POST /api/v1/admin/site/theme` multipart `file=`).
 
 Install writes `theme/installed/<id>/` under the game root, sets
 `plugins.site.themeDir` / `skinCss` / banner, and hot-reloads
@@ -66,16 +129,22 @@ Install writes `theme/installed/<id>/` under the game root, sets
 
 ```json
 {
-  "id": "court",
-  "label": "Court of Miracles",
-  "version": "1.1.0",
+  "id": "starter",
+  "label": "UrsaMU FE Starter",
+  "version": "1.0.0",
   "css": "site.css",
-  "bannerImage": "imgs/header.png",
-  "title": "Court of Miracles"
+  "bannerImage": "imgs/header.svg",
+  "title": "My UrsaMU Game"
 }
 ```
 
-Reference package: `examples/themes/court/`.
+| Package | Path |
+|---------|------|
+| Guide | [`docs/fe-theme-guide.md`](./docs/fe-theme-guide.md) |
+| Starter source | `examples/themes/starter/` |
+| Starter zip | `examples/themes/starter/starter.zip` |
+| Court source | `examples/themes/court/` |
+| Court zip | `examples/themes/court/court.zip` |
 
 ### Court of Miracles (after install)
 

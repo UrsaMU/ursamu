@@ -1,0 +1,127 @@
+/**
+ * UrsaMU FE starter theme — installable package.
+ *
+ * After Admin upload, this file is served as:
+ *   /site/theme/installed/starter/site.css
+ * Keep asset URLs relative to that path (or absolute /site/theme/installed/starter/…).
+ *
+ * Rules:
+ *   - Override --site-* tokens and decorative rules only.
+ *   - Do NOT rename .site-shell / .site-nav / .site-main / etc.
+ *   - See GUIDE.md in this folder and docs/fe-theme-guide.md.
+ */
+
+:root {
+  /* ── Surfaces ─────────────────────────────────────────────── */
+  --site-bg: #0b0a12;
+  --site-bg-elevated: #12101c;
+  --site-bg-surface: #161422;
+  --site-bg-surface-2: #1c1929;
+  --site-bg-code: #0e0c16;
+
+  /* ── Borders ──────────────────────────────────────────────── */
+  --site-border: #3a3554;
+  --site-border-subtle: #2a2640;
+  --site-border-strong: #5a5480;
+
+  /* ── Text ─────────────────────────────────────────────────── */
+  --site-text: #f0eef8;
+  --site-text-secondary: #c4c0d4;
+  --site-text-muted: #b0a9c4;
+  --site-text-on-accent: #ffffff;
+  --site-text-on-primary: #ffffff;
+
+  /* ── Brand accent ─────────────────────────────────────────── */
+  --site-accent: #a78bfa;
+  --site-accent-hover: #c4b5fd;
+  --site-accent-muted: rgba(167, 139, 250, 0.16);
+  --site-accent-border: rgba(167, 139, 250, 0.45);
+
+  --site-btn-bg: #6d28d9;
+  --site-btn-bg-hover: #7c3aed;
+  --site-btn-fg: #ffffff;
+
+  /* ── Status ───────────────────────────────────────────────── */
+  --site-success: #4ade9f;
+  --site-warning: #f0c14d;
+  --site-error: #ff8a8f;
+  --site-info: #8ec5ff;
+
+  /* ── Type ─────────────────────────────────────────────────── */
+  --site-font-ui: Inter, ui-sans-serif, system-ui, sans-serif;
+  --site-font-display: Inter, ui-sans-serif, system-ui, sans-serif;
+  --site-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* ── Geometry ─────────────────────────────────────────────── */
+  --site-nav-h: 60px;
+  --site-banner-offset: 200px;
+  --site-sticky-top: 120px;
+  --site-gutter: 40px;
+  --site-max-w: 1440px;
+  --site-main-max: 800px;
+  --site-aside-min: 280px;
+  --site-aside-max: 360px;
+  --site-radius-sm: 4px;
+  --site-radius-md: 6px;
+
+  /*
+   * Art — absolute paths after install.
+   * When developing with themeDir copy, keep the same folder name
+   * as theme.json "id" (starter).
+   */
+  --site-bg-image-top: url("/site/theme/installed/starter/imgs/background.svg");
+  --site-bg-image-bottom: url("/site/theme/installed/starter/imgs/footer.svg");
+  --site-rule-image: url("/site/theme/installed/starter/imgs/hr.svg");
+  --site-search-icon: url("/site/theme/installed/starter/imgs/search.svg");
+
+  /* Termv media rails — sep-top (top cap) + sep-bottom (bottom cap) */
+  --site-sep-top: url("/site/theme/installed/starter/imgs/sep-top.svg");
+  --site-sep-bottom: url("/site/theme/installed/starter/imgs/sep-bottom.svg");
+  --site-sep-h: 15px;
+  --site-sep-pad-y: 15px;
+  --site-sep-inset-end: 25px;
+  --site-sep-bracket-w: 53px;
+}
+
+/* Optional local fonts — uncomment and add files under fonts/
+@font-face {
+  font-family: "MyDisplay";
+  src: url("/site/theme/installed/starter/fonts/display.woff2")
+    format("woff2");
+  font-display: swap;
+}
+:root {
+  --site-font-display: "MyDisplay", serif;
+}
+*/
+
+/* ── Nav brand scale (optional polish) ──────────────────────── */
+
+.site-nav__brand {
+  font-family: var(--site-font-display);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.site-nav__list a.is-active {
+  border-bottom-color: var(--site-accent);
+}
+
+/* ── Banner ─────────────────────────────────────────────────── */
+
+.site-banner {
+  /* Host already sets background-image from bannerImage config;
+     this only tunes height if you need it. */
+  min-height: 12rem;
+}
+
+/* ── Play client touches (optional) ─────────────────────────── */
+
+.play-prompt__send {
+  background: var(--site-btn-bg);
+  color: var(--site-btn-fg);
+}
+
+.play-prompt__send:hover {
+  background: var(--site-btn-bg-hover);
+}

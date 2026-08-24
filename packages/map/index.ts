@@ -8,7 +8,7 @@ import {
   registerFormatHandler,
   unregisterFormatHandler,
 } from "ursamu";
-import { registerHelpDir } from "@ursamu/help";
+import { registerHelpDir } from "@ursamu/help/register";
 
 import { descFormatHandler } from "./format.ts";
 import { pruneStaleMemory } from "./fog.ts";

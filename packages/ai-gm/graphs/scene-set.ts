@@ -4,13 +4,13 @@
 // The draft is paged privately to the staff member who posted the scene-set;
 // they can edit and broadcast it with +gm/scene/publish.
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { buildGraph, invokeGraph } from "./base.ts";
 import type { IInjectOptions } from "../context/injector.ts";
 import { buildInjectedPrompt } from "../context/injector.ts";
 import { SCENE_SET_DRAFT_SYSTEM_SUFFIX } from "../prompts/templates.ts";
 
-export function buildSceneSetGraph(model: ChatGoogleGenerativeAI) {
+export function buildSceneSetGraph(model: BaseChatModel) {
   return buildGraph(model);
 }
 

@@ -111,7 +111,7 @@ export function markNavActive(
 }
 
 /** Cache-bust query for shipped site CSS (bump when layout/tokens change). */
-export const SITE_ASSET_V = "20260809playmob";
+export const SITE_ASSET_V = "20260819deck";
 
 /** Resolve stylesheet href for the active skin. */
 export function resolveSkinHref(cfg: SitePluginConfig): string {
@@ -141,10 +141,42 @@ export function applySkinDefaults(
 
   if (!out.nav) {
     out.nav = [
-      { label: "Home", href: "/site/" },
-      { label: "Wiki", href: "/site/wiki/" },
-      { label: "Help", href: "/site/help/" },
+      { id: "home", label: "Home", href: "/site/", order: 10 },
+      { id: "wiki", label: "Wiki", href: "/site/wiki/", order: 20 },
+      { id: "help", label: "Help", href: "/site/help/", order: 30 },
+      {
+        id: "chargen",
+        label: "Character",
+        href: "/chargen",
+        order: 35,
+        require: "connected",
+      },
+      {
+        id: "play",
+        label: "Play",
+        href: "/play",
+        order: 36,
+        require: "connected",
+      },
     ];
+  } else {
+    // Ensure Play is always available when games override nav
+    // without it (config wins on id; only inject if missing).
+    const hasPlay = out.nav.some((n) => {
+      const id = String(n.id || "").toLowerCase();
+      const href = String(n.href || "").replace(/\/$/, "");
+      return id === "play" || href === "/play" ||
+        href.endsWith("/play");
+    });
+    if (!hasPlay) {
+      out.nav = out.nav.concat([{
+        id: "play",
+        label: "Play",
+        href: "/play",
+        order: 36,
+        require: "connected",
+      }]);
+    }
   }
   return out;
 }

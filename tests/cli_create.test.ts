@@ -155,11 +155,15 @@ Deno.test("create project: generates scripts/safe-update.sh", OPTS, async () => 
   });
 });
 
-Deno.test("create project: run.sh references project name", OPTS, async () => {
+Deno.test("create project: run.sh uses supervisor + _ports", OPTS, async () => {
   await withTempDir(async (dir) => {
     await runCreate(["my-game"], dir);
-    const content = await Deno.readTextFile(join(dir, "my-game", "scripts", "run.sh"));
-    assertStringIncludes(content, "main.ts");
+    const content = await Deno.readTextFile(
+      join(dir, "my-game", "scripts", "run.sh"),
+    );
+    assertStringIncludes(content, "_ports.sh");
+    assertStringIncludes(content, "ursamu_find_supervisor");
+    assert(existsSync(join(dir, "my-game", "scripts", "_ports.sh")));
   });
 });
 

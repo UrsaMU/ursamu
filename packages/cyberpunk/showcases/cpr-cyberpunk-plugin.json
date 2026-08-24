@@ -1,0 +1,97 @@
+{
+  "key": "cpr-cyberpunk-plugin",
+  "label": "Cyberpunk RED — Plugin Overview",
+  "vars": {},
+  "setup": {
+    "character": {
+      "stats": { "int": 6, "ref": 8, "dex": 7, "tech": 5, "cool": 7, "will": 6, "luck": 6, "move": 6, "body": 7, "emp": 6, "empBase": 7 },
+      "hp": { "max": 45, "current": 45 },
+      "swThreshold": 23,
+      "deathSave": 7,
+      "deathSavePenalty": 0,
+      "role": "solo",
+      "roleRank": 4,
+      "roleData": {},
+      "skills": { "athletics": 6, "brawling": 4, "concentration": 3, "conversation": 2, "education": 2, "evasion": 6, "handgun": 6, "human_perception": 3, "interrogation": 4, "local_expert": 2, "perception": 6, "persuasion": 2, "shoulder_arms": 6, "stealth": 4, "streetwise": 4, "tactics": 4, "tracking": 2 },
+      "luckRemaining": 6,
+      "woundState": "healthy",
+      "criticalInjuries": [],
+      "armorBody": { "name": "Light Armorjack", "sp": 11, "currentSp": 11, "penalty": 0 },
+      "armorHead": null,
+      "cyberware": [
+        { "id": "cw1", "name": "neural_link", "category": "neuralware", "hl": 7, "installType": "clinic", "installedAt": 0 },
+        { "id": "cw2", "name": "interface_plugs", "category": "neuralware", "hl": 3, "installType": "clinic", "installedAt": 0 }
+      ],
+      "humanityLoss": 10,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 3,
+      "reputationDeeds": ["Survived the Night City Arena"],
+      "eurodollars": 2550,
+      "lifestyle": { "tier": "low", "nextDueDate": 0 },
+      "lifepath": { "culturalOrigin": "North American", "language": "English" },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": []
+    }
+  },
+  "steps": [
+    {
+      "sub": "Plugin Overview"
+    },
+    {
+      "note": "Full Cyberpunk RED 2045 ruleset for UrsaMU. All core mechanics are implemented."
+    },
+    {
+      "sub": "Showcase Index"
+    },
+    {
+      "note": "cpr-chargen     — Character generation wizard (+chargen)"
+    },
+    {
+      "note": "cpr-sheet       — Character sheet and dice rolls (+sheet, +score, +roll, +luck)"
+    },
+    {
+      "note": "cpr-combat      — Combat, wounds, brawl, FNFF (+init, +attack, +wound, +brawl)"
+    },
+    {
+      "note": "cpr-economy     — EB, lifestyle, drugs, jobs, night market (+eb, +lifestyle, +drug, +job, +market)"
+    },
+    {
+      "note": "cpr-netrunning  — NET architecture access (+netrun)"
+    },
+    {
+      "note": "cpr-tech        — Crafting, pharma, chop shop (+craft, +pharma, +chopshop)"
+    },
+    {
+      "note": "cpr-social      — Reputation, facedowns, roles, humanity, therapy (+rep, +role, +humanity, +therapy)"
+    },
+    {
+      "note": "cpr-cyberware   — Cyberware, armor, bodysculpting (+cyber, +armor, +bodysculpt)"
+    },
+    {
+      "note": "cpr-survival    — Rest, nomad pack, scavenging (+rest, +pack, +scavenge)"
+    },
+    {
+      "note": "cpr-gm          — GM and admin commands (+cpr)"
+    },
+    {
+      "sub": "Quick Commands"
+    },
+    {
+      "cmd": "+sheet",
+      "label": "view your character sheet"
+    },
+    {
+      "cmd": "+roll ref+athletics",
+      "label": "roll a stat+skill check"
+    },
+    {
+      "cmd": "+init",
+      "label": "roll initiative"
+    }
+  ]
+}

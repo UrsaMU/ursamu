@@ -252,6 +252,8 @@ export function renderLoginMarkdown(md: string): string {
   let html = "";
   let inList = false;
   let inPara = false;
+  let inCode = false;
+  let codeBuf: string[] = [];
 
   const closePara = () => {
     if (inPara) {
@@ -265,8 +267,33 @@ export function renderLoginMarkdown(md: string): string {
       inList = false;
     }
   };
+  const flushCode = () => {
+    if (!inCode) return;
+    html += '<pre class="play-md__pre"><code class="play-md__code">' +
+      esc(codeBuf.join("\n")) +
+      "</code></pre>";
+    codeBuf = [];
+    inCode = false;
+  };
 
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? "";
+    // Fenced code window (``` / ```lang) — preserve blank lines inside
+    if (/^```/.test(line)) {
+      closePara();
+      closeList();
+      if (inCode) {
+        flushCode();
+      } else {
+        inCode = true;
+        codeBuf = [];
+      }
+      continue;
+    }
+    if (inCode) {
+      codeBuf.push(line);
+      continue;
+    }
     const t = line.trim();
     if (!t) {
       closePara();
@@ -305,6 +332,24 @@ export function renderLoginMarkdown(md: string): string {
       }
       continue;
     }
+    // Markdown blockquote: > text (parity with play.js)
+    const bq = t.match(/^>\s?(.*)$/);
+    if (bq) {
+      closePara();
+      closeList();
+      const bqLines = [bq[1]!];
+      while (i + 1 < lines.length) {
+        const nt = (lines[i + 1] ?? "").trim();
+        const nb = nt.match(/^>\s?(.*)$/);
+        if (!nb) break;
+        i += 1;
+        bqLines.push(nb[1]!);
+      }
+      html += '<blockquote class="play-info play-md__bq">' +
+        "<p>" + inlineMd(bqLines.join("\n")) +
+        "</p></blockquote>";
+      continue;
+    }
     closeList();
     if (!inPara) {
       html += '<p class="play-md__p">';
@@ -314,6 +359,7 @@ export function renderLoginMarkdown(md: string): string {
     }
     html += inlineMd(t);
   }
+  flushCode();
   closePara();
   closeList();
   return `<div class="play-md">${html}</div>`;

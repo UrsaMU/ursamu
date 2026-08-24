@@ -24,6 +24,11 @@ const ALLOWED_PREFIXES = [
   "/api/v1/mail",
   "/api/v1/channels",
   "/api/v1/help",
+  "/api/v1/events",
+  // System chargen staff approve / wipe / sheet
+  "/api/v1/cpr",
+  "/api/v1/cofd",
+  "/api/v1/dnd",
 ];
 
 const ALLOWED_METHODS = new Set([

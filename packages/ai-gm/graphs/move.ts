@@ -3,13 +3,13 @@
 // Adjudicates a completed PbtA move roll after the player has rolled dice.
 // Applies outcome to fiction and fires mechanical effects via tools.
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { buildGraph, invokeGraph } from "./base.ts";
 import type { IInjectOptions } from "../context/injector.ts";
 import { buildInjectedPrompt } from "../context/injector.ts";
 import { MOVE_SYSTEM_SUFFIX } from "../prompts/templates.ts";
 
-export function buildMoveGraph(model: ChatGoogleGenerativeAI) {
+export function buildMoveGraph(model: BaseChatModel) {
   return buildGraph(model);
 }
 

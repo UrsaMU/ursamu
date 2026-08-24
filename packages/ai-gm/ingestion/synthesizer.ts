@@ -3,7 +3,7 @@
 // Merges IChunkExtraction[] from all books into a single IGameSystemDraft,
 // reconciles conflicts, and produces IUncertainItem[] for admin review.
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import type {
   IChunkExtraction,
@@ -15,7 +15,7 @@ import { nanoid } from "./util.ts";
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function synthesize(
-  model: ChatGoogleGenerativeAI,
+  model: BaseChatModel,
   extractions: IChunkExtraction[],
 ): Promise<{ draft: IGameSystemDraft; uncertainItems: IUncertainItem[] }> {
   const merged = mergeExtractions(extractions);
@@ -181,7 +181,7 @@ Respond with ONLY valid JSON matching this schema:
 }`;
 
 async function generateNarrativeSections(
-  model: ChatGoogleGenerativeAI,
+  model: BaseChatModel,
   extractions: IChunkExtraction[],
 ): Promise<
   {

@@ -11,7 +11,7 @@
  * loudly rather than silently.
  */
 
-import { registerHelpDir } from "@ursamu/help-plugin";
+import { registerHelpDir } from "@ursamu/help/register";
 
 const HELP_DIR = new URL("../help", import.meta.url);
 const SECTION  = "language";

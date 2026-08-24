@@ -1,16 +1,19 @@
 +LOCKS
 
-  Boolean keys checked when someone uses an object or exit.
-  Empty lock always passes.
+  Boolean keys checked when someone uses an
+  object or exit. Empty lock always passes.
 
 TOPICS
   **lock**       @lock command syntax
-  **keys**       Atoms: me, #id, *Name, flags
-  **types**      Basic, use, enter, and related switches
-  **funcs**      flag() holds() is() owner() perm()
-  **examples**   Common exit and room patterns
+  **keys**       Atoms + `&` `|` operators
+  **types**      Basic, use, enter, …
+  **funcs**      flag() holds() is() …
+  **examples**   Exit and room patterns
 
-  Operators: `&` `&&` `|` `||` `!` and `( )`.
-  On fail, FAIL / OFAIL / AFAIL may fire.
+OPERATORS
+  `&` / `&&` AND   `|` / `||` OR   `!` NOT
+  Shorthand single-char forms preferred.
+  Space between atoms also means AND.
 
-SEE ALSO: +help actions, +help building
+Channel join/speak: same keys via `@chanset`.
+SEE ALSO: +help locks/keys, +help staff/locks

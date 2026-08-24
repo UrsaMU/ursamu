@@ -1,0 +1,64 @@
+{
+  "key": "sg-chargen",
+  "label": "Sprawl Goons — Character Generation",
+  "vars": { "player": "Neon" },
+  "steps": [
+    { "sub": "Start draft" },
+    { "note": "Open a draft sheet and spend 4 stat points." },
+    { "cmd": "+chargen", "label": "checklist (empty)" },
+    { "cmd": "+chargen/start", "label": "begin draft" },
+    { "expect": "Draft online" },
+
+    { "sub": "Stats (4 points)" },
+    { "cmd": "+chargen/stat reaction=2", "label": "REA 2" },
+    { "cmd": "+chargen/stat cognition=1", "label": "COG 1" },
+    { "cmd": "+chargen/stat morphology=1", "label": "MOR 1" },
+    { "expect": "4/4" },
+
+    { "sub": "Catalog browse (no draft lock)" },
+    { "cmd": "+chargen/list", "label": "topic index" },
+    { "expect": "backgrounds" },
+    { "cmd": "+chargen/list backgrounds", "label": "list BGs" },
+    { "expect": "nodejacker" },
+    { "cmd": "+chargen/list edges feed", "label": "filter edges" },
+    { "expect": "Feedwise" },
+    { "cmd": "+chargen/info nodejacker", "label": "BG + edge detail" },
+    { "expect": "Cognition" },
+    { "cmd": "+chargen/list street-tech", "label": "clinic quirks" },
+    { "expect": "tremors" },
+
+    { "sub": "Background + edge" },
+    { "cmd": "+chargen/background nodejacker", "label": "pick Nodejacker" },
+    { "expect": "Feedwise" },
+
+    { "sub": "Belongings ×3" },
+    { "cmd": "+chargen/belongings roll", "label": "belonging 1" },
+    { "cmd": "+chargen/belongings roll", "label": "belonging 2" },
+    { "cmd": "+chargen/belongings roll", "label": "belonging 3" },
+    { "expect": "3/3" },
+
+    { "sub": "Cash & optional look" },
+    { "cmd": "+chargen/cash", "label": "2d6 × 100 b¥" },
+    { "cmd": "+chargen/affect neonpunk", "label": "affectation" },
+    { "cmd": "+chargen/quirk roll", "label": "optional quirk" },
+    { "cmd": "+chargen", "label": "checklist ready" },
+
+    { "sub": "Submit & staff approve" },
+    { "cmd": "+chargen/submit", "label": "lock for review" },
+    { "expect": "Submitted" },
+    { "cmd": "+chargen/view Neon", "as": "admin", "label": "staff view" },
+    { "cmd": "+chargen/approve Neon", "as": "admin", "label": "approve" },
+    { "expect": "Approved" },
+
+    { "sub": "Live sheet & look" },
+    { "cmd": "+sheet", "label": "approved sheet" },
+    { "expect": "Nodejacker" },
+    { "cmd": "inv", "label": "carried belongings" },
+    {
+      "cmd": "@desc me=Neon still smells like solder and rain.",
+      "label": "set DESCRIPTION"
+    },
+    { "cmd": "+desc", "label": "assembled look" },
+    { "expect": "solder and rain" }
+  ]
+}

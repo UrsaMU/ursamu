@@ -14,6 +14,7 @@ import {
 } from "./config.ts";
 import { setSiteRuntime, siteStaticHandler } from "./static.ts";
 import { scanInstalledThemes } from "./themes.ts";
+import { registerSiteNav } from "./site-nav.ts";
 
 async function loadGameConfig(): Promise<unknown> {
   try {
@@ -33,7 +34,7 @@ async function loadGameConfig(): Promise<unknown> {
 
 export const plugin: IPlugin = {
   name: "site",
-  version: "0.1.93",
+  version: "0.1.95",
   description:
     "Public front-end shell — layout framing + design tokens + skins.",
 
@@ -49,6 +50,14 @@ export const plugin: IPlugin = {
     }
 
     cfg = applySkinDefaults(cfg);
+    // Builtin Play link (config nav with same id wins).
+    registerSiteNav({
+      id: "play",
+      label: "Play",
+      href: "/play",
+      order: 36,
+      require: "connected",
+    });
     // Load zip-installed themes from theme/installed/
     try {
       await scanInstalledThemes(Deno.cwd());

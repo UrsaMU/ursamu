@@ -4,9 +4,9 @@
 // Each entry is an AI-written recap of a session's exchanges.
 // Entries can be exported as plain text or posted to Discord.
 
-import { DBO } from "ursamu";
+import { DBO } from "@ursamu/mush";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { nanoid } from "../ingestion/util.ts";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -26,7 +26,7 @@ export const gmJournal = new DBO<IJournalEntry>("server.gm.journal");
 // ─── Generate a journal entry from session exchanges ─────────────────────────
 
 export async function generateJournalEntry(
-  model: ChatGoogleGenerativeAI,
+  model: BaseChatModel,
   sessionLabel: string,
   sessionId: string,
   exchanges: Array<{ input: string; output: string; playerName?: string }>,
@@ -56,7 +56,7 @@ export async function generateJournalEntry(
 }
 
 async function summarize(
-  model: ChatGoogleGenerativeAI,
+  model: BaseChatModel,
   sessionLabel: string,
   transcript: string,
 ): Promise<string> {

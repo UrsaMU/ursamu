@@ -30,6 +30,8 @@ export interface IInjectOptions {
   currentRound?: IGMRound;
   graphSuffix: string;
   inRoomPlayerIds: string[];
+  /** Watched room id for mission lookup. */
+  roomId?: string;
 }
 
 function formatRound(round: IGMRound): string {
@@ -66,12 +68,25 @@ export function buildInjectedPrompt(opts: IInjectOptions): string {
     inRoomPlayerIds,
   } = opts;
 
+  // playersInRoom is already room-scoped — pass empty filter so we
+  // never re-drop sheets on id shape mismatch.
+  const scenePlayers = roomCtx.playersInRoom.length
+    ? formatCharactersFull(roomCtx.playersInRoom, [])
+    : formatCharactersFull(snapshot.characters, inRoomPlayerIds);
+
+  // Cap history to cut repetition loops
+  const recentTrim = recentExchanges.slice(-3).map((ex) => ({
+    ...ex,
+    output: String(ex.output ?? "").slice(0, 280),
+    input: String(ex.input ?? "").slice(0, 200),
+  }));
+
   // Build assembled context object
   const context: IAssembledContext = {
     sceneDescription: formatScene(roomCtx),
-    scenePlayers: formatCharactersFull(roomCtx.playersInRoom, inRoomPlayerIds),
+    scenePlayers,
     activeFronts: formatFronts(snapshot.fronts),
-    recentExchanges: formatRecentExchanges(recentExchanges),
+    recentExchanges: formatRecentExchanges(recentTrim as typeof recentExchanges),
     criticalMemories: formatCriticalMemories(snapshot.memories),
     chaosLevel: config.chaosLevel,
     currentRound: currentRound ? formatRound(currentRound) : undefined,

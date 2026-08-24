@@ -1,0 +1,14 @@
+{
+  "name": "sprawl",
+  "version": "1.0.0",
+  "description": "Sprawl Goons: Upgraded — 2d6 cyberpunk sheets, chargen, combat, hack, Flow.",
+  "ursamu": ">=2.6.0",
+  "author": "UrsaMU",
+  "license": "MIT",
+  "main": "index.ts",
+  "dependencies": [
+    { "name": "help", "version": ">=1.0.0" },
+    { "name": "jobs", "version": ">=1.0.0" },
+    { "name": "mail", "version": ">=2.5.0" }
+  ]
+}

@@ -5,18 +5,17 @@ See also: +help locks (overview)
   Building blocks of a lock expression.
 
 ATOMS
-  `me`         The enactor
-  `#12`        Object by id
-  `*Name`      Named player
-  `+flag`      Has flag (engine-dependent)
-  `attr:val`   Attribute equals value
+  `me`  `#12`  `*Name`  `+flag`  `attr:val`
 
-  Combine with `&` / `&&`, `|` / `||`, `!`, and parentheses.
-  Adjacent atoms often imply AND.
+OPERATORS
+  `&` same as `&&` (AND)   `|` same as `||` (OR)
+  `!` NOT                  `( )` group
+  Adjacent atoms imply AND (space = `&`).
 
 EXAMPLES
   me|*Alice
-  !(me)
-  flag(wizard)|is(#5)
+  wizard | #2
+  +member & !dark
+  flag(wizard)||is(#5)
 
 SEE ALSO: +help locks/funcs, +help locks/examples

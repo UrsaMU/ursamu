@@ -13,4 +13,5 @@ QUICK START
   pub :waves.
   allcom off
 
-SEE ALSO: +help player, +help staff, +help player/alias
+SEE ALSO: +help player, +help staff,
++help staff/locks, +help player/alias

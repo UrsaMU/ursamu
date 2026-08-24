@@ -4,6 +4,11 @@ import type { ICoreContext } from "@ursamu/core";
 import type { IChannel, IChanEntry, IChanMessage } from "../types.ts";
 import { channelEvents } from "../channel-events.ts";
 import { channelAnnounces, broadcastAnnounce } from "../announce.ts";
+import {
+  channelTagFromHeader,
+  deliverChannelSpeech,
+  type ChanSpeechKind,
+} from "../chan-deliver.ts";
 
 const chans = new DBO<IChannel>(() =>
   getConfig<string>("plugins.channels.db", "server.chans"),
@@ -26,12 +31,24 @@ function moniker(obj: {
   );
 }
 
-function chanSend(
-  chanName: string,
-  header: string,
-  text: string,
-): void {
-  rooms.broadcast(chanName, `${header} ${text}`);
+function avatarHint(
+  id: string,
+  data?: Record<string, unknown>,
+): string | null {
+  if (!data) return null;
+  const img = data.image;
+  if (typeof img === "string" && /^https?:\/\//i.test(img.trim())) {
+    return img.trim();
+  }
+  if (typeof img === "string" && /\.(png|jpe?g|gif|webp)$/i.test(img)) {
+    return `/avatars/${img.replace(/^\/avatars\//, "")}`;
+  }
+  const ext = data.imageExt ?? data.avatarExt;
+  if (typeof ext === "string" && /^(png|jpe?g|gif|webp)$/i.test(ext)) {
+    const e = ext.toLowerCase() === "jpeg" ? "jpg" : ext.toLowerCase();
+    return `/avatars/${id}.${e}`;
+  }
+  return `/avatars/${id}`;
 }
 
 async function persistMessage(
@@ -194,7 +211,37 @@ export async function matchChannel(
   }
 
   if (msg.toLowerCase() === "who") {
-    const { players, objects } = await getChannelMembers(channel.channel);
+    const { players, objects } = await getChannelMembers(
+      channel.channel,
+    );
+    const rows = [
+      ...players.map((name) => ({
+        name,
+        status: "on",
+        isPlayer: true,
+      })),
+      ...objects.map((name) => ({
+        name,
+        status: "on",
+        isPlayer: false,
+      })),
+    ];
+    try {
+      const { emitChannelWho } = await import(
+        "../commands/chan-ui.ts"
+      );
+      if (
+        emitChannelWho(ctx.socketId, {
+          channel: channel.channel,
+          rows,
+          alias: channel.alias,
+        })
+      ) {
+        return true;
+      }
+    } catch {
+      /* fall through to text */
+    }
     send([ctx.socketId], "-- Players --");
     for (const p of players) {
       send([ctx.socketId], p);
@@ -209,28 +256,59 @@ export async function matchChannel(
 
   if (!channel.active) return false;
 
+  let kind: ChanSpeechKind = "say";
+  let speechText = msg;
+  let telnetBody: string;
+
   if (match[1] === ":") {
-    msg = `${titlePrefix}${displayName} ${match[2]}`;
+    kind = "pose";
+    speechText = String(match[2] ?? "").trim();
+    telnetBody =
+      `${titlePrefix}${displayName} ${speechText}`.trim();
   } else if (match[1] === ";") {
-    msg = `${titlePrefix}${displayName}${match[2]}`;
+    kind = "semi";
+    speechText = String(match[2] ?? "").trim();
+    telnetBody = `${titlePrefix}${displayName}${speechText}`;
   } else {
-    msg = `${titlePrefix}${displayName} says, "${msg}"`;
+    kind = "say";
+    speechText = msg;
+    telnetBody =
+      `${titlePrefix}${displayName} says, "${msg}"`;
   }
 
-  chanSend(chan.name, chan.header, msg);
+  const header = String(chan.header || "").trim();
+  const telnetLine = header
+    ? `${header} ${telnetBody}`
+    : telnetBody;
+  const tag = channelTagFromHeader(header, chan.name);
+  const bag = (en.data ?? {}) as Record<string, unknown>;
+
+  deliverChannelSpeech({
+    chanName: chan.name,
+    telnetLine,
+    chat: {
+      kind,
+      name: displayName,
+      text: speechText,
+      tag,
+      channel: chan.name,
+      actorId: en.id,
+      avatar: avatarHint(en.id, bag),
+    },
+  });
 
   channelEvents
     .emit("channel:message", {
       channelName: chan.name,
       senderId: en.id,
       senderName: moniker(en),
-      message: msg,
+      message: telnetBody,
       source: "game",
     })
     .catch((e: unknown) =>
       console.error("[channels] channel:message:", e)
     );
 
-  await persistMessage(chan, en.id, moniker(en), msg);
+  await persistMessage(chan, en.id, moniker(en), telnetBody);
   return true;
 }

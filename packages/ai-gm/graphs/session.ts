@@ -3,14 +3,14 @@
 // Generates an end-of-session recap: key events, NPC shifts, world changes,
 // unresolved threads. Stores memories and optionally publishes a wiki recap.
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { buildGraph, invokeGraph } from "./base.ts";
 import type { IInjectOptions } from "../context/injector.ts";
 import { buildInjectedPrompt } from "../context/injector.ts";
 import { SESSION_SUMMARY_SYSTEM_SUFFIX } from "../prompts/templates.ts";
 import type { IGMExchange, IGMSession } from "../schema.ts";
 
-export function buildSessionGraph(model: ChatGoogleGenerativeAI) {
+export function buildSessionGraph(model: BaseChatModel) {
   return buildGraph(model);
 }
 

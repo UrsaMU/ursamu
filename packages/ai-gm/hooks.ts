@@ -15,8 +15,8 @@
 //
 // This module exports a single registerHooks(ctx) function called from index.ts.
 
-import { gameHooks } from "ursamu";
-import { jobHooks } from "ursamu/jobs";
+import { gameHooks } from "@ursamu/mush";
+import { jobHooks } from "@ursamu/jobs";
 import { sessionCache } from "./context/cache.ts";
 import { embedText } from "./rag.ts";
 import {
@@ -51,20 +51,27 @@ import type {
   ISrRollEvent,
   ISrSystemRegisterEvent,
 } from "./game-hooks-augment.ts";
+import { registerUtopiaHooks } from "./hooks-utopia.ts";
 
 // ─── Hook context ─────────────────────────────────────────────────────────────
 
 export interface IHookContext {
+  /** Live config — always re-read (watch/mode changes mid-session). */
+  getConfig: () => Promise<IGMConfig>;
+  /** @deprecated use getConfig() — kept briefly for call-site migration */
   config: IGMConfig;
   graphs: IGMGraphs;
   /** Sends a page (private message) to a player. */
   page: (playerId: string, message: string) => void;
   /** Broadcasts to all connected players in a room. */
-  broadcast: (roomId: string, message: string) => void;
+  broadcast: (
+    roomId: string,
+    message: string,
+  ) => void | Promise<void>;
   /** Returns a map of playerId → playerName for players in a room. */
   getPlayersInRoom: (roomId: string) => Promise<Map<string, string>>;
   /** Current open session id (null if no session open). */
-  getSessionId: () => string | null;
+  getSessionId: () => string | null | Promise<string | null>;
 }
 
 // ─── Shared helper: build IInjectOptions ─────────────────────────────────────
@@ -74,12 +81,22 @@ async function buildInjectOpts(
   roomId: string,
   inRoomPlayerIds: string[],
 ): Promise<IInjectOptions> {
+  const config = await ctx.getConfig();
+  const system = getSystem(config.systemId);
+
+  // Keep sheet loader aligned with active system (CPR → cpr.players)
+  const col = config.charCollection ||
+    system.charCollection ||
+    "server.playbooks";
+  sessionCache.setCharCollection(col);
+  // Always refresh characters before adjudicating
+  sessionCache.invalidate("characters");
+
   const [snapshot, lore] = await Promise.all([
     sessionCache.getSnapshot(),
     sessionCache.getLore(),
   ]);
 
-  const _playerNames = await ctx.getPlayersInRoom(roomId);
   const recentExchanges = await fetchRecentExchanges(roomId);
 
   const roomCtx = await loadRoomContext(
@@ -89,15 +106,23 @@ async function buildInjectOpts(
     recentExchanges.map((e) => `[${e.type}] ${e.input}`),
   );
 
+  console.log(
+    `[GM] inject room=${roomId} system=${system.id} ` +
+      `chars=${snapshot.characters.length} ` +
+      `inScene=${roomCtx.playersInRoom.length} ` +
+      `scene=${roomCtx.scene?.title ?? "none"}`,
+  );
+
   return {
-    config: ctx.config,
-    system: getSystem(ctx.config.systemId),
+    config,
+    system,
     snapshot,
     roomCtx,
     lorePages: lore,
     recentExchanges,
     graphSuffix: "", // overridden by each graph's run function
     inRoomPlayerIds,
+    roomId,
   };
 }
 
@@ -146,65 +171,105 @@ async function adjudicateRound(
   }
 
   if (output) {
-    ctx.broadcast(roomId, output);
+    try {
+      await ctx.broadcast(roomId, output);
+    } catch (err) {
+      console.error("[GM] broadcast after pose failed:", err);
+    }
   }
 
-  await closeRound(roundId);
+  try {
+    await closeRound(roundId);
+  } catch (err) {
+    console.error("[GM] closeRound error:", err);
+  }
 
-  // Store the exchange
-  const embedding = await embedText(roundSummary + " " + output);
-  await gmExchanges.create(
-    {
-      id: nanoid(),
-      type: "pose",
-      roomId,
-      input: roundSummary,
-      output,
-      toolsUsed: [],
-      timestamp: Date.now(),
-      embedding,
-    },
-  );
+  // Store the exchange (never crash the server on log failure)
+  try {
+    const embedding = await embedText(roundSummary + " " + output);
+    await gmExchanges.create(
+      {
+        id: nanoid(),
+        type: "pose",
+        roomId,
+        input: roundSummary,
+        output,
+        toolsUsed: [],
+        timestamp: Date.now(),
+        embedding,
+      },
+    );
+  } catch (err) {
+    console.error("[GM] exchange log error:", err);
+  }
 }
 
 // ─── Register all hooks ───────────────────────────────────────────────────────
 
 export function registerHooks(ctx: IHookContext): void {
+
+  async function liveConfig(): Promise<IGMConfig> {
+    return await ctx.getConfig();
+  }
+
   // ── player:pose ──────────────────────────────────────────────────────────────
 
   gameHooks.on("player:pose", async (e) => {
-    const { actorId, actorName: _actorName, roomId, content } = e;
+    try {
+      const { actorId, roomId, content } = e;
+      const cfg = await ctx.getConfig();
 
-    if (!ctx.config.watchedRooms.includes(roomId)) return;
-    if (ctx.config.ignoredPlayers.includes(actorId)) return;
-    if (ctx.config.mode === "hybrid") return; // hybrid: staff-triggered only
+      if (!cfg.watchedRooms.includes(roomId)) return;
+      if (cfg.ignoredPlayers.includes(actorId)) return;
+      if (cfg.mode === "hybrid") return; // hybrid: staff only
 
-    const playerNames = await ctx.getPlayersInRoom(roomId);
-    const inRoom = [...playerNames.keys()];
+      const playerNames = await ctx.getPlayersInRoom(roomId);
+      const inRoom = [...playerNames.keys()];
 
-    // Open a round if none is open
-    let round = await getOpenRound(roomId);
-    if (!round) {
-      const sessionId = ctx.getSessionId() ?? "no-session";
-      const nameMap = playerNames;
-      round = await openRound(
+      // Open a round if none is open
+      let round = await getOpenRound(roomId);
+      if (!round) {
+        const sessionId =
+          (await ctx.getSessionId()) ?? "no-session";
+        round = await openRound(
+          roomId,
+          sessionId,
+          inRoom,
+          playerNames,
+          cfg.roundTimeoutSeconds,
+        );
+      }
+
+      const { round: updated, allReady } = await addPose(
         roomId,
-        sessionId,
-        inRoom,
-        nameMap,
-        ctx.config.roundTimeoutSeconds,
+        actorId,
+        content,
       );
-    }
+      if (!updated) return;
 
-    const { round: updated, allReady } = await addPose(
-      roomId,
-      actorId,
-      content,
-    );
-    if (!updated) return;
+      console.log(
+        `[GM] pose from ${actorId} in ${roomId} ` +
+          `ready=${allReady} contribs=${updated.contributions.length}`,
+      );
 
-    if (allReady) {
-      await adjudicateRound(ctx, updated.id, roomId);
+      if (allReady) {
+        ctx.page(actorId, "Got it — adjudicating…");
+        await adjudicateRound(ctx, updated.id, roomId);
+      } else {
+        const waiting = updated.contributions
+          .filter((c) => !c.ready)
+          .map((c) => c.playerName)
+          .join(", ");
+        ctx.page(
+          actorId,
+          waiting
+            ? `Noted. Waiting on: ${waiting}`
+            : "Noted. Waiting for the round to close.",
+        );
+      }
+    } catch (err) {
+      // Never let GM hook failures kill the game process
+      console.error("[GM] player:pose handler error:", err);
     }
   });
 
@@ -212,36 +277,59 @@ export function registerHooks(ctx: IHookContext): void {
   // Treat +say as a pose contribution (same round logic).
 
   gameHooks.on("player:say", async (e) => {
-    const { actorId, actorName: _actorName, roomId, message } = e;
+    try {
+      const { actorId, actorName: _actorName, roomId, message } =
+        e;
+      const cfg = await ctx.getConfig();
 
-    if (!ctx.config.watchedRooms.includes(roomId)) return;
-    if (ctx.config.ignoredPlayers.includes(actorId)) return;
-    if (ctx.config.mode === "hybrid") return;
+      if (!cfg.watchedRooms.includes(roomId)) return;
+      if (cfg.ignoredPlayers.includes(actorId)) return;
+      if (cfg.mode === "hybrid") return;
 
-    const playerNames = await ctx.getPlayersInRoom(roomId);
-    const inRoom = [...playerNames.keys()];
+      const playerNames = await ctx.getPlayersInRoom(roomId);
+      const inRoom = [...playerNames.keys()];
 
-    let round = await getOpenRound(roomId);
-    if (!round) {
-      round = await openRound(
+      let round = await getOpenRound(roomId);
+      if (!round) {
+        round = await openRound(
+          roomId,
+          (await ctx.getSessionId()) ?? "no-session",
+          inRoom,
+          playerNames,
+          cfg.roundTimeoutSeconds,
+        );
+      }
+
+      const sayText = `${_actorName} says: "${message}"`;
+      const { round: updated, allReady } = await addPose(
         roomId,
-        ctx.getSessionId() ?? "no-session",
-        inRoom,
-        playerNames,
-        ctx.config.roundTimeoutSeconds,
+        actorId,
+        sayText,
+        _actorName,
       );
-    }
+      if (!updated) return;
 
-    const sayText = `${_actorName} says: "${message}"`;
-    const { round: updated, allReady } = await addPose(
-      roomId,
-      actorId,
-      sayText,
-    );
-    if (!updated) return;
+      console.log(
+        `[GM] say from ${actorId} in ${roomId} ready=${allReady}`,
+      );
 
-    if (allReady) {
-      await adjudicateRound(ctx, updated.id, roomId);
+      if (allReady) {
+        ctx.page(actorId, "Got it — adjudicating…");
+        await adjudicateRound(ctx, updated.id, roomId);
+      } else {
+        const waiting = updated.contributions
+          .filter((c) => !c.ready)
+          .map((c) => c.playerName)
+          .join(", ");
+        ctx.page(
+          actorId,
+          waiting
+            ? `Noted. Waiting on: ${waiting}`
+            : "Noted. Waiting for the round to close.",
+        );
+      }
+    } catch (err) {
+      console.error("[GM] player:say handler error:", err);
     }
   });
 
@@ -249,73 +337,74 @@ export function registerHooks(ctx: IHookContext): void {
   // Page entering player with scene + recent activity summary.
 
   gameHooks.on("player:move", async (e) => {
-    const { actorId, actorName, toRoomId } = e;
-
-    if (!ctx.config.watchedRooms.includes(toRoomId)) return;
-    if (ctx.config.ignoredPlayers.includes(actorId)) return;
-    if (!ctx.config.autoframe) return;
-
-    const playerNames = await ctx.getPlayersInRoom(toRoomId);
-    const inRoom = [...playerNames.keys()];
-    const opts = await buildInjectOpts(ctx, toRoomId, inRoom);
-
-    // Also add the entering player to the round if one is open
-    const round = await getOpenRound(toRoomId);
-    if (round && ctx.config.lateJoins === "include") {
-      // Will be picked up next time they pose; no forced contribution needed
-    }
-
-    const recentExchanges = await fetchRecentExchanges(toRoomId);
-    const recentActivity = recentExchanges
-      .slice(-5)
-      .map((ex) => ex.output.slice(0, 200))
-      .join("\n\n");
-
-    let pageText = "";
     try {
-      pageText = await runScenePageGraph(ctx.graphs.scenePage, {
-        opts,
-        playerName: actorName,
-        recentActivity,
-      });
+      const { actorId, actorName, toRoomId } = e;
+
+      if (!(await liveConfig()).watchedRooms.includes(toRoomId)) return;
+      if ((await liveConfig()).ignoredPlayers.includes(actorId)) return;
+      if (!(await liveConfig()).autoframe) return;
+
+      const playerNames = await ctx.getPlayersInRoom(toRoomId);
+      const inRoom = [...playerNames.keys()];
+      const opts = await buildInjectOpts(ctx, toRoomId, inRoom);
+
+      const recentExchanges = await fetchRecentExchanges(toRoomId);
+      const recentActivity = recentExchanges
+        .slice(-5)
+        .map((ex) => ex.output.slice(0, 200))
+        .join("\n\n");
+
+      let pageText = "";
+      try {
+        pageText = await runScenePageGraph(ctx.graphs.scenePage, {
+          opts,
+          playerName: actorName,
+          recentActivity,
+        });
+      } catch (err) {
+        console.error("[GM] scene-page graph error:", err);
+      }
+
+      if (pageText) {
+        ctx.page(actorId, pageText);
+      }
+
+      sessionCache.invalidate("characters");
     } catch (err) {
-      console.error("[GM] scene-page graph error:", err);
+      console.error("[GM] player:move handler error:", err);
     }
-
-    if (pageText) {
-      ctx.page(actorId, pageText);
-    }
-
-    // Invalidate cache entries that depend on room occupancy (characters)
-    sessionCache.invalidate("characters");
   });
 
   // ── player:login ─────────────────────────────────────────────────────────────
 
   gameHooks.on("player:login", async (e) => {
-    if (!ctx.config.greet) return;
-    if (ctx.config.ignoredPlayers.includes(e.actorId)) return;
+    try {
+      if (!(await liveConfig()).greet) return;
+      if ((await liveConfig()).ignoredPlayers.includes(e.actorId)) return;
 
-    // Brief session state greeting — just a page, no full graph needed
-    const sessionId = ctx.getSessionId();
-    if (!sessionId) {
+      const sessionId = await ctx.getSessionId();
+      if (!sessionId) {
+        ctx.page(
+          e.actorId,
+          "[GM] No active session. Staff: use " +
+            "+gm/session/open to start one.",
+        );
+        return;
+      }
+
+      const snapshot = await sessionCache.getSnapshot();
+      const charCount = snapshot.characters.length;
+      const frontCount = snapshot.fronts.length;
+
       ctx.page(
         e.actorId,
-        "[GM] No active session. Staff: use +gm/session/open to start one.",
+        `[GM] Session active. ${charCount} approved character(s), ` +
+          `${frontCount} active front(s). ` +
+          `Pose in a watched room when ready.`,
       );
-      return;
+    } catch (err) {
+      console.error("[GM] player:login handler error:", err);
     }
-
-    const snapshot = await sessionCache.getSnapshot();
-    const charCount = snapshot.characters.length;
-    const frontCount = snapshot.fronts.length;
-
-    ctx.page(
-      e.actorId,
-      `[GM] Session active. ${charCount} approved character(s), ` +
-        `${frontCount} active front(s). ` +
-        `Pose in a watched room when ready.`,
-    );
   });
 
   // ── player:logout ─────────────────────────────────────────────────────────────
@@ -329,11 +418,18 @@ export function registerHooks(ctx: IHookContext): void {
   // Log new scene opens. No round management needed -- rounds are room-scoped
   // and will open naturally when the first pose arrives.
 
-  gameHooks.on("scene:created", (e) => {
-    if (!ctx.config.watchedRooms.includes(e.roomId)) return;
-    console.log(
-      `[GM] Scene created: "${e.sceneName}" (${e.sceneId}) in room ${e.roomId} by ${e.actorName}.`,
-    );
+  gameHooks.on("scene:created", async (e) => {
+    try {
+      if (!(await liveConfig()).watchedRooms.includes(e.roomId)) {
+        return;
+      }
+      console.log(
+        `[GM] Scene created: "${e.sceneName}" (${e.sceneId}) ` +
+          `in room ${e.roomId} by ${e.actorName}.`,
+      );
+    } catch (err) {
+      console.error("[GM] scene:created handler error:", err);
+    }
   });
 
   // ── scene:pose ────────────────────────────────────────────────────────────────
@@ -341,8 +437,8 @@ export function registerHooks(ctx: IHookContext): void {
   // OOC comments and scene-set entries are skipped here.
 
   gameHooks.on("scene:pose", async (e) => {
-    const { actorId, actorName: _actorName, roomId, msg, type } =
-      e as unknown as {
+    try {
+      const { actorId, roomId, msg, type } = e as unknown as {
         actorId: string;
         actorName: string;
         roomId: string;
@@ -350,30 +446,37 @@ export function registerHooks(ctx: IHookContext): void {
         type: string;
       };
 
-    if (type !== "pose") return; // ooc and set are handled elsewhere
-    if (!ctx.config.watchedRooms.includes(roomId)) return;
-    if (ctx.config.ignoredPlayers.includes(actorId)) return;
-    if (ctx.config.mode === "hybrid") return;
+      if (type !== "pose") return; // ooc and set are handled elsewhere
+      if (!(await liveConfig()).watchedRooms.includes(roomId)) return;
+      if ((await liveConfig()).ignoredPlayers.includes(actorId)) return;
+      if ((await liveConfig()).mode === "hybrid") return;
 
-    const playerNames = await ctx.getPlayersInRoom(roomId);
-    const inRoom = [...playerNames.keys()];
+      const playerNames = await ctx.getPlayersInRoom(roomId);
+      const inRoom = [...playerNames.keys()];
 
-    let round = await getOpenRound(roomId);
-    if (!round) {
-      round = await openRound(
+      let round = await getOpenRound(roomId);
+      if (!round) {
+        round = await openRound(
+          roomId,
+          (await ctx.getSessionId()) ?? "no-session",
+          inRoom,
+          playerNames,
+          (await liveConfig()).roundTimeoutSeconds,
+        );
+      }
+
+      const { round: updated, allReady } = await addPose(
         roomId,
-        ctx.getSessionId() ?? "no-session",
-        inRoom,
-        playerNames,
-        ctx.config.roundTimeoutSeconds,
+        actorId,
+        msg,
       );
-    }
+      if (!updated) return;
 
-    const { round: updated, allReady } = await addPose(roomId, actorId, msg);
-    if (!updated) return;
-
-    if (allReady) {
-      await adjudicateRound(ctx, updated.id, roomId);
+      if (allReady) {
+        await adjudicateRound(ctx, updated.id, roomId);
+      }
+    } catch (err) {
+      console.error("[GM] scene:pose handler error:", err);
     }
   });
 
@@ -383,35 +486,41 @@ export function registerHooks(ctx: IHookContext): void {
   // +gm/scene/publish.
 
   gameHooks.on("scene:set", async (e) => {
-    const { actorId, actorName, roomId, description } = e as unknown as {
-      actorId: string;
-      actorName: string;
-      roomId: string;
-      description: string;
-    };
-
-    if (!ctx.config.watchedRooms.includes(roomId)) return;
-
-    const playerNames = await ctx.getPlayersInRoom(roomId);
-    const inRoom = [...playerNames.keys()];
-    const opts = await buildInjectOpts(ctx, roomId, inRoom);
-
-    let draft = "";
     try {
-      draft = await runSceneSetGraph(ctx.graphs.sceneSet, {
-        opts,
-        actorName,
-        description,
-      });
-    } catch (err) {
-      console.error("[GM] scene-set draft graph error:", err);
-    }
+      const { actorId, actorName, roomId, description } =
+        e as unknown as {
+          actorId: string;
+          actorName: string;
+          roomId: string;
+          description: string;
+        };
 
-    if (draft) {
-      ctx.page(
-        actorId,
-        `[GM DRAFT] Review and edit, then use +gm/scene/publish to broadcast:\n\n${draft}`,
-      );
+      if (!(await liveConfig()).watchedRooms.includes(roomId)) return;
+
+      const playerNames = await ctx.getPlayersInRoom(roomId);
+      const inRoom = [...playerNames.keys()];
+      const opts = await buildInjectOpts(ctx, roomId, inRoom);
+
+      let draft = "";
+      try {
+        draft = await runSceneSetGraph(ctx.graphs.sceneSet, {
+          opts,
+          actorName,
+          description,
+        });
+      } catch (err) {
+        console.error("[GM] scene-set draft graph error:", err);
+      }
+
+      if (draft) {
+        ctx.page(
+          actorId,
+          `[GM DRAFT] Review and edit, then use ` +
+            `+gm/scene/publish to broadcast:\n\n${draft}`,
+        );
+      }
+    } catch (err) {
+      console.error("[GM] scene:set handler error:", err);
     }
   });
 
@@ -455,7 +564,7 @@ export function registerHooks(ctx: IHookContext): void {
     try {
       const timedOut = await collectTimedOutRounds();
       for (const round of timedOut) {
-        if (!ctx.config.watchedRooms.includes(round.roomId)) continue;
+        if (!(await liveConfig()).watchedRooms.includes(round.roomId)) continue;
         console.log(
           `[GM] Round ${round.id} in room ${round.roomId} timed out -- adjudicating.`,
         );
@@ -475,29 +584,166 @@ export function registerHooks(ctx: IHookContext): void {
   // with ai-gm at runtime without requiring a restart.
 
   const gh = gameHooks as unknown as IGameHooks;
-  gh.on("gm:system:register", (event: unknown) => {
+  gh.on("gm:system:register", async (event: unknown) => {
     const { system } = event as ISrSystemRegisterEvent;
     if (!system?.id) return;
     try {
-      // registerGameSystem accepts IGameSystem; ingested systems pass Zod
-      // validation inside deserializeSystem() which is called by loadCustomSystems.
-      // Here we call it directly with the runtime object — functions are re-built
-      // by the store from the serialized fields, so this is structurally safe.
       // deno-lint-ignore no-explicit-any
       registerGameSystem(system as any);
-      // If the system specifies its own character collection, point the cache at it.
-      const charCollection = (system as Record<string, unknown>).charCollection;
+
+      const charCollection =
+        (system as Record<string, unknown>).charCollection;
+      const cfg = await liveConfig();
+      const patch: Record<string, unknown> = {};
+
+      // Auto-activate when still on placeholder "generic"
+      if (!cfg.systemId || cfg.systemId === "generic") {
+        patch.systemId = system.id;
+      }
+
       if (typeof charCollection === "string" && charCollection) {
+        patch.charCollection = charCollection;
         sessionCache.setCharCollection(charCollection);
         console.log(
-          `[GM] Character collection switched to "${charCollection}" for system "${system.id}".`,
+          `[GM] Character collection → "${charCollection}" ` +
+            `for system "${system.id}".`,
         );
       }
+
+      // CPR / Night City persona when activating Cyberpunk RED
+      if (
+        system.id === "cyberpunk-red" &&
+        (cfg.systemId === "generic" ||
+          cfg.systemId === "cyberpunk-red" ||
+          !cfg.systemId)
+      ) {
+        patch.systemId = "cyberpunk-red";
+        patch.persona = {
+          name: "Night City",
+          tone:
+            "gritty cyberpunk noir, chrome and blood, Night City 2045",
+          style:
+            "terse, visceral, present tense, second person, " +
+            "fiction-first, Cyberpunk RED core rules",
+          oocBrackets: true,
+        };
+      }
+
+      if (
+        system.id === "utopia" &&
+        (cfg.systemId === "generic" ||
+          cfg.systemId === "utopia" ||
+          !cfg.systemId)
+      ) {
+        patch.systemId = "utopia";
+        patch.persona = {
+          name: "The City",
+          tone:
+            "neo-future after The Fall, hope and inequality",
+          style:
+            "terse, present tense, the city as judge not companion",
+          oocBrackets: true,
+        };
+      }
+
+      if (Object.keys(patch).length) {
+        const { saveConfig } = await import("./providers.ts");
+        await saveConfig(patch);
+        console.log(
+          `[GM] Active system set to "${
+            patch.systemId ?? cfg.systemId
+          }".`,
+        );
+      }
+
       console.log(
-        `[GM] Game system "${system.id}" registered via gm:system:register.`,
+        `[GM] Game system "${system.id}" registered ` +
+          `via gm:system:register.`,
       );
+
+      // Subscribe to system-declared GM events (CPR rolls, hits, …)
+      const events = (event as {
+        events?: { name: string; cue?: string }[];
+      }).events;
+      if (Array.isArray(events)) {
+        for (const ev of events) {
+          if (!ev?.name) continue;
+          const evtName = ev.name;
+          const cue = ev.cue ?? evtName;
+          // deno-lint-ignore no-explicit-any
+          (gameHooks as any).on?.(evtName, async (payload: {
+            roomId?: string;
+            playerId?: string;
+            playerName?: string;
+            summary?: string;
+          }) => {
+            try {
+              const roomId = String(payload.roomId ?? "");
+              if (!roomId) return;
+              const cfg = await liveConfig();
+              if (!cfg.watchedRooms.includes(roomId) &&
+                !cfg.watchedRooms.map(String).includes(roomId)) {
+                // still inject if open round exists
+              }
+              if (
+                (payload as { autoWatch?: boolean }).autoWatch
+              ) {
+                const { loadConfig, saveConfig } = await import(
+                  "./providers.ts"
+                );
+                const live = await loadConfig();
+                if (!live.watchedRooms.includes(roomId)) {
+                  await saveConfig({
+                    watchedRooms: [
+                      ...live.watchedRooms,
+                      roomId,
+                    ],
+                  });
+                }
+              }
+              const note = `[${cue}] ${payload.summary ?? ""}`.trim();
+              const round = await getOpenRound(roomId);
+              if (round && payload.playerId) {
+                await injectRollIntoRound(
+                  round.id,
+                  payload.playerId,
+                  note,
+                );
+              }
+            } catch (err) {
+              console.error(`[GM] event ${evtName}:`, err);
+            }
+          });
+          console.log(`[GM] Subscribed to ${evtName}`);
+        }
+      }
     } catch (e: unknown) {
       console.error("[GM] gm:system:register failed:", e);
+    }
+  });
+
+  // Mission run started — ensure room is watched
+  // deno-lint-ignore no-explicit-any
+  (gameHooks as any).on?.("cpr:run:started", async (payload: {
+    roomId?: string;
+    title?: string;
+  }) => {
+    try {
+      const roomId = String(payload.roomId ?? "");
+      if (!roomId) return;
+      const { loadConfig, saveConfig } = await import("./providers.ts");
+      const cfg = await loadConfig();
+      if (!cfg.watchedRooms.includes(roomId)) {
+        await saveConfig({
+          watchedRooms: [...cfg.watchedRooms, roomId],
+        });
+        console.log(
+          `[GM] Auto-watched room ${roomId} for run ` +
+            `"${payload.title ?? ""}"`,
+        );
+      }
+    } catch (err) {
+      console.error("[GM] cpr:run:started:", err);
     }
   });
 
@@ -507,9 +753,19 @@ export function registerHooks(ctx: IHookContext): void {
   // GM LLM sees the mechanical outcome when it adjudicates the round.
   // If no round is open, store as a gmExchange so it appears in recentExchanges.
 
+  registerUtopiaHooks({
+    getConfig: liveConfig,
+    graphs: ctx.graphs,
+    broadcast: ctx.broadcast,
+    getPlayersInRoom: ctx.getPlayersInRoom,
+    getSessionId: ctx.getSessionId,
+    buildInjectOpts: (roomId, ids) =>
+      buildInjectOpts(ctx, roomId, ids),
+  });
+
   gh.on("shadowrun:roll", async (event: unknown) => {
     const e = event as ISrRollEvent;
-    if (!ctx.config.watchedRooms.includes(e.roomId)) return;
+    if (!(await liveConfig()).watchedRooms.includes(e.roomId)) return;
 
     const note = formatSrRollNote(e);
 

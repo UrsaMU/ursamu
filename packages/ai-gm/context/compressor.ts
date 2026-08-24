@@ -5,9 +5,10 @@ import type {
   INPC,
   IOrg,
 } from "./loader.ts";
+import { bareId, idsEqual } from "./loader.ts";
 import type { IGMExchange, IGMMemory, IGMReveal } from "../schema.ts";
 import type { ILorePage } from "./loader.ts";
-import type { IJob } from "ursamu/jobs";
+import type { IJob } from "@ursamu/jobs";
 
 // ─── Richer internal shapes (cast from loader minimal types at runtime) ────────
 // These add explicit field declarations the loader omits; the index signature
@@ -106,8 +107,53 @@ function isSr4Char(c: ICharSheet): c is ICharSheet & ISr4CharSheet {
     (c as Record<string, unknown>)["attrs"] !== null;
 }
 
+function isCprChar(c: ICharSheet): boolean {
+  return c.system === "cyberpunk-red" ||
+    (typeof c.data === "object" && c.data !== null &&
+      (c.data as { stats?: unknown }).stats != null &&
+      (c.playbook != null ||
+        (c.data as { role?: unknown }).role != null));
+}
+
+function formatCprCharFull(c: ICharSheet): string {
+  const d = (c.data ?? {}) as Record<string, unknown>;
+  const stats = (d.stats ?? {}) as Record<string, number>;
+  const role = String(c.playbook ?? d.role ?? "?");
+  const wound = String(d.woundState ?? "healthy");
+  const hp = d.hp as { current?: number; max?: number } | undefined;
+  const sk = (d.skills ?? {}) as Record<string, number>;
+  const topSkills = Object.entries(sk)
+    .filter(([, r]) => Number(r) >= 4)
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .slice(0, 8)
+    .map(([n, r]) => `${n} ${r}`)
+    .join(", ");
+  const chrome = Array.isArray(d.cyberware)
+    ? (d.cyberware as string[]).slice(0, 6).join(", ")
+    : "";
+  return [
+    `${c.name} (${role}) [Cyberpunk RED]`,
+    `  INT ${stats.int ?? "?"} REF ${stats.ref ?? "?"} ` +
+    `DEX ${stats.dex ?? "?"} TECH ${stats.tech ?? "?"} ` +
+    `COOL ${stats.cool ?? "?"}`,
+    `  WILL ${stats.will ?? "?"} LUCK ${stats.luck ?? "?"} ` +
+    `MOVE ${stats.move ?? "?"} BODY ${stats.body ?? "?"} ` +
+    `EMP ${stats.emp ?? "?"}`,
+    `  HP ${hp?.current ?? "?"}/${hp?.max ?? "?"}  ` +
+    `Wound: ${wound}` +
+    (d.eurodollars != null ? `  EB ${d.eurodollars}` : ""),
+    topSkills ? `  Skills: ${topSkills}` : "",
+    chrome ? `  Chrome: ${chrome}` : "",
+  ].filter(Boolean).join("\n");
+}
+
 function formatSr4CharFull(c: ISr4CharSheet, inRoomIds: string[]): string {
-  if (!inRoomIds.includes(c.playerId)) return "";
+  if (
+    inRoomIds.length &&
+    !inRoomIds.some((pid) => idsEqual(pid, c.playerId))
+  ) {
+    return "";
+  }
   const a = c.attrs;
   const body = a["Body"] ?? 0;
   const willpower = a["Willpower"] ?? 0;
@@ -221,11 +267,23 @@ export function formatCharactersFull(
   inRoomIds: string[],
 ): string {
   if (!chars.length) return "None.";
-  const inRoom = chars.filter((c) => inRoomIds.includes(c.playerId));
+  // If caller already scoped the list (roomCtx.playersInRoom), format all.
+  // Otherwise filter by room ids with # stripped.
+  const scoped = inRoomIds.length === 0
+    ? chars
+    : chars.filter((c) =>
+      inRoomIds.some((pid) => idsEqual(pid, c.playerId))
+    );
+  // Last resort: if filter emptied a non-empty list, still show them
+  // (ID shape mismatch should never blank the GM).
+  const inRoom = scoped.length ? scoped : chars;
   if (!inRoom.length) return "None.";
   return inRoom
     .map((c) => {
-      if (isSr4Char(c)) return formatSr4CharFull(c, [c.playerId]);
+      if (isCprChar(c)) return formatCprCharFull(c);
+      if (isSr4Char(c)) {
+        return formatSr4CharFull(c, [bareId(c.playerId)]);
+      }
       if (isUrbanShadowsChar(c)) {
         const u = c as unknown as ICharSheetFull;
         const harmCount = markedHarmCount(u.harm);
@@ -255,6 +313,14 @@ export function formatCharactersOneLiner(chars: ICharSheet[]): string {
   if (!chars.length) return "None.";
   return chars
     .map((c) => {
+      if (isCprChar(c)) {
+        const d = (c.data ?? {}) as Record<string, unknown>;
+        const hp = d.hp as { current?: number; max?: number } |
+          undefined;
+        return `${c.name} (${c.playbook ?? d.role ?? "?"}) — ` +
+          `HP ${hp?.current ?? "?"}/${hp?.max ?? "?"} ` +
+          `${d.woundState ?? "healthy"}`;
+      }
       if (isSr4Char(c)) return formatSr4CharOneLiner(c);
       if (isUrbanShadowsChar(c)) {
         const u = c as unknown as ICharSheetFull;

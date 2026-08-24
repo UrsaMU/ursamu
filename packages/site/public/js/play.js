@@ -14,7 +14,11 @@
   var socket = null;
   var status = "idle";
   var rootEl = null;
-  var PLAY_JS_VER = "20260809playmob";
+  var PLAY_JS_VER = "20260819deck";
+  var deckState = (global.PlayDeck && global.PlayDeck.emptyDeck)
+    ? global.PlayDeck.emptyDeck()
+    : { feed: null, week: null };
+  var deckSheetOpen = false;
   /** Stick to bottom unless the user scrolls up. */
   var stickBottom = true;
   var STICK_PX = 48;
@@ -108,12 +112,25 @@
     white: "#ffffff",
   };
 
+  /**
+   * Durable auth token — same keys as site.js (mobile Safari often
+   * drops sessionStorage while localStorage still has the JWT).
+   */
   function token() {
     try {
-      return sessionStorage.getItem("ursamu.webAdmin.token") || "";
-    } catch (_) {
-      return "";
-    }
+      var s = sessionStorage.getItem("ursamu.webAdmin.token") || "";
+      if (s) return s;
+    } catch (_) { /* private mode */ }
+    try {
+      var l = localStorage.getItem("ursamu.webAdmin.token") || "";
+      if (l) {
+        try {
+          sessionStorage.setItem("ursamu.webAdmin.token", l);
+        } catch (_) { /* ignore */ }
+        return l;
+      }
+    } catch (_) { /* private mode */ }
+    return "";
   }
 
   function esc(s) {
@@ -567,7 +584,7 @@
     img: 1, figure: 1, figcaption: 1, blockquote: 1, code: 1,
     pre: 1, table: 1, thead: 1, tbody: 1, tr: 1, th: 1, td: 1,
     center: 1, section: 1, article: 1, header: 1, footer: 1,
-    main: 1, aside: 1, nav: 1,
+    main: 1, aside: 1, nav: 1, button: 1,
   };
   var LOGIN_HTML_VOID = { br: 1, hr: 1, img: 1 };
 
@@ -626,6 +643,20 @@
       if (el.hasAttribute("data-dnd-sheet")) {
         parts.push("data-dnd-sheet");
       }
+      if (el.hasAttribute("data-cpr-sheet")) {
+        parts.push("data-cpr-sheet");
+      }
+      if (el.hasAttribute("data-cpr-score")) {
+        parts.push("data-cpr-score");
+      }
+      var cprView = el.getAttribute("data-cpr-view");
+      if (cprView && /^[a-z0-9_-]+$/i.test(cprView)) {
+        parts.push('data-cpr-view="' + cprView + '"');
+      }
+      var dataRank = el.getAttribute("data-rank");
+      if (dataRank && /^[0-9]+$/.test(dataRank)) {
+        parts.push('data-rank="' + dataRank + '"');
+      }
       var ariaL = el.getAttribute("aria-label");
       if (ariaL && /^[a-zA-Z0-9 .,_+-]+$/.test(ariaL)) {
         parts.push('aria-label="' + ariaL.replace(/"/g, "") + '"');
@@ -633,6 +664,33 @@
       var ariaH = el.getAttribute("aria-hidden");
       if (ariaH === "true" || ariaH === "false") {
         parts.push('aria-hidden="' + ariaH + '"');
+      }
+      var ariaCur = el.getAttribute("aria-current");
+      if (ariaCur === "page" || ariaCur === "true") {
+        parts.push('aria-current="' + ariaCur + '"');
+      }
+      // In-game sheet nav / help chips → send as command
+      var playCmd = el.getAttribute("data-play-cmd");
+      if (
+        playCmd &&
+        playCmd.length <= 120 &&
+        /^[+\w][\w /@#.=+\-]*$/i.test(playCmd)
+      ) {
+        parts.push(
+          'data-play-cmd="' + esc(playCmd) + '"',
+        );
+      }
+      if (tag === "button") {
+        var bType = el.getAttribute("type") || "button";
+        if (bType === "button" || bType === "submit") {
+          parts.push('type="' + bType + '"');
+        } else {
+          parts.push('type="button"');
+        }
+        var bTitle = el.getAttribute("title");
+        if (bTitle) {
+          parts.push('title="' + esc(bTitle) + '"');
+        }
       }
       if (tag === "a") {
         var href = safeSplashUrl(el.getAttribute("href") || "", "href");
@@ -749,6 +807,17 @@
       }
       return u;
     }
+    /** help:topic or cmd:help foo → in-game click (data-play-cmd). */
+    function playCmdFromHref(url) {
+      var u = String(url || "").trim();
+      var hm = u.match(/^help:(.+)$/i);
+      if (hm) {
+        return "help " + hm[1].trim();
+      }
+      var cm = u.match(/^cmd:(.+)$/i);
+      if (cm) return cm[1].trim();
+      return null;
+    }
     function inlineMd(text) {
       var s = esc(text);
       s = s.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>");
@@ -768,17 +837,60 @@
       s = s.replace(
         /\[([^\]]+)\]\(([^)]+)\)/g,
         function (_m, lbl, url) {
+          var cmd = playCmdFromHref(url);
+          if (cmd) {
+            return '<a href="#" class="play-md__cmd" ' +
+              'data-play-cmd="' + escAttr(cmd) + '">' +
+              lbl + "</a>";
+          }
           var href = safeHref(url);
           if (!href) return lbl;
           return '<a href="' + esc(href) + '" rel="noopener">' +
             lbl + "</a>";
         },
       );
+      // Bare +help topic / help topic (after SEE ALSO: etc.)
+      s = s.replace(
+        /(^|[\s,;:])(\+?help\s+)([a-z0-9][a-z0-9/_-]*)/gi,
+        function (_m, pre, _hp, topic) {
+          var cmd = "help " + topic;
+          return pre +
+            '<a href="#" class="play-md__cmd" data-play-cmd="' +
+            escAttr(cmd) + '">help ' + esc(topic) + "</a>";
+        },
+      );
       return s;
+    }
+
+    var inCode = false;
+    var codeBuf = [];
+    function flushCode() {
+      if (!inCode) return;
+      html += '<pre class="play-md__pre"><code class="play-md__code">' +
+        esc(codeBuf.join("\n")) +
+        "</code></pre>";
+      codeBuf = [];
+      inCode = false;
     }
 
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i];
+      // Fenced code window (``` / ```lang) — preserve blank lines inside
+      if (/^```/.test(line)) {
+        closePara();
+        closeList();
+        if (inCode) {
+          flushCode();
+        } else {
+          inCode = true;
+          codeBuf = [];
+        }
+        continue;
+      }
+      if (inCode) {
+        codeBuf.push(line);
+        continue;
+      }
       var t = line.trim();
       if (!t) {
         closePara();
@@ -848,6 +960,7 @@
         html += inlineMd(t);
       }
     }
+    flushCode();
     closePara();
     closeList();
     return '<div class="play-md">' + html + "</div>";
@@ -1098,10 +1211,18 @@
     var extraCls = extraRaw
       ? " " + esc(String(extraRaw).replace(/[^\w\s-]/g, ""))
       : "";
+    var face = "";
+    if (metaType === "utopia-ruling" && global.PlayDeck) {
+      face = global.PlayDeck.rulingFace(ui) || "";
+    }
     var html = '<div class="play-layout' +
       (metaType ? " play-layout--" + esc(metaType) : "") +
+      (face ? " play-ruling play-ruling--" + esc(face) : "") +
       extraCls +
       '">';
+    if (face) {
+      html += '<p class="play-ruling__face">' + esc(face) + "</p>";
+    }
     for (var i = 0; i < comps.length; i++) {
       var c = comps[i] || {};
       var t = String(c.type || "");
@@ -1109,13 +1230,21 @@
         html += '<header class="play-layout__header"><h2 class="' +
           'play-layout__title">' +
           cellHtml(c.title || c.content || "") +
-          "</h2></header>";
+          "</h2>" +
+          /* Reuse site page-title sep chrome (.site-rule) */
+          '<div class="site-rule" aria-hidden="true"></div>' +
+          "</header>";
       } else if (t === "markdown" || t === "html") {
         var rawHtml = typeof c.content === "string" ? c.content : "";
-        // D&D character sheet: full-width .dnd-sheet (no md wrapper)
+        // Full-width game sheets (no md wrapper)
         if (
           metaType === "dnd-sheet" ||
-          /class=["'][^"']*dnd-sheet/.test(rawHtml)
+          metaType === "cpr-sheet" ||
+          metaType === "cpr-score" ||
+          /class=["'][^"']*dnd-sheet/.test(rawHtml) ||
+          /class=["'][^"']*cpr-sheet/.test(rawHtml) ||
+          /data-cpr-sheet/.test(rawHtml) ||
+          /data-cpr-score/.test(rawHtml)
         ) {
           html += sanitizeLoginHtml(rawHtml);
         } else {
@@ -1125,15 +1254,22 @@
         html += '<div class="play-layout__text">' +
           cellHtml(c.content || "") + "</div>";
       } else if (t === "media" && c.url) {
-        html += '<figure class="play-layout__media">' +
+        /*
+         * Reuse wiki content-media chrome: .image-wrap gets the same
+         * sep-top / sep-bottom ::pseudos as site articles (theme CSS).
+         * Keep .play-layout__media for play sizing (cover frame).
+         */
+        html += '<figure class="play-layout__media image-wrap">' +
           '<img src="' + esc(String(c.url)) + '" alt="' +
           esc(String(c.alt || "")) +
-          '" loading="lazy" /></figure>';
+          '" loading="lazy" />' +
+          "</figure>";
       } else if (t === "entity-list") {
         html += '<section class="play-layout__section">';
         if (c.title) {
           html += '<h3 class="play-layout__section-title">' +
-            esc(String(c.title)) + "</h3>";
+            esc(String(c.title)) + "</h3>" +
+            '<div class="site-rule" aria-hidden="true"></div>';
         }
         html += '<div class="play-entity-list">';
         var ents = Array.isArray(c.items) ? c.items : [];
@@ -1145,16 +1281,25 @@
         html += '<section class="play-layout__section">';
         if (c.title) {
           html += '<h3 class="play-layout__section-title">' +
-            esc(String(c.title)) + "</h3>";
+            esc(String(c.title)) + "</h3>" +
+            '<div class="site-rule" aria-hidden="true"></div>';
         }
         var cols = 2;
-        if (c.content && typeof c.content === "object" &&
-          c.content.columns) {
-          cols = Math.max(1, Math.min(3, Number(c.content.columns) || 2));
+        var colReq = null;
+        if (typeof c.columns === "number") colReq = c.columns;
+        else if (c.content && typeof c.content === "object" &&
+          c.content.columns != null) {
+          colReq = Number(c.content.columns);
+        }
+        if (colReq != null && !isNaN(colReq)) {
+          cols = Math.max(1, Math.min(4, colReq));
         }
         var acts = Array.isArray(c.items) ? c.items : [];
-        if (acts.length === 1) cols = 1;
-        else if (acts.length >= 5 && cols < 3) cols = 3;
+        // Auto widen only when columns not explicitly set
+        if (colReq == null) {
+          if (acts.length === 1) cols = 1;
+          else if (acts.length >= 5 && cols < 3) cols = 3;
+        }
         html += '<div class="play-actions play-actions--cols-' +
           cols + '">';
         for (var ai = 0; ai < acts.length; ai++) {
@@ -1649,6 +1794,7 @@
       out.innerHTML =
         '<p class="play-output__empty">Connecting to the world…</p>';
       if (shouldStick) scrollOutputToBottom(out);
+      renderDeck();
       return;
     }
     // Divider only when not autoscrolling / have unread
@@ -1701,6 +1847,7 @@
       var delta = out.scrollHeight - prevH;
       out.scrollTop = prevTop + (delta > 0 ? delta : 0);
     }
+    renderDeck();
   }
 
   function setStatus(s) {
@@ -1786,6 +1933,16 @@
       unreadCount += 1;
     }
     updatePlayNavBadge();
+    try {
+      var pinUi = m.data && m.data.ui;
+      if (pinUi && global.PlayDeck && global.PlayDeck.rememberPin) {
+        deckState = global.PlayDeck.rememberPin(deckState, pinUi);
+      }
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("play-deck pin", e);
+      }
+    }
 
     if (playVisible) renderMessages();
   }
@@ -1853,7 +2010,215 @@
     }, delay);
   }
 
+  /**
+   * Theme-preview mode: no live WS. Seed a representative feed so
+   * skins can style play chrome (chat, OOC, channels, info, prompt).
+   * Enabled when site config has playPreview:true (preview.ts).
+   */
+  function isPlayPreview() {
+    try {
+      var cfg = global.__SITE_CFG__;
+      if (cfg && cfg.playPreview === true) return true;
+    } catch (_) { /* ignore */ }
+    try {
+      if (global.__SITE_PLAY_PREVIEW__ === true) return true;
+    } catch (_) { /* ignore */ }
+    return false;
+  }
+
+  function pushPreview(data, msg) {
+    msgSeq += 1;
+    messages.push({
+      _id: "pv-" + msgSeq,
+      data: data || null,
+      msg: msg != null ? String(msg) : "",
+      at: Date.now(),
+    });
+    if (messages.length > MAX_MSG) {
+      messages = messages.slice(messages.length - MAX_MSG);
+    }
+  }
+
+  /**
+   * Room look payload — packages/mush look-ui.ts / Figma Client
+   * 1685:1009: media → header → text → Characters → Exits.
+   */
+  function previewRoomLookUi() {
+    var cover =
+      "/site/theme/installed/termv/imgs/cover.png";
+    return {
+      type: "layout",
+      meta: {
+        type: "look",
+        targetId: "42",
+        isRoom: true,
+      },
+      components: [
+        {
+          type: "media",
+          url: cover,
+          alt: "ROOM NAME",
+        },
+        {
+          type: "header",
+          title: "ROOM NAME",
+        },
+        {
+          type: "text",
+          content:
+            "Lorem ipsum dolor sit amet consectetur. Arcu duis " +
+            "at accumsan amet. Purus facilisis nulla scelerisque " +
+            "diam lorem eget enim a vitae. Massa rhoncus netus " +
+            "hac dictum. Nunc ultricies aliquam vel in praesent " +
+            "commodo non dolor. Sed pellentesque ut molestie " +
+            "morbi accumsan aliquet.",
+        },
+        {
+          type: "entity-list",
+          title: "CHARACTERS",
+          items: [
+            {
+              id: "2",
+              label: "Wizard (#2AbC)",
+              role: "<DEV/>",
+              meta: "0s",
+              sublabel: "The Ruler and I.",
+              action: { cmd: "look #2" },
+            },
+            {
+              id: "3",
+              label: "Someone",
+              meta: "0s",
+              sublabel: "A Short description with a few words.",
+              action: { cmd: "look #3" },
+            },
+            {
+              id: "4",
+              label: "Another",
+              meta: "0s",
+              sublabel:
+                "To set this, type ‘&short-desc me=<desc>’",
+              action: { cmd: "look #4" },
+            },
+          ],
+        },
+        {
+          type: "entity-list",
+          title: "CONTENTS",
+          items: [
+            {
+              id: "20",
+              label: "Neon Sign (#20)",
+              meta: "",
+              sublabel: "A buzzing cyan board over the alley.",
+              action: { cmd: "look #20" },
+            },
+            {
+              id: "21",
+              label: "Datapad (#21)",
+              meta: "",
+              sublabel: "Scratched plastic; screen still lit.",
+              action: { cmd: "look #21" },
+            },
+            {
+              id: "22",
+              label: "Crate (#22)",
+              meta: "",
+              sublabel: "Stenciled FRAGILE. Feels heavy.",
+              action: { cmd: "look #22" },
+            },
+          ],
+        },
+        {
+          type: "actions",
+          title: "Exits",
+          content: { columns: 3 },
+          items: [
+            {
+              id: "12",
+              label: "Some Exit",
+              badge: "e",
+              dbref: "#12e",
+              action: { cmd: "e" },
+            },
+            {
+              id: "13",
+              label: "Some Exit",
+              badge: "e",
+              dbref: "#12e",
+              action: { cmd: "e" },
+            },
+            {
+              id: "14",
+              label: "Some Exit",
+              badge: "e",
+              dbref: "#12e",
+              action: { cmd: "e" },
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  /** Telnet-style fallback string (non-layout clients). */
+  function previewRoomLookText() {
+    return (
+      "ROOM NAME\r\n" +
+      "Lorem ipsum dolor sit amet consectetur.\r\n" +
+      "Characters: Wizard, Someone, Another\r\n" +
+      "Contents: Neon Sign, Datapad, Crate\r\n" +
+      "Exits: Some Exit <e>"
+    );
+  }
+
+  function pushPreviewLook() {
+    pushPreview(
+      { ui: previewRoomLookUi() },
+      previewRoomLookText(),
+    );
+  }
+
+  function seedPreviewFeed() {
+    messages = [];
+    msgSeq = 0;
+    unreadCount = 0;
+    unreadStartId = null;
+    lastUnreadId = null;
+    stickBottom = true;
+    var now = Date.now();
+    // Figma Client 1685:1009 — look layout then one chat bubble
+    pushPreviewLook();
+    pushPreview({
+      ui: {
+        type: "chat",
+        kind: "say",
+        name: "Wizard(#2AbC)",
+        text:
+          "Lorem ipsum dolor sit amet consectetur. Arcu duis " +
+          "at accumsan amet. Purus facilisis nulla scelerisque " +
+          "diam lorem eget enim a vitae. Massa.",
+        at: now - 15000,
+        tag: "<DEV/>",
+      },
+    });
+    setStatus("open");
+    setError("");
+    if (playVisible) renderMessages();
+  }
+
   function connect() {
+    // Theme preview: fake open + sample feed (no engine WS).
+    if (isPlayPreview()) {
+      wantLive = true;
+      clearReconnect();
+      if (socket) {
+        try { socket.close(); } catch (_) { /* ignore */ }
+        socket = null;
+      }
+      seedPreviewFeed();
+      return;
+    }
     var t = token();
     if (!t) {
       setStatus("error");
@@ -2055,9 +2420,168 @@
   function sendCmd(line) {
     var t = String(line || "").trim();
     if (!t) return;
+    // Preview: local echo + canned reply (no live socket).
+    if (isPlayPreview()) {
+      pushCmdHistory(t);
+      pushPreview({ ui: { type: "cmd-echo", text: t } });
+      var low = t.toLowerCase();
+      // look / l → structured look layout (mush look-ui)
+      if (
+        low === "look" || low === "l" ||
+        low.indexOf("look ") === 0
+      ) {
+        pushPreviewLook();
+      } else if (
+        low === "n" || low === "north" ||
+        low === "e" || low === "east" ||
+        low === "s" || low === "south" ||
+        low === "alley" || low === "neon alley"
+      ) {
+        // Exit click / type — re-show look as if you arrived
+        pushPreview(null,
+          "%chYou head " + low + ".%cn");
+        pushPreviewLook();
+      } else {
+        pushPreview(null,
+          "%ch%cg[preview]%cn " +
+          "No live world — try %chlook%cn or an exit. " +
+          "You typed: %ch" + t + "%cn");
+      }
+      if (playVisible) renderMessages();
+      return;
+    }
     if (!socket || socket.readyState !== 1) return;
     pushCmdHistory(t);
     socket.send(JSON.stringify({ msg: t }));
+  }
+
+  function severityPips(n) {
+    var html = '<span class="play-deck__pips" aria-hidden="true">';
+    var fill = Math.max(0, Math.min(6, Number(n) || 0));
+    for (var i = 0; i < 6; i++) {
+      html += '<span class="play-deck__pip-dot' +
+        (i < fill ? " is-on" : "") + '"></span>';
+    }
+    return html + "</span>";
+  }
+
+  function mastheadHtml(mh) {
+    var city = mh.city || "This week";
+    var week = mh.week ? "Wk " + mh.week : "";
+    var html = '<button type="button" class="play-deck__masthead-btn" ' +
+      'data-play-deck="feed">' +
+      '<span class="play-deck__city">' + esc(city) + "</span>" +
+      '<span class="play-deck__week">' + esc(week) + "</span>" +
+      '<span class="play-deck__stories">';
+    var stories = mh.stories || [];
+    for (var i = 0; i < stories.length; i++) {
+      var st = stories[i];
+      html += '<span class="play-deck__story">' +
+        severityPips(st.severity) +
+        esc(st.title || "") +
+        "</span>";
+    }
+    html += "</span></button>";
+    return html;
+  }
+
+  function crewHtml(crew) {
+    var html = "";
+    for (var i = 0; i < crew.length; i++) {
+      var p = crew[i];
+      var cmd = p.cmd
+        ? ' data-play-cmd="' + esc(p.cmd) + '"'
+        : "";
+      html += '<button type="button" class="play-deck__pip' +
+        (p.ready ? " is-ready" : "") + '"' +
+        cmd + ">" + esc(p.name || "?") + "</button>";
+    }
+    return html;
+  }
+
+  function dockHtml() {
+    var chips = (global.PlayDeck && global.PlayDeck.dockChips) || [];
+    var html = "";
+    for (var i = 0; i < chips.length; i++) {
+      var c = chips[i];
+      html += '<button type="button" class="play-deck__chip" ' +
+        'data-play-cmd="' + esc(c.cmd) + '">' +
+        esc(c.label) + "</button>";
+    }
+    return html;
+  }
+
+  function setDeckHidden(el, hide) {
+    if (!el) return;
+    if (hide) el.setAttribute("hidden", "");
+    else el.removeAttribute("hidden");
+  }
+
+  function closeDeckSheet() {
+    deckSheetOpen = false;
+    if (!rootEl) return;
+    setDeckHidden(rootEl.querySelector(".play-deck__sheet"), true);
+  }
+
+  function openFeedSheet() {
+    if (!rootEl || !deckState.feed) return;
+    var sheet = rootEl.querySelector(".play-deck__sheet");
+    var body = rootEl.querySelector(".play-deck__sheet-body");
+    if (!sheet || !body) return;
+    body.innerHTML = renderLayout(deckState.feed);
+    deckSheetOpen = true;
+    setDeckHidden(sheet, false);
+  }
+
+  function renderDeck() {
+    if (!rootEl || !global.PlayDeck) return;
+    var show = global.PlayDeck.pinsVisible(deckState);
+    var mast = rootEl.querySelector(".play-deck__masthead");
+    var crewEl = rootEl.querySelector(".play-deck__crew");
+    var dock = rootEl.querySelector(".play-deck__dock");
+    setDeckHidden(mast, !show);
+    setDeckHidden(crewEl, !show);
+    setDeckHidden(dock, !show);
+    if (!show) {
+      closeDeckSheet();
+      return;
+    }
+    if (mast) {
+      mast.innerHTML = mastheadHtml(
+        global.PlayDeck.mastheadFromFeed(deckState.feed),
+      );
+    }
+    if (crewEl) {
+      crewEl.innerHTML = crewHtml(
+        global.PlayDeck.crewFromWeek(deckState.week),
+      );
+    }
+    if (dock) dock.innerHTML = dockHtml();
+    if (deckSheetOpen) openFeedSheet();
+  }
+
+  function bindDeckRoot(root) {
+    if (!root || root._playDeckBound) return;
+    root._playDeckBound = true;
+    root.addEventListener("click", function (ev) {
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      var deckEl = t.closest("[data-play-deck]");
+      if (deckEl && root.contains(deckEl)) {
+        ev.preventDefault();
+        var act = deckEl.getAttribute("data-play-deck");
+        if (act === "feed") openFeedSheet();
+        if (act === "close") closeDeckSheet();
+        return;
+      }
+      var cmdEl = t.closest("[data-play-cmd]");
+      if (!cmdEl || !root.contains(cmdEl)) return;
+      if (cmdEl.closest(".play-output")) return;
+      var cmd = cmdEl.getAttribute("data-play-cmd");
+      if (!cmd) return;
+      ev.preventDefault();
+      sendCmd(cmd);
+    });
   }
 
   function mount(mainEl) {
@@ -2070,8 +2594,16 @@
       PLAY_JS_VER + '">' +
       '<span class="play-root__status" aria-live="polite">idle</span>' +
       '<p class="play-error" hidden></p>' +
+      '<header class="play-deck play-deck__masthead" hidden></header>' +
       '<div class="play-output" role="log" aria-live="polite" ' +
       'aria-relevant="additions"></div>' +
+      '<div class="play-deck play-deck__crew" hidden></div>' +
+      '<nav class="play-deck play-deck__dock" hidden ' +
+      'aria-label="Week actions"></nav>' +
+      '<div class="play-deck play-deck__sheet" hidden>' +
+      '<button type="button" class="play-deck__sheet-close" ' +
+      'data-play-deck="close">Close</button>' +
+      '<div class="play-deck__sheet-body"></div></div>' +
       '<hr class="play-prompt-rule" aria-hidden="true" />' +
       '<form class="play-prompt" id="play-form" autocomplete="off">' +
       '<label class="visually-hidden" for="play-cmd">Command</label>' +
@@ -2084,6 +2616,13 @@
       "</form></div>";
 
     rootEl = document.getElementById("play-root");
+    bindDeckRoot(rootEl);
+    // Figma Client placeholder
+    if (isPlayPreview()) {
+      var pinp = rootEl &&
+        rootEl.querySelector(".play-prompt__input");
+      if (pinp) pinp.setAttribute("placeholder", "Enter something...");
+    }
     // Keep message history across SPA navigations
     // Unread: land on divider (not forced to bottom)
     if (unreadCount > 0) stickBottom = false;
@@ -2274,6 +2813,9 @@
     destroy: destroy,
     connect: connect,
     sendCmd: sendCmd,
+    /** Theme preview: re-seed demo chat feed. */
+    seedPreview: seedPreviewFeed,
+    isPreview: isPlayPreview,
     getUnread: function () { return unreadCount; },
     refreshBadge: updatePlayNavBadge,
     mushToHtml: mushToHtml,

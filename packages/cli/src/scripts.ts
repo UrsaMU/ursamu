@@ -44,9 +44,14 @@ const dryRun     = args["dry-run"] as boolean;
 
 // ── Engine script source ──────────────────────────────────────────────────────
 
-// Monorepo: packages/cli/src → ../../../scripts/
-// Published @ursamu/ursamu: scripts/ next to package root (also tried).
-const ENGINE_SCRIPTS_BASE = new URL("../../../scripts/", import.meta.url);
+// Game project scripts live next to the CLI package so create + update share
+// one source of truth (ports read from each game's config/config.json).
+// Fallback: monorepo root scripts/ for legacy names (main-loop, ursamu.sh).
+const GAME_SCRIPTS_BASE = new URL(
+  "../templates/game-scripts/",
+  import.meta.url,
+);
+const LEGACY_SCRIPTS_BASE = new URL("../../../scripts/", import.meta.url);
 
 /**
  * Engine scripts intended for game projects.
@@ -54,28 +59,44 @@ const ENGINE_SCRIPTS_BASE = new URL("../../../scripts/", import.meta.url);
  * are excluded — they have no use in a running game.
  */
 const GAME_SCRIPTS = [
+  "_ports.sh",
   "daemon.sh",
-  "main-loop.sh",
   "restart.sh",
   "run.sh",
   "status.sh",
   "stop.sh",
   "safe-update.sh",
+  "main-loop.sh",
   "ursamu.sh",
 ];
 
+const GAME_SCRIPT_SET = new Set([
+  "_ports.sh",
+  "daemon.sh",
+  "restart.sh",
+  "run.sh",
+  "status.sh",
+  "stop.sh",
+]);
+
 /** Fetch a script from the engine package. Returns null if not found. */
 async function fetchEngineScript(name: string): Promise<string | null> {
-  const url = new URL(name, ENGINE_SCRIPTS_BASE);
-  try {
-    if (url.protocol === "file:") {
-      return await Deno.readTextFile(fromFileUrl(url));
+  const bases = GAME_SCRIPT_SET.has(name)
+    ? [GAME_SCRIPTS_BASE, LEGACY_SCRIPTS_BASE]
+    : [LEGACY_SCRIPTS_BASE, GAME_SCRIPTS_BASE];
+  for (const base of bases) {
+    const url = new URL(name, base);
+    try {
+      if (url.protocol === "file:") {
+        return await Deno.readTextFile(fromFileUrl(url));
+      }
+      const res = await fetch(url.toString());
+      if (res.ok) return await res.text();
+    } catch {
+      /* try next */
     }
-    const res = await fetch(url.toString());
-    return res.ok ? await res.text() : null;
-  } catch {
-    return null;
   }
+  return null;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

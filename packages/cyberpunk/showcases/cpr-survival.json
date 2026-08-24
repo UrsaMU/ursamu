@@ -1,0 +1,108 @@
+{
+  "key": "cpr-survival",
+  "label": "Cyberpunk RED — Survival: Rest, Pack & Scavenging",
+  "vars": { "player": "Nomad" },
+  "setup": {
+    "character": {
+      "stats": { "int": 5, "ref": 7, "dex": 7, "tech": 6, "cool": 6, "will": 7, "luck": 5, "move": 7, "body": 7, "emp": 6, "empBase": 7 },
+      "hp": { "max": 50, "current": 40 },
+      "swThreshold": 25,
+      "deathSave": 7,
+      "deathSavePenalty": 0,
+      "role": "nomad",
+      "roleRank": 4,
+      "roleData": {},
+      "skills": { "athletics": 6, "brawling": 4, "concentration": 4, "conversation": 3, "drive_land_vehicle": 6, "education": 3, "evasion": 5, "handgun": 4, "human_perception": 4, "local_expert": 5, "navigation": 5, "perception": 5, "persuasion": 3, "shoulder_arms": 5, "stealth": 4, "survival": 6, "tactics": 4, "tracking": 5 },
+      "luckRemaining": 5,
+      "woundState": "lightly",
+      "criticalInjuries": [],
+      "armorBody": { "name": "Light Armorjack", "sp": 11, "currentSp": 11, "penalty": 0 },
+      "armorHead": null,
+      "cyberware": [],
+      "humanityLoss": 0,
+      "bodysculpt": [],
+      "activeEffects": [],
+      "reputation": 4,
+      "reputationDeeds": ["Led a Badlands convoy through a corpo ambush"],
+      "eurodollars": 1800,
+      "lifestyle": { "tier": "low", "nextDueDate": 0 },
+      "lifepath": { "culturalOrigin": "Nomadic", "language": "Spanish" },
+      "chargenComplete": true,
+      "chargenStage": "complete",
+      "chargenMethod": "complete",
+      "restTimer": null,
+      "humanityGainedAt": null,
+      "locationEffects": []
+    }
+  },
+  "steps": [
+    {
+      "sub": "Resting & Recovery"
+    },
+    {
+      "note": "Short rest: 8 hours, heals 2d6 HP. Long rest: 24 hours, full HP recovery. You must not be in combat."
+    },
+    {
+      "cmd": "+rest",
+      "label": "view current rest status and time remaining"
+    },
+    {
+      "cmd": "+rest/start short",
+      "label": "begin an 8-hour short rest (heals 2d6 HP)"
+    },
+    {
+      "cmd": "+rest/status",
+      "label": "check how much time remains on your rest"
+    },
+    {
+      "cmd": "+rest/cancel",
+      "label": "cancel an in-progress rest (forfeits healing)"
+    },
+    {
+      "cmd": "+rest/start long",
+      "label": "begin a 24-hour long rest (full HP recovery)"
+    },
+    {
+      "cmd": "+rest/cancel",
+      "label": "cancel long rest before continuing"
+    },
+    {
+      "sub": "Nomad Pack Support"
+    },
+    {
+      "note": "Nomads can call on their pack for support. Four request types, each on a 24-hour per-type cooldown. Rank scales the benefit."
+    },
+    {
+      "cmd": "+pack/status",
+      "label": "view pack support cooldowns and available request types"
+    },
+    {
+      "cmd": "+pack/request supplies",
+      "label": "request supplies from the pack — EB value scales with rank"
+    },
+    {
+      "cmd": "+pack/request backup",
+      "label": "request backup — NPCs arrive to assist in combat"
+    },
+    {
+      "cmd": "+pack/request medical",
+      "label": "request medical aid — heals 2d6 HP"
+    },
+    {
+      "note": "+pack/request haven requires Rank 7+. It provides a hidden location for a long rest."
+    },
+    {
+      "sub": "Scavenging"
+    },
+    {
+      "note": "Scavenging yields random loot based on zone danger. 30-minute real-time cooldown between runs. Higher danger = better loot, higher ambush risk. Zone types: safe, contested, hot, combat, hellhole."
+    },
+    {
+      "cmd": "+scavenge contested",
+      "label": "scavenge a contested zone — moderate risk, better loot"
+    },
+    {
+      "reset": true
+    }
+  ]
+}

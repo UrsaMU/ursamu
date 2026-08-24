@@ -1,0 +1,321 @@
+/**
+ * CYBER d6 — installable @ursamu/site theme.
+ * Source: github/cyber-d6/src/theme/tokens.ts
+ * Do not rename shell classes.
+ *
+ * colors.bg        #04090a
+ * colors.panel     #08191a
+ * colors.line      #14514c
+ * colors.dimLine   #0e3230
+ * colors.phosphor  #31ded2
+ * colors.text      #c9fffa
+ * colors.mid       #5fc9c2
+ * colors.dim       #2f9c95
+ * colors.ink       #04090a
+ * colors.alert     #ff4d7d
+ * colors.alertDim  #7a2038
+ * fonts.mono       Courier New
+ * space            4 / 6 / 10 / 14
+ */
+
+:root {
+  /* surfaces — bg / panel / dimLine */
+  --site-bg: #04090a;
+  --site-bg-elevated: #08191a;
+  --site-bg-surface: #08191a;
+  --site-bg-surface-2: #0e3230;
+  --site-bg-code: #04090a;
+
+  /* borders — line / dimLine */
+  --site-border: #14514c;
+  --site-border-subtle: #0e3230;
+  --site-border-strong: #14514c;
+
+  /* text — text / mid / dim / ink */
+  --site-text: #c9fffa;
+  --site-text-secondary: #5fc9c2;
+  --site-text-muted: #2f9c95;
+  --site-text-on-accent: #04090a;
+  --site-text-on-primary: #04090a;
+  --site-text-inverse: #04090a;
+
+  /* brand — phosphor / mid */
+  --site-accent: #31ded2;
+  --site-accent-hover: #5fc9c2;
+  --site-accent-muted: rgba(49, 222, 210, 0.16);
+  --site-accent-border: #14514c;
+  --site-accent-focus: rgba(49, 222, 210, 0.55);
+
+  /* buttons — phosphor fill, ink type (KeyChip primary) */
+  --site-btn-bg: #31ded2;
+  --site-btn-bg-hover: #5fc9c2;
+  --site-btn-fg: #04090a;
+  --site-btn-default-bg: #04090a;
+  --site-btn-default-fg: #c9fffa;
+  --site-btn-default-border: #14514c;
+  --site-btn-outline-fg: #5fc9c2;
+  --site-btn-outline-border: #14514c;
+
+  /* status — phosphor ok / alert warn+err */
+  --site-success: #31ded2;
+  --site-warning: #ff4d7d;
+  --site-error: #ff4d7d;
+  --site-info: #5fc9c2;
+
+  /* type — Courier New only */
+  --site-font-ui: "Courier New", Courier, ui-monospace, monospace;
+  --site-font-display: "Courier New", Courier, ui-monospace, monospace;
+  --site-font-mono: "Courier New", Courier, ui-monospace, monospace;
+  --site-font-size: 14px;
+  --site-line-height: 1.35;
+  --site-type-brand: 0.6875rem;
+  --site-type-nav: 0.6875rem;
+  --site-type-menu-title: 0.6875rem;
+  --site-type-menu-link: 0.75rem;
+  --site-type-h1: 1.375rem;
+  --site-type-h2: 1.125rem;
+  --site-type-connect: 0.6875rem;
+  --site-type-footer: 0.5625rem;
+
+  /* geometry — 0 radius; space.lg gutter */
+  --site-radius-sm: 0;
+  --site-radius-md: 0;
+  --site-radius: 0;
+  --site-nav-h: 2.75rem;
+  --site-banner-offset: 4.5rem;
+  --site-sticky-top: calc(var(--site-nav-h) + 10px);
+  --site-gutter: 14px;
+  --site-max-w: 1440px;
+  --site-main-max: 800px;
+  --site-aside-min: 16rem;
+  --site-aside-max: 19.625rem;
+  --site-control-h: 2.15rem;
+  --site-search-h: 2.15rem;
+
+  /* scroll — dim thumb, phosphor active */
+  --site-scrollbar-size: 6px;
+  --site-scrollbar-track: #08191a;
+  --site-scrollbar-thumb: #2f9c95;
+  --site-scrollbar-thumb-hover: #5fc9c2;
+  --site-scrollbar-thumb-active: #31ded2;
+  --site-scrollbar-corner: #08191a;
+
+  --site-play-placeholder: #2f9c95;
+
+  --site-bg-image-top: none;
+  --site-bg-image-bottom: none;
+  --site-rule-image: none;
+  --site-search-icon: none;
+  --site-banner-image: none;
+  --site-sep-top: none;
+  --site-sep-bottom: none;
+}
+
+/* ── Title bar (TerminalShell phosphor strip) ─────────────────── */
+
+.site-nav {
+  background: var(--site-accent);
+}
+
+.site-nav::before,
+.site-nav.is-scrolled::before {
+  background: var(--site-accent);
+  transition: none;
+}
+
+.site-nav__brand {
+  color: var(--site-btn-fg);
+  font-size: var(--site-type-brand);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.site-nav__brand:hover {
+  color: var(--site-btn-fg);
+}
+
+.site-nav__list {
+  font-size: var(--site-type-nav);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  gap: 4px 10px;
+}
+
+.site-nav__list a {
+  color: var(--site-btn-fg);
+  border-bottom-width: 1px;
+}
+
+.site-nav__list a:hover,
+.site-nav__list a.is-active,
+.site-nav__list a.has-unread {
+  color: var(--site-btn-fg);
+  border-bottom-color: var(--site-btn-fg);
+}
+
+.site-nav__badge {
+  border-radius: 0;
+  background: var(--site-error);
+  color: var(--site-text);
+}
+
+.site-nav__toggle {
+  border-radius: 0;
+  border-color: var(--site-btn-fg);
+  color: var(--site-btn-fg);
+}
+
+.site-nav__toggle:hover,
+.site-nav__toggle:focus-visible {
+  border-color: var(--site-btn-fg);
+}
+
+/* ── Banner ───────────────────────────────────────────────────── */
+
+.site-banner {
+  min-height: 0;
+}
+
+.site-banner__title {
+  font-size: clamp(1.125rem, 3vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--site-accent);
+}
+
+.site-banner__connect {
+  font-size: var(--site-type-connect);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--site-text-muted);
+}
+
+/* ── Panels (1px line, 8px pad) ───────────────────────────────── */
+
+.site-menu,
+.site-section,
+.site-gate-card {
+  border: 1px solid var(--site-border);
+  background: var(--site-bg-surface);
+  padding: 8px;
+}
+
+.site-menu__title,
+.site-section__title,
+.site-gate-card > header h1 {
+  color: var(--site-accent);
+  font-size: var(--site-type-menu-title);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.site-menu__list a {
+  font-size: var(--site-type-menu-link);
+}
+
+.site-rule {
+  height: 1px;
+  margin: 6px 0;
+  background: var(--site-border);
+  border-radius: 0;
+}
+
+.site-search__input,
+.site-search__btn,
+.site-auth-input,
+.site-help-search__input,
+.play-prompt__input {
+  border-radius: 0;
+  background: var(--site-bg);
+  border-color: var(--site-border);
+  font-family: var(--site-font-mono);
+}
+
+.site-help-count,
+.site-badge,
+.site-wiki-open-link {
+  border-radius: 0;
+}
+
+.site-search__btn:hover {
+  background: var(--site-bg-surface-2);
+  border-color: var(--site-accent);
+}
+
+/* ── Keys (primary = phosphor / ink) ──────────────────────────── */
+
+.site-gate-btn,
+.site-auth-tab,
+.site-auth-logout {
+  border-radius: 0;
+  border: 1px solid var(--site-border);
+  background: transparent;
+  color: var(--site-text-secondary);
+  font-family: var(--site-font-mono);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.site-gate-btn--primary,
+.site-auth-submit,
+.site-auth-tab.is-active,
+.play-prompt__send {
+  background: var(--site-btn-bg);
+  color: var(--site-btn-fg);
+  border: 1px solid var(--site-accent);
+  border-radius: 0;
+  font-family: var(--site-font-mono);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.site-gate-btn--primary:hover,
+.site-auth-submit:hover,
+.play-prompt__send:hover:not(:disabled) {
+  background: var(--site-btn-bg-hover);
+  color: var(--site-btn-fg);
+}
+
+.site-auth-error {
+  color: var(--site-error);
+  border: 1px solid var(--site-error);
+  background: #7a2038;
+  border-radius: 0;
+}
+
+/* ── Footer as status strip ───────────────────────────────────── */
+
+.site-footer {
+  width: 100%;
+  max-width: var(--site-max-w);
+  margin-top: auto;
+  padding: 4px 14px;
+  box-sizing: border-box;
+  background: var(--site-bg-elevated);
+  border-top: 1px solid var(--site-border);
+  font-size: var(--site-type-footer);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--site-text-muted);
+}
+
+.site-section__body h2,
+.site-section__body h3,
+.site-section__body h4 {
+  font-family: var(--site-font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.site-section__body code,
+.site-section__body pre {
+  background: var(--site-bg);
+  border: 1px solid var(--site-border-subtle);
+  border-radius: 0;
+}

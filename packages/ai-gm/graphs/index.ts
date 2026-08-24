@@ -3,7 +3,7 @@
 // Builds all GM graphs once from a single model instance and exports them
 // as a typed bundle. Call buildAllGraphs(model) in index.ts during init.
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { buildPoseGraph } from "./pose.ts";
 import { buildOracleGraph } from "./oracle.ts";
 import { buildMoveGraph } from "./move.ts";
@@ -13,9 +13,11 @@ import { buildSessionGraph } from "./session.ts";
 import { buildWorldEventGraph } from "./world-event.ts";
 import { buildScenePageGraph } from "./scene-page.ts";
 import { buildSceneSetGraph } from "./scene-set.ts";
+import { buildCityGraph } from "./utopia-city.ts";
 
 export interface IGMGraphs {
   pose: ReturnType<typeof buildPoseGraph>;
+  city: ReturnType<typeof buildCityGraph>;
   oracle: ReturnType<typeof buildOracleGraph>;
   move: ReturnType<typeof buildMoveGraph>;
   jobReview: ReturnType<typeof buildJobReviewGraph>;
@@ -26,7 +28,7 @@ export interface IGMGraphs {
   sceneSet: ReturnType<typeof buildSceneSetGraph>;
 }
 
-export function buildAllGraphs(model: ChatGoogleGenerativeAI): IGMGraphs {
+export function buildAllGraphs(model: BaseChatModel): IGMGraphs {
   return {
     pose: buildPoseGraph(model),
     oracle: buildOracleGraph(model),
@@ -37,6 +39,7 @@ export function buildAllGraphs(model: ChatGoogleGenerativeAI): IGMGraphs {
     worldEvent: buildWorldEventGraph(model),
     scenePage: buildScenePageGraph(model),
     sceneSet: buildSceneSetGraph(model),
+    city: buildCityGraph(model),
   };
 }
 
@@ -56,3 +59,4 @@ export {
 } from "./world-event.ts";
 export { type IScenePageGraphInput, runScenePageGraph } from "./scene-page.ts";
 export { type ISceneSetGraphInput, runSceneSetGraph } from "./scene-set.ts";
+export { type ICityGraphInput, runCityGraph } from "./utopia-city.ts";

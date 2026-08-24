@@ -1,0 +1,10 @@
+{
+  "id": "starter",
+  "label": "UrsaMU FE Starter",
+  "version": "1.0.0",
+  "description": "Colored violet-night starter. Same tooling as skeleton: preview, studio, pack.",
+  "css": "site.css",
+  "bannerImage": "imgs/header.svg",
+  "title": "My UrsaMU Game",
+  "plainBg": false
+}

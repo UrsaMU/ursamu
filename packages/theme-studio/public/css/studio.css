@@ -1,0 +1,845 @@
+/**
+ * Theme Studio chrome (not part of exported theme).
+ */
+
+:root {
+  --ts-bg: #12141a;
+  --ts-panel: #1a1d26;
+  --ts-border: #2e3340;
+  --ts-text: #e8eaf0;
+  --ts-muted: #9aa3b5;
+  --ts-accent: #8b7cf6;
+  --ts-accent-2: #6d28d9;
+  --ts-input: #0e1016;
+  --ts-font: Inter, system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body.ts-app {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--ts-font);
+  font-size: 13px;
+  color: var(--ts-text);
+  background: var(--ts-bg);
+}
+
+.ts-top {
+  --ts-control-h: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid var(--ts-border);
+  background: var(--ts-panel);
+  z-index: 5;
+}
+
+.ts-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 10rem;
+  align-self: center;
+}
+
+.ts-brand strong {
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.ts-muted {
+  color: var(--ts-muted);
+  font-size: 0.75rem;
+}
+
+.ts-manifest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.65rem;
+  flex: 1 1 auto;
+}
+
+.ts-manifest label {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.2rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ts-muted);
+  line-height: 1.2;
+}
+
+.ts-manifest input[type="text"] {
+  min-width: 7.5rem;
+  height: var(--ts-control-h);
+  padding: 0 0.45rem;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  background: var(--ts-input);
+  color: var(--ts-text);
+  font: inherit;
+  font-size: 0.8125rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.ts-check {
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  height: var(--ts-control-h);
+  padding-bottom: 0 !important;
+  text-transform: none !important;
+  font-size: 0.8125rem !important;
+  color: var(--ts-text) !important;
+  letter-spacing: 0 !important;
+}
+
+/* Shared stacked label + control (manifest / mode / layout) */
+.ts-field-stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.2rem;
+  margin: 0;
+}
+
+.ts-field-stack__label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ts-muted);
+  line-height: 1.2;
+  min-height: 0.9rem;
+}
+
+.ts-field-stack select {
+  display: block;
+  box-sizing: border-box;
+  min-width: 9rem;
+  height: var(--ts-control-h);
+  margin: 0;
+  padding: 0 1.75rem 0 0.45rem;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  background: var(--ts-input);
+  color: var(--ts-text);
+  font: inherit;
+  font-size: 0.8125rem;
+  line-height: calc(var(--ts-control-h) - 2px);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239aa3b5' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+}
+
+.ts-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.65rem;
+}
+
+.ts-view-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  height: var(--ts-control-h);
+  gap: 0;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.ts-view-toggle .ts-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 0;
+  background: var(--ts-input);
+  line-height: 1;
+}
+
+.ts-view-toggle .ts-btn.is-active {
+  background: var(--ts-accent-2);
+  color: #fff;
+}
+
+.ts-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-left: auto;
+  align-items: flex-end;
+}
+
+.ts-actions .ts-btn,
+.ts-actions .ts-file-btn {
+  height: var(--ts-control-h);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.ts-workspace {
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.7rem;
+}
+
+.ts-file-btn {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin: 0;
+}
+
+.ts-file-btn--block {
+  width: 100%;
+  justify-content: center;
+  margin: 0.35rem 0;
+}
+
+/* Media panel (Images / Fonts) */
+.ts-media {
+  border-top: 1px solid var(--ts-border);
+  flex-shrink: 0;
+  max-height: 38%;
+  display: flex;
+  flex-direction: column;
+  min-height: 9rem;
+  background: var(--ts-panel);
+}
+
+.ts-media-tabs {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--ts-border);
+}
+
+.ts-media-tab {
+  flex: 1;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ts-muted);
+  padding: 0.5rem 0.4rem;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.ts-media-tab:hover {
+  color: var(--ts-text);
+}
+
+.ts-media-tab.is-active {
+  color: var(--ts-text);
+  border-bottom-color: var(--ts-accent);
+}
+
+.ts-media-pane {
+  display: none;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.55rem 0.65rem 0.65rem;
+  overflow: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.ts-media-pane.is-active {
+  display: flex;
+}
+
+.ts-media-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+.ts-media-upload {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0 0.7rem;
+  white-space: nowrap;
+}
+
+.ts-media-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--ts-control-h, 2rem);
+  padding: 0 0.4rem;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  background: var(--ts-input);
+  color: var(--ts-text);
+  font: inherit;
+  font-size: 0.75rem;
+}
+
+.ts-media-input {
+  width: 100%;
+  height: var(--ts-control-h, 2rem);
+  padding: 0 0.5rem;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  background: var(--ts-input);
+  color: var(--ts-text);
+  font: inherit;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.ts-media-opt {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.ts-media-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 3rem;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  background: var(--ts-input);
+}
+
+.ts-media-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--ts-border);
+  color: var(--ts-text);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.ts-media-list li:last-child {
+  border-bottom: 0;
+}
+
+.ts-media-list li.ts-media-empty {
+  color: var(--ts-muted);
+  font-style: italic;
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+}
+
+.ts-media-list li.ts-media-img {
+  cursor: default;
+}
+
+.ts-media-thumb {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+  border-radius: 3px;
+  border: 1px solid var(--ts-border);
+  background: #0a0b0f center / cover no-repeat;
+  object-fit: cover;
+}
+
+.ts-media-thumb--ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  color: var(--ts-muted);
+  background: #0a0b0f;
+}
+
+.ts-media-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ts-media-list--fonts li {
+  cursor: pointer;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.15rem;
+  user-select: none;
+}
+
+.ts-media-list--fonts li:hover:not(.ts-media-empty) {
+  background: rgba(139, 124, 246, 0.08);
+}
+
+.ts-media-list--fonts li.is-selected {
+  background: rgba(139, 124, 246, 0.18);
+  box-shadow: inset 3px 0 0 var(--ts-accent);
+}
+
+.ts-media-list--fonts .ts-font-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ts-text);
+}
+
+.ts-media-list--fonts .ts-font-meta {
+  font-size: 0.65rem;
+  color: var(--ts-muted);
+}
+
+.ts-media-apply {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.ts-media-apply .ts-btn {
+  flex: 1 1 0;
+  justify-content: center;
+  padding: 0.35rem 0.4rem;
+  font-size: 0.7rem;
+}
+
+/* Font token dropdowns in Type group */
+.ts-field--font {
+  grid-template-columns: 1fr;
+}
+
+.ts-field--font select {
+  width: 100%;
+  height: var(--ts-control-h, 2rem);
+  padding: 0 0.4rem;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  background: var(--ts-input);
+  color: var(--ts-text);
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.ts-field--font select option {
+  font-size: 0.9rem;
+  padding: 0.25rem 0.35rem;
+}
+
+.ts-field--font select optgroup {
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ts-muted);
+}
+
+.ts-field--font .ts-font-custom {
+  margin-top: 0.3rem;
+  width: 100%;
+  height: var(--ts-control-h, 2rem);
+  padding: 0 0.45rem;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  background: var(--ts-input);
+  color: var(--ts-text);
+  font: inherit;
+  font-size: 0.75rem;
+}
+
+.ts-field--font .ts-font-custom[hidden] {
+  display: none;
+}
+
+.ts-canvas-wrap {
+  position: relative;
+}
+
+.ts-pane {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: none;
+  background: #0a0b0f;
+}
+
+.ts-pane.is-active {
+  display: block;
+}
+
+#gjs.ts-pane.is-active {
+  /* grapes fills container */
+}
+
+.ts-btn {
+  appearance: none;
+  border: 1px solid var(--ts-border);
+  background: var(--ts-input);
+  color: var(--ts-text);
+  border-radius: 4px;
+  padding: 0.45rem 0.75rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ts-btn:hover {
+  border-color: var(--ts-accent);
+}
+
+.ts-btn--primary {
+  background: var(--ts-accent-2);
+  border-color: transparent;
+  color: #fff;
+}
+
+.ts-btn--primary:hover {
+  filter: brightness(1.08);
+}
+
+.ts-body {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr minmax(240px, 300px);
+  min-height: 0;
+}
+
+.ts-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--ts-panel);
+  border-right: 1px solid var(--ts-border);
+  overflow: hidden;
+}
+
+.ts-side--right {
+  border-right: 0;
+  border-left: 1px solid var(--ts-border);
+}
+
+.ts-side__head {
+  padding: 0.75rem 0.85rem 0.35rem;
+  border-bottom: 1px solid var(--ts-border);
+}
+
+.ts-side__head h2 {
+  margin: 0 0 0.25rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ts-muted);
+  font-weight: 700;
+}
+
+.ts-side__head p {
+  margin: 0 0 0.5rem;
+  line-height: 1.4;
+}
+
+.ts-side__head code {
+  font-size: 0.7rem;
+  color: var(--ts-accent);
+}
+
+.ts-side__head .ts-preset-row {
+  margin: 0.55rem 0 0.35rem;
+}
+
+.ts-side__head .ts-preset-row select {
+  width: 100%;
+  min-width: 0;
+}
+
+.ts-mode-row {
+  display: flex;
+  gap: 0;
+  margin: 0.35rem 0;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ts-mode-row .ts-btn {
+  flex: 1;
+  border: 0;
+  border-radius: 0;
+  padding: 0.35rem 0.5rem;
+  background: var(--ts-input);
+}
+
+.ts-mode-row .ts-btn.is-active {
+  background: var(--ts-accent-2);
+  color: #fff;
+}
+
+.ts-contrast {
+  margin: 0.45rem 0 0;
+  max-height: 7.5rem;
+  overflow: auto;
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.ts-contrast__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.15rem 0;
+  border-bottom: 1px solid var(--ts-border);
+}
+
+.ts-contrast__row.is-fail {
+  color: #ff8a8f;
+}
+
+.ts-contrast__row.is-pass {
+  color: #4ade9f;
+}
+
+.ts-contrast__row.is-skip {
+  color: var(--ts-muted);
+}
+
+.ts-token-panels {
+  overflow: auto;
+  padding: 0.5rem 0.75rem 1.25rem;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ts-group {
+  margin: 0 0 1rem;
+}
+
+.ts-group__title {
+  margin: 0 0 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ts-muted);
+}
+
+.ts-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem;
+  align-items: center;
+  margin: 0 0 0.4rem;
+}
+
+.ts-field label {
+  grid-column: 1 / -1;
+  font-size: 0.7rem;
+  color: var(--ts-muted);
+}
+
+.ts-field input[type="text"],
+.ts-field input[type="color"] {
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  background: var(--ts-input);
+  color: var(--ts-text);
+  font: inherit;
+  font-size: 0.75rem;
+}
+
+.ts-field input[type="text"] {
+  padding: 0.3rem 0.4rem;
+  min-width: 0;
+}
+
+.ts-field input[type="color"] {
+  width: 2.25rem;
+  height: 1.85rem;
+  padding: 0;
+  cursor: pointer;
+}
+
+.ts-field--text {
+  grid-template-columns: 1fr;
+}
+
+.ts-canvas-wrap {
+  min-width: 0;
+  min-height: 0;
+  background: #0a0b0f;
+  position: relative;
+}
+
+#gjs {
+  height: 100%;
+}
+
+#live-frame {
+  background: #fff;
+}
+
+/* Grapes overrides inside studio chrome */
+.gjs-one-bg {
+  background-color: var(--ts-panel);
+}
+
+.gjs-two-color {
+  color: var(--ts-text);
+}
+
+.gjs-three-bg {
+  background-color: var(--ts-input);
+}
+
+.gjs-four-color,
+.gjs-four-color-h:hover {
+  color: var(--ts-accent);
+}
+
+.gjs-pn-panel {
+  background: transparent;
+}
+
+.gjs-cv-canvas {
+  background: #2a2d36;
+  width: 100%;
+  height: 100%;
+  top: 0;
+}
+
+/* Hide default Grapes blocks panel clutter — structure locked */
+.gjs-blocks-c,
+.gjs-pn-views-container .gjs-blocks-cs {
+  display: none !important;
+}
+
+.ts-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--ts-border);
+}
+
+.ts-tab {
+  flex: 1;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ts-muted);
+  padding: 0.55rem 0.35rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.ts-tab.is-active {
+  color: var(--ts-text);
+  border-bottom-color: var(--ts-accent);
+}
+
+.ts-gjs-host {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.35rem;
+}
+
+.ts-css-label {
+  display: block;
+  margin: 0.35rem 0.25rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ts-muted);
+}
+
+.ts-css-extras {
+  width: 100%;
+  min-height: 14rem;
+  resize: vertical;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  background: var(--ts-input);
+  color: var(--ts-text);
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  padding: 0.55rem;
+}
+
+.ts-hint {
+  margin: 0.5rem 0.25rem;
+  line-height: 1.4;
+}
+
+.ts-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0.85rem;
+  border-top: 1px solid var(--ts-border);
+  background: var(--ts-panel);
+}
+
+.ts-foot a {
+  color: var(--ts-accent);
+}
+
+/* Grapes devices / toolbar toned down */
+.gjs-pn-commands {
+  min-height: 36px;
+}
+
+@media (max-width: 1100px) {
+  .ts-body {
+    grid-template-columns: 200px 1fr 220px;
+  }
+}
+
+@media (max-width: 840px) {
+  .ts-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 200px 1fr 240px;
+  }
+
+  .ts-side--left {
+    border-right: 0;
+    border-bottom: 1px solid var(--ts-border);
+  }
+
+  .ts-side--right {
+    border-left: 0;
+    border-top: 1px solid var(--ts-border);
+  }
+}

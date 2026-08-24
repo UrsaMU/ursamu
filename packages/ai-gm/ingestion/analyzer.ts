@@ -15,7 +15,7 @@ import {
 import type { BaseMessage } from "@langchain/core/messages";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import type { IChunkExtraction, ITextChunk } from "./schema.ts";
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -110,11 +110,14 @@ function makeAnalyzerTools(getState: () => AnalyzerState) {
 
 // ─── Graph ────────────────────────────────────────────────────────────────────
 
-export function buildAnalyzerGraph(model: ChatGoogleGenerativeAI) {
+export function buildAnalyzerGraph(model: BaseChatModel) {
   // We use a closure to share state with tools
   let _state: AnalyzerState = AnalyzerAnnotation.State;
   const tools = makeAnalyzerTools(() => _state);
   const toolNode = new ToolNode(tools);
+  if (typeof model.bindTools !== "function") {
+    throw new Error("GM model does not support bindTools");
+  }
   const boundModel = model.bindTools(tools);
 
   const agentNode = async (
@@ -178,7 +181,7 @@ Be thorough — a game book has rules scattered across many sections.
 Mark confidence as "high" if the data is explicit; "uncertain" if you're inferring.`;
 
 export async function analyzeChunks(
-  model: ChatGoogleGenerativeAI,
+  model: BaseChatModel,
   chunks: ITextChunk[],
   onProgress?: (done: number, total: number) => void,
 ): Promise<IChunkExtraction[]> {

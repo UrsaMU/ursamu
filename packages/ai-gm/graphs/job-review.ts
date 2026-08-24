@@ -3,13 +3,13 @@
 // Reviews a pending staff job and either approves, rejects, or flags it for
 // human attention. Used when staff delegate a job decision to the GM agent.
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { buildGraph, invokeGraph } from "./base.ts";
 import type { IInjectOptions } from "../context/injector.ts";
 import { buildInjectedPrompt } from "../context/injector.ts";
 import { JOB_REVIEW_SYSTEM_SUFFIX } from "../prompts/templates.ts";
 
-export function buildJobReviewGraph(model: ChatGoogleGenerativeAI) {
+export function buildJobReviewGraph(model: BaseChatModel) {
   return buildGraph(model);
 }
 

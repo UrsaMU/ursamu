@@ -13,9 +13,10 @@
   "imports": {
     "ursamu": "jsr:@ursamu/mush@^1.0.4",
     "@ursamu/mush": "jsr:@ursamu/mush@^1.0.4",
-    "@ursamu/help": "jsr:@ursamu/help@^1.0.0",
-    "@ursamu/help-plugin": "jsr:@ursamu/help@^1.0.0",
-    "@std/assert": "jsr:@std/assert@^1.0.0"
+    "@ursamu/help": "../help/mod.ts",
+    "@ursamu/help-plugin": "../help/mod.ts",
+    "@std/assert": "jsr:@std/assert@^1.0.0",
+    "@ursamu/help/register": "../help/register.ts"
   },
   "publish": {
     "include": [

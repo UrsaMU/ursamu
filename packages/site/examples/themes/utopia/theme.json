@@ -1,0 +1,9 @@
+{
+  "id": "utopia",
+  "label": "Utopia RetroWave",
+  "version": "1.0.0",
+  "description": "Synthwave city deck for Utopia /play. Hot pink, purple, navy.",
+  "css": "site.css",
+  "title": "Utopia",
+  "plainBg": true
+}

@@ -1,0 +1,87 @@
+{
+  "key": "sg-hack",
+  "label": "Sprawl Goons — Netrunning (Console & Hack)",
+  "vars": { "player": "Ghost" },
+  "setup": {
+    "character": {
+      "version": 1,
+      "chargenStatus": "approved",
+      "chargenComplete": true,
+      "name": "Ghost",
+      "stats": {
+        "morphology": 0,
+        "equilibrium": 0,
+        "reaction": 1,
+        "cognition": 3,
+        "affinity": 0
+      },
+      "resilience": 12,
+      "resilienceMax": 12,
+      "loadoutMax": 10,
+      "bityuan": 3000,
+      "background": "nodejacker",
+      "backgroundName": "Nodejacker",
+      "edge": "nodejacker-edge",
+      "edgeName": "Feedwise",
+      "affectations": [],
+      "quirks": [],
+      "loadout": [],
+      "augs": [
+        {
+          "slug": "neural-lattice",
+          "name": "Neural Lattice",
+          "modStat": "cognition",
+          "mod": 1
+        }
+      ],
+      "shards": [],
+      "software": [],
+      "console": null,
+      "ap": 0,
+      "level": 0,
+      "notes": ""
+    }
+  },
+  "steps": [
+    { "sub": "Deck setup" },
+    { "cmd": "+console", "label": "no deck yet" },
+    { "cmd": "+console/catalog", "label": "console list" },
+    { "expect": "npod" },
+    { "cmd": "+console/equip npod", "label": "equip nPod" },
+    { "expect": "Equipped" },
+    { "cmd": "+console", "label": "active deck" },
+    { "expect": "npod" },
+
+    { "sub": "Software loadout" },
+    { "cmd": "+console/software", "label": "soft catalog" },
+    { "expect": "tunnel-rat" },
+    { "cmd": "+console/load tunnel-rat", "label": "install tunnel_rat" },
+    { "expect": "Loaded" },
+    { "cmd": "+console/load cloak", "label": "install cloak" },
+    { "cmd": "+console/load neuroshield", "label": "install NeuroShield" },
+    { "cmd": "+console", "label": "deck + soft list" },
+    { "expect": "tunnel-rat" },
+    { "cmd": "+console/unload cloak", "label": "unload cloak" },
+    { "expect": "Unloaded" },
+
+    { "sub": "Exploits" },
+    { "cmd": "+exploit", "label": "exploit catalog" },
+    { "cmd": "+hack", "label": "usage (no args)" },
+
+    { "sub": "Jack in" },
+    { "note": "Cognition vs DS. Fail → system response + neural." },
+    { "cmd": "+hack 10", "label": "raw DS10" },
+    { "expect": "HACK" },
+    { "cmd": "+hack/find 10 +upgrade", "label": "find + soft bonus" },
+    { "expect": "HACK" },
+    { "cmd": "+hack/spoof 12", "label": "spoof DS12" },
+    { "cmd": "+hack/control 14", "label": "control DS14" },
+    { "cmd": "+hack/scan 10", "label": "scan" },
+    { "cmd": "+hack 20", "label": "hard DS20 (likely burn)" },
+    { "expect": "HACK" },
+
+    { "sub": "Sheet after jack" },
+    { "cmd": "+sheet", "label": "check Res after neural dmg" },
+    { "cmd": "+sheet/edge", "label": "Feedwise edge" }
+  ]
+}

@@ -3,13 +3,13 @@
 // Pages a player who just entered a watched room with the current scene
 // description + a brief "so far in this scene" summary.
 
-import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { buildGraph, invokeGraph } from "./base.ts";
 import type { IInjectOptions } from "../context/injector.ts";
 import { buildInjectedPrompt } from "../context/injector.ts";
 import { SCENE_PAGE_SYSTEM_SUFFIX } from "../prompts/templates.ts";
 
-export function buildScenePageGraph(model: ChatGoogleGenerativeAI) {
+export function buildScenePageGraph(model: BaseChatModel) {
   return buildGraph(model);
 }
 

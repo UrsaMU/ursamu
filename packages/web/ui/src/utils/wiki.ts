@@ -58,6 +58,15 @@ export type WikiPagePayload = {
   featured: boolean;
   /** Public site: theme bg + home-height; default false = compact. */
   bgImage: boolean;
+  /** Shown at "/" — only one page may hold this at a time. */
+  home: boolean;
+  /**
+   * Auto H1 (.site-section__title) on the public site; default true.
+   * Off = body-only chrome (use markdown headings in the body).
+   */
+  heading: boolean;
+  /** Sep underline under the auto H1; default true. Ignored if heading off. */
+  rule: boolean;
   readLock: string;
   tags: string[];
 };
@@ -69,6 +78,9 @@ export function pageSnapshot(p: WikiPagePayload): string {
     draft: p.draft,
     featured: p.featured === true,
     bgImage: p.bgImage === true,
+    home: p.home === true,
+    heading: p.heading !== false,
+    rule: p.rule !== false,
     readLock: p.readLock,
     tags: [...p.tags].map((t) => t.toLowerCase()).sort(),
   });

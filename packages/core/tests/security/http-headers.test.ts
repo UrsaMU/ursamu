@@ -45,3 +45,31 @@ Deno.test("HTTP security headers — 404 response must include security headers"
     );
   }
 });
+
+Deno.test("HTTP CORS — OPTIONS preflight returns 204 and allow-origin", OPTS, async () => {
+  const res = await requestHandler(
+    new Request("http://localhost/api/v1/register", {
+      method: "OPTIONS",
+      headers: {
+        origin: "http://localhost:53525",
+        "access-control-request-method": "POST",
+        "access-control-request-headers": "content-type",
+      },
+    }),
+  );
+  assertEquals(res.status, 204);
+  assertEquals(res.headers.get("access-control-allow-origin"), "http://localhost:53525");
+  assertEquals(
+    (res.headers.get("access-control-allow-methods") ?? "").includes("POST"),
+    true,
+  );
+});
+
+Deno.test("HTTP CORS — JSON responses include allow-origin", OPTS, async () => {
+  const res = await requestHandler(
+    new Request("http://localhost/health", {
+      headers: { origin: "http://localhost:53525" },
+    }),
+  );
+  assertEquals(res.headers.get("access-control-allow-origin"), "http://localhost:53525");
+});

@@ -64,9 +64,14 @@ export class DenoKvAdapter<T extends WithId> implements IDatabase<T> {
 
   async create(data: T): Promise<T> {
     const kv = await this.getKv();
-    await kv.set(this.key(data.id), { ...data });
+    const rawId = (data as { id?: unknown }).id;
+    const id = typeof rawId === "string" && rawId.trim()
+      ? rawId.trim()
+      : crypto.randomUUID();
+    const record = { ...data, id } as T;
+    await kv.set(this.key(id), { ...record });
     this.clearCache();
-    return data;
+    return record;
   }
 
   async query(query?: Query<T>): Promise<T[]> {

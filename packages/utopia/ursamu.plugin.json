@@ -1,0 +1,13 @@
+{
+  "name": "utopia",
+  "version": "0.1.1",
+  "description": "Week / feed / sphere crew play for UrsaMU. AI-GM optional.",
+  "ursamu": ">=1.0.0",
+  "author": "UrsaMU",
+  "license": "MIT",
+  "main": "index.ts",
+  "dependencies": [
+    { "name": "help", "version": ">=1.0.0" }
+  ],
+  "tags": ["ttrpg", "utopia", "cyberpunk"]
+}

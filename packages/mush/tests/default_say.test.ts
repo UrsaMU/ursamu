@@ -2,7 +2,11 @@
  * Unmatched bare text defaults to say (not Huh).
  */
 import { assertEquals } from "@std/assert";
-import { shouldDefaultToSay } from "../src/commands/addCmd.ts";
+import {
+  isRegisteredCmdVerb,
+  shouldDefaultToSay,
+} from "../src/commands/addCmd.ts";
+import type { ICmd } from "../src/commands/types.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -29,4 +33,17 @@ Deno.test("shouldDefaultToSay: staff prefixes no", OPTS, () => {
 Deno.test("shouldDefaultToSay: empty no", OPTS, () => {
   assertEquals(shouldDefaultToSay(""), false);
   assertEquals(shouldDefaultToSay("   "), false);
+});
+
+Deno.test("isRegisteredCmdVerb blocks speech rewrite", OPTS, () => {
+  const cmds = [
+    { name: "wield", pattern: /^wield/i },
+    { name: "+wear", pattern: /^\+wear/i },
+  ] as ICmd[];
+  assertEquals(isRegisteredCmdVerb("wield #1", cmds), true);
+  assertEquals(isRegisteredCmdVerb("Wield gun", cmds), true);
+  assertEquals(isRegisteredCmdVerb("+wear vest", cmds), true);
+  assertEquals(isRegisteredCmdVerb("wear vest", cmds), true);
+  assertEquals(isRegisteredCmdVerb("hello there", cmds), false);
+  assertEquals(isRegisteredCmdVerb("say wield", cmds), false);
 });

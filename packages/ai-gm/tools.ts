@@ -1,12 +1,13 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
-import { DBO } from "ursamu";
-import { jobs } from "ursamu/jobs";
+import { DBO } from "@ursamu/mush";
+import { jobs } from "@ursamu/jobs";
 import { gmExchanges, gmMemory } from "./db.ts";
 import type { ICharSheet, INPC, IOrg } from "./context/loader.ts";
 import type { IGMExchange, IGMMemory } from "./schema.ts";
 import { cosineSimilarity, embedText } from "./rag.ts";
 import { nanoid } from "./ingestion/util.ts";
+import { MISSION_TOOLS } from "./tools-mission.ts";
 
 // Richer front shape needed for clock operations
 interface IFront {
@@ -690,4 +691,5 @@ export const ALL_TOOLS = [
   store_lore,
   search_session_history,
   search_campaign_memory,
+  ...MISSION_TOOLS,
 ];

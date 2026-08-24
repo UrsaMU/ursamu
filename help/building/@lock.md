@@ -22,7 +22,8 @@ TYPES (default: basic)
 EXAMPLES
   @lock north=me
   @lock door=wizard | #2
+  @lock portal=+member & !dark
   @lock/use lever=flag(builder)
   @unlock north
 
-SEE ALSO: +help locks, +help locks/keys, +help locks/examples
+SEE ALSO: +help locks/keys (`|` `&` shorthand)

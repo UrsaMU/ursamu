@@ -1,7 +1,7 @@
 {
   "name": "@ursamu/dnd-plugin",
   "version": "1.0.0",
-  "description": "D&D 5e/2024 (SRD 5.2) system plugin for UrsaMU — character sheets, rolling with advantage/disadvantage, health/resource tracking, and guided chargen.",
+  "description": "D&D 5e/2024 (SRD 5.2) system plugin for UrsaMU \u2014 character sheets, rolling with advantage/disadvantage, health/resource tracking, and guided chargen.",
   "exports": "./index.ts",
   "tasks": {
     "test": "deno test -A --unstable-kv",
@@ -40,8 +40,8 @@
     "@ursamu/jobs-plugin": "../jobs/mod.ts",
     "@ursamu/vendor-plugin": "../vendor/index.ts",
     "@ursamu/vendor": "../vendor/mod.ts",
-    "@ursamu/help-plugin": "../help/register.ts",
-    "@ursamu/help": "../help/register.ts",
+    "@ursamu/help-plugin": "../help/mod.ts",
+    "@ursamu/help": "../help/mod.ts",
     "@ursamu/map-plugin": "../map/index.ts",
     "@ursamu/map": "../map/index.ts",
     "@ursamu/mail": "../mail/mod.ts",
@@ -65,6 +65,7 @@
     "@std/flags": "jsr:@std/flags@^0.224.0",
     "@std/semver": "jsr:@std/semver@^1.0.0",
     "@std/fmt": "jsr:@std/fmt@^0.224.0",
-    "@std/fmt/": "jsr:@std/fmt@^0.224.0/"
+    "@std/fmt/": "jsr:@std/fmt@^0.224.0/",
+    "@ursamu/help/register": "../help/register.ts"
   }
 }

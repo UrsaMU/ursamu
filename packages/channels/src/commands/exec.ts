@@ -2,6 +2,35 @@ import { DBO, getConfig } from "@ursamu/mush";
 import type { IUrsamuSDK } from "@ursamu/mush";
 import type { IChanEntry } from "../types.ts";
 import { announceChannelMember } from "../announce.ts";
+import {
+  prefersWebUi,
+  refreshChannelsHub,
+  sendChannelHistoryUi,
+  sendChannelWhoUi,
+  sendChannelsHub,
+  sendMyAliasesUi,
+  type ChanListRow,
+  type WhoRow,
+} from "./chan-ui.ts";
+
+async function listWithOnline(
+  u: IUrsamuSDK,
+): Promise<ChanListRow[]> {
+  const list = (await u.chan.list()) as ChanListRow[];
+  try {
+    const { rooms } = await import("jsr:@ursamu/core@^1.0.0");
+    for (const c of list) {
+      try {
+        c.online = rooms.members(c.name).length;
+      } catch {
+        /* ignore */
+      }
+    }
+  } catch {
+    /* core optional */
+  }
+  return list;
+}
 
 export async function execChannel(u: IUrsamuSDK): Promise<void> {
   const sw = (u.cmd.args[0] || "").toLowerCase().trim();
@@ -23,6 +52,7 @@ export async function execChannel(u: IUrsamuSDK): Promise<void> {
     const who = String(u.me.state.name || u.me.name || u.me.id);
     await announceChannelMember(chan, who, "join");
     u.send(`You have joined channel ${chan} with alias ${alias}.`);
+    await refreshChannelsHub(u);
     return;
   }
 
@@ -42,11 +72,12 @@ export async function execChannel(u: IUrsamuSDK): Promise<void> {
     }
     await u.chan.leave(arg);
     u.send(`You have left the channel with alias ${arg}.`);
+    await refreshChannelsHub(u);
     return;
   }
 
   const cmdName = u.cmd.name.toLowerCase().replace(/^@/, "");
-  const list = (await u.chan.list()) as any[];
+  const list = await listWithOnline(u);
 
   if (
     cmdName === "clist" ||
@@ -56,6 +87,15 @@ export async function execChannel(u: IUrsamuSDK): Promise<void> {
   ) {
     const isFull = sw === "full";
     const isHeaders = sw === "headers";
+
+    // Web: interactive hub (full/headers still get richer meta).
+    if (prefersWebUi(u) && !isHeaders) {
+      sendChannelsHub(u, {
+        channels: list,
+        mode: isFull ? "list" : "hub",
+      });
+      return;
+    }
 
     if (isFull) {
       // Real fields only (no Obj/Charge/Balance/Messages economy stubs).
@@ -75,8 +115,7 @@ export async function execChannel(u: IUrsamuSDK): Promise<void> {
           chan.announce ? "A" : "-"
         }`;
         const own = chan.owner || "God";
-        const { rooms } = await import("@ursamu/core");
-        const users = rooms.members(chan.name).length;
+        const users = chan.online ?? 0;
         u.send(
           `--- ${u.util.ljust(chan.name, 12)} ` +
             `${u.util.ljust(flagsStr, 10)} ` +
@@ -126,6 +165,12 @@ export async function execChannel(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
+  // Default @channel — hub on web, short list on telnet.
+  if (prefersWebUi(u)) {
+    sendChannelsHub(u, { channels: list, mode: "hub" });
+    return;
+  }
+
   u.send("--- Channels ---");
   for (const chan of list as { name: string; alias?: string }[]) {
     u.send(`${chan.name} [${chan.alias || "No Alias"}]`);
@@ -156,6 +201,17 @@ export async function execChanhistory(u: IUrsamuSDK): Promise<void> {
     u.send(`No history available for channel %ch${name}%cn.`);
     return;
   }
+  if (prefersWebUi(u)) {
+    sendChannelHistoryUi(u, {
+      channel: name,
+      lines: history.map((entry) => ({
+        timestamp: entry.timestamp,
+        message: entry.message,
+        playerName: (entry as { playerName?: string }).playerName,
+      })),
+    });
+    return;
+  }
   u.send(`--- Channel History: ${name} (last ${history.length}) ---`);
   for (const entry of history) {
     u.send(`[${new Date(entry.timestamp).toUTCString()}] ${entry.message}`);
@@ -181,6 +237,17 @@ export async function execChantranscript(u: IUrsamuSDK): Promise<void> {
   }
   if (history.length === 0) {
     u.send(`No history available for channel %ch${name}%cn.`);
+    return;
+  }
+  if (prefersWebUi(u)) {
+    sendChannelHistoryUi(u, {
+      channel: name,
+      lines: history.map((entry) => ({
+        timestamp: entry.timestamp,
+        message: entry.message,
+        playerName: (entry as { playerName?: string }).playerName,
+      })),
+    });
     return;
   }
   u.send(`--- Transcript: ${name} (${lines} lines) ---`);
@@ -415,6 +482,7 @@ async function doAddcom(u: IUrsamuSDK, arg: string): Promise<void> {
   const who = String(u.me.state.name || u.me.name || u.me.id);
   await announceChannelMember(channel, who, "join");
   u.send(`Added alias %ch${alias}%cn for channel %ch${channel}%cn.`);
+  await refreshChannelsHub(u);
 }
 
 async function doDelcom(u: IUrsamuSDK, arg: string): Promise<void> {
@@ -433,6 +501,7 @@ async function doDelcom(u: IUrsamuSDK, arg: string): Promise<void> {
   }
   await u.chan.leave(arg);
   u.send(`Removed channel alias %ch${arg}%cn.`);
+  await refreshChannelsHub(u);
 }
 
 async function doAllcom(u: IUrsamuSDK, arg?: string): Promise<void> {
@@ -448,7 +517,7 @@ async function doAllcom(u: IUrsamuSDK, arg?: string): Promise<void> {
       if (entry.alias && !entry.active) {
         entry.active = true;
         count++;
-        const { sessions, rooms } = await import("@ursamu/core");
+        const { sessions, rooms } = await import("jsr:@ursamu/core@^1.0.0");
         const playerSessions = sessions.list().filter(
           (s) => s.sessionId === u.me.id || (s as any).actorId === u.me.id,
         );
@@ -459,10 +528,13 @@ async function doAllcom(u: IUrsamuSDK, arg?: string): Promise<void> {
     }
     if (count > 0) {
       await u.db.modify(u.me.id, "$set", { "data.channels": channels });
+      // Keep hydrated state in sync for web hub.
+      (u.me.state as Record<string, unknown>).channels = channels;
       u.send(`Turned on all channel aliases (${count} channel(s)).`);
     } else {
       u.send("All channels are already on.");
     }
+    await refreshChannelsHub(u);
     return;
   }
 
@@ -472,7 +544,7 @@ async function doAllcom(u: IUrsamuSDK, arg?: string): Promise<void> {
       if (entry.alias && entry.active) {
         entry.active = false;
         count++;
-        const { sessions, rooms } = await import("@ursamu/core");
+        const { sessions, rooms } = await import("jsr:@ursamu/core@^1.0.0");
         const playerSessions = sessions.list().filter(
           (s) => s.sessionId === u.me.id || (s as any).actorId === u.me.id,
         );
@@ -483,10 +555,12 @@ async function doAllcom(u: IUrsamuSDK, arg?: string): Promise<void> {
     }
     if (count > 0) {
       await u.db.modify(u.me.id, "$set", { "data.channels": channels });
+      (u.me.state as Record<string, unknown>).channels = channels;
       u.send(`Turned off all channel aliases (${count} channel(s)).`);
     } else {
       u.send("All channels are already off.");
     }
+    await refreshChannelsHub(u);
     return;
   }
 
@@ -495,43 +569,43 @@ async function doAllcom(u: IUrsamuSDK, arg?: string): Promise<void> {
       u.send("You have no channel aliases.");
       return;
     }
-    const { rooms, sessions } = await import("@ursamu/core");
-    const { dbojs } = await import("@ursamu/mush");
-    for (const entry of channels) {
-      const sockets = rooms.members(entry.channel);
-      const playerIds = new Set<string>();
-      for (const socketId of sockets) {
-        const s = sessions.get(socketId);
-        const actorId = (s as any)?.actorId;
-        if (actorId) playerIds.add(actorId);
-      }
-      const players: string[] = [];
-      const objects: string[] = [];
-      for (const id of playerIds) {
-        const dbObj = await dbojs.queryOne({ id });
-        if (dbObj) {
-          const name = (dbObj.data?.name as string) || dbObj.id;
-          // IDBOBJ.flags is a space-delimited string
-          const isPlayer = String(dbObj.flags ?? "")
-            .split(/\s+/)
-            .includes("player");
-          if (isPlayer) {
-            players.push(name);
-          } else {
-            objects.push(name);
-          }
+    const { rooms, sessions } = await import("jsr:@ursamu/core@^1.0.0");
+    const { dbojs } = await import("jsr:@ursamu/mush@^1.0.0");
+    // Web: one dense who panel per channel (first with people, else first).
+    if (prefersWebUi(u)) {
+      for (const entry of channels) {
+        const rows = await whoRowsFor(
+          entry.channel,
+          rooms,
+          sessions,
+          dbojs,
+        );
+        if (rows.length || entry === channels[0]) {
+          sendChannelWhoUi(u, {
+            channel: entry.channel,
+            rows,
+            alias: entry.alias,
+          });
+          // Only first channel with members (or first alias)
+          if (rows.length) return;
         }
       }
-      players.sort();
-      objects.sort();
-
+      return;
+    }
+    for (const entry of channels) {
+      const rows = await whoRowsFor(
+        entry.channel,
+        rooms,
+        sessions,
+        dbojs,
+      );
       u.send("-- Players --");
-      for (const p of players) {
-        u.send(p);
+      for (const r of rows.filter((x) => x.isPlayer !== false)) {
+        u.send(r.name);
       }
       u.send("-- Objects --");
-      for (const o of objects) {
-        u.send(o);
+      for (const r of rows.filter((x) => x.isPlayer === false)) {
+        u.send(r.name);
       }
       u.send(`-- ${entry.channel} --`);
     }
@@ -540,17 +614,28 @@ async function doAllcom(u: IUrsamuSDK, arg?: string): Promise<void> {
 
   if (!channels.length) {
     u.send("You have no channel aliases.");
+    if (prefersWebUi(u)) {
+      sendMyAliasesUi(u, "You have no channel aliases.");
+    }
     return;
   }
-  u.send("--- Your Channel Aliases ---");
-  for (const entry of channels) {
-    const status = entry.active === false ? "%cr[off]%cn" : "%cg[on]%cn";
-    const title = entry.title ? ` <${entry.title}>` : "";
-    u.send(
-      `  %ch${entry.alias || "?"}%cn → ${entry.channel}${title} ${status}`,
-    );
+  const lines = [
+    "--- Your Channel Aliases ---",
+    ...channels.map((entry) => {
+      const status = entry.active === false
+        ? "%cr[off]%cn"
+        : "%cg[on]%cn";
+      const title = entry.title ? ` <${entry.title}>` : "";
+      return `  %ch${entry.alias || "?"}%cn → ${entry.channel}` +
+        `${title} ${status}`;
+    }),
+    "----------------------------",
+  ];
+  if (prefersWebUi(u)) {
+    sendMyAliasesUi(u, lines.join("\n"));
+    return;
   }
-  u.send("----------------------------");
+  for (const line of lines) u.send(line);
 }
 
 async function doClearcom(u: IUrsamuSDK): Promise<void> {
@@ -562,6 +647,7 @@ async function doClearcom(u: IUrsamuSDK): Promise<void> {
     if (entry.alias) await u.chan.leave(entry.alias);
   }
   u.send("All channel aliases removed.");
+  await refreshChannelsHub(u);
 }
 
 async function doComtitle(u: IUrsamuSDK, arg: string): Promise<void> {
@@ -588,11 +674,13 @@ async function doComtitle(u: IUrsamuSDK, arg: string): Promise<void> {
   }
   entry.title = title || undefined;
   await u.db.modify(u.me.id, "$set", { "data.channels": channels });
+  (u.me.state as Record<string, unknown>).channels = channels;
   u.send(
     title
       ? `Title on %ch${alias}%cn set to: ${title}`
       : `Title on %ch${alias}%cn cleared.`,
   );
+  await refreshChannelsHub(u);
 }
 
 export async function execCemit(u: IUrsamuSDK): Promise<void> {
@@ -629,7 +717,7 @@ export async function execCemit(u: IUrsamuSDK): Promise<void> {
   }
 
   const header = sw === "noheader" ? "" : chan.header + " ";
-  const { rooms } = await import("@ursamu/core");
+  const { rooms } = await import("jsr:@ursamu/core@^1.0.0");
   rooms.broadcast(chan.name, `${header}${msg}`);
 }
 
@@ -673,8 +761,8 @@ export async function execCboot(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
-  const { sessions, rooms } = await import("@ursamu/core");
-  const { dbojs } = await import("@ursamu/mush");
+  const { sessions, rooms } = await import("jsr:@ursamu/core@^1.0.0");
+  const { dbojs } = await import("jsr:@ursamu/mush@^1.0.0");
   const targetObj = await dbojs.queryOne({ id: target.id });
   if (targetObj && targetObj.data?.channels) {
     const chs = targetObj.data.channels as IChanEntry[];
@@ -749,8 +837,8 @@ export async function execCwho(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
-  const { rooms, sessions } = await import("@ursamu/core");
-  const { dbojs } = await import("@ursamu/mush");
+  const { rooms, sessions } = await import("jsr:@ursamu/core@^1.0.0");
+  const { dbojs } = await import("jsr:@ursamu/mush@^1.0.0");
 
   const sockets = rooms.members(chan.name);
   const playerIds = new Set<string>();
@@ -758,6 +846,51 @@ export async function execCwho(u: IUrsamuSDK): Promise<void> {
     const s = sessions.get(socketId);
     const actorId = (s as any)?.actorId;
     if (actorId) playerIds.add(actorId);
+  }
+
+  if (prefersWebUi(u)) {
+    const rows: WhoRow[] = [];
+    if (sw === "all") {
+      const allPlayers = await dbojs.query({
+        "data.channels": { $exists: true },
+      });
+      for (const p of allPlayers) {
+        const chs = (p.data?.channels || []) as IChanEntry[];
+        const found = chs.find(
+          (c) =>
+            c.channel.toLowerCase() ===
+              chan.name.toLowerCase(),
+        );
+        if (!found) continue;
+        const isPlayer = String(p.flags ?? "")
+          .split(/\s+/)
+          .includes("player");
+        rows.push({
+          name: String(p.data?.name || p.id),
+          status: playerIds.has(p.id) ? "on" : "off",
+          isPlayer,
+        });
+      }
+    } else {
+      for (const id of playerIds) {
+        const p = await dbojs.queryOne({ id });
+        if (!p) continue;
+        const isPlayer = String(p.flags ?? "")
+          .split(/\s+/)
+          .includes("player");
+        rows.push({
+          name: String(p.data?.name || p.id),
+          status: "on",
+          isPlayer,
+        });
+      }
+    }
+    rows.sort((a, b) => a.name.localeCompare(b.name));
+    sendChannelWhoUi(u, {
+      channel: chan.name,
+      rows,
+    });
+    return;
   }
 
   u.send("Name Status Player");
@@ -801,4 +934,45 @@ export async function execCwho(u: IUrsamuSDK): Promise<void> {
       }
     }
   }
+}
+
+/** Shared who-row builder for allcom who / alias who. */
+async function whoRowsFor(
+  channel: string,
+  rooms: { members: (n: string) => string[] },
+  sessions: { get: (id: string) => unknown },
+  dbojs: {
+    queryOne: (q: { id: string }) => Promise<{
+      id: string;
+      flags?: unknown;
+      data?: { name?: string };
+    } | null | false | undefined>;
+  },
+): Promise<WhoRow[]> {
+  let sockets: string[] = [];
+  try {
+    sockets = rooms.members(channel);
+  } catch {
+    return [];
+  }
+  const playerIds = new Set<string>();
+  for (const socketId of sockets) {
+    const s = sessions.get(socketId) as
+      | { actorId?: string }
+      | undefined;
+    const actorId = s?.actorId;
+    if (actorId) playerIds.add(actorId);
+  }
+  const rows: WhoRow[] = [];
+  for (const id of playerIds) {
+    const dbObj = await dbojs.queryOne({ id });
+    if (!dbObj) continue;
+    const name = (dbObj.data?.name as string) || dbObj.id;
+    const isPlayer = String(dbObj.flags ?? "")
+      .split(/\s+/)
+      .includes("player");
+    rows.push({ name, status: "on", isPlayer });
+  }
+  rows.sort((a, b) => a.name.localeCompare(b.name));
+  return rows;
 }

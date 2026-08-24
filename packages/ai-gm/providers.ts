@@ -1,27 +1,124 @@
+import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import type { IGMConfig } from "./schema.ts";
+import type { BaseChatModel } from
+  "@langchain/core/language_models/chat_models";
+import type { GMProvider, IGMConfig } from "./schema.ts";
 
 // ─── Provider factory ─────────────────────────────────────────────────────────
 //
-// Returns a ChatGoogleGenerativeAI instance configured from IGMConfig.
-// API key is read exclusively from the GOOGLE_API_KEY environment variable.
-// Set it in your .env file — never store API keys in the database.
+// Builds a chat model from IGMConfig.provider.
+// Keys live in env only — never the DB.
+//   anthropic → ANTHROPIC_API_KEY
+//   google    → GOOGLE_API_KEY
 
-export function createModel(config: IGMConfig): ChatGoogleGenerativeAI {
-  const apiKey = Deno.env.get("GOOGLE_API_KEY") ?? "";
+const DEFAULT_ANTHROPIC_MODEL = "claude-haiku-4-5-20251001";
+const DEFAULT_GOOGLE_MODEL = "gemini-2.0-flash-latest";
 
-  if (!apiKey) {
-    throw new Error(
-      "GM: No Google API key found. Set GOOGLE_API_KEY in your .env file.",
+/** Resolved provider: config → GM_PROVIDER env → anthropic. */
+export function resolveProvider(
+  config?: Pick<IGMConfig, "provider"> | null,
+): GMProvider {
+  const fromCfg = config?.provider;
+  if (fromCfg === "anthropic" || fromCfg === "google") {
+    return fromCfg;
+  }
+  const env = (Deno.env.get("GM_PROVIDER") ?? "").trim().toLowerCase();
+  if (env === "google" || env === "gemini") return "google";
+  if (env === "anthropic" || env === "claude") return "anthropic";
+  if (Deno.env.get("ANTHROPIC_API_KEY")?.trim()) return "anthropic";
+  if (Deno.env.get("GOOGLE_API_KEY")?.trim()) return "google";
+  return "anthropic";
+}
+
+export function hasApiKey(provider?: GMProvider): boolean {
+  const p = provider ?? resolveProvider();
+  if (p === "google") {
+    return Boolean(Deno.env.get("GOOGLE_API_KEY")?.trim());
+  }
+  return Boolean(Deno.env.get("ANTHROPIC_API_KEY")?.trim());
+}
+
+/** @deprecated use hasApiKey */
+export function hasGoogleApiKey(): boolean {
+  return hasApiKey("google");
+}
+
+function resolveModelName(
+  config: IGMConfig,
+  provider: GMProvider,
+): string {
+  const configured = (config.model ?? "").trim();
+  if (configured && !looksLikeWrongProvider(configured, provider)) {
+    return configured;
+  }
+  if (provider === "anthropic") {
+    return (
+      Deno.env.get("ANTHROPIC_MODEL")?.trim() ||
+      DEFAULT_ANTHROPIC_MODEL
     );
   }
+  return (
+    Deno.env.get("GOOGLE_MODEL")?.trim() ||
+    Deno.env.get("GEMINI_MODEL")?.trim() ||
+    DEFAULT_GOOGLE_MODEL
+  );
+}
 
-  return new ChatGoogleGenerativeAI({
-    model: config.model,
+function looksLikeWrongProvider(
+  model: string,
+  provider: GMProvider,
+): boolean {
+  const m = model.toLowerCase();
+  if (provider === "anthropic") {
+    return m.startsWith("gemini") || m.startsWith("models/");
+  }
+  return m.startsWith("claude") || m.startsWith("anthropic");
+}
+
+/**
+ * Build a chat model, or null when the active provider has no API key.
+ * Config/watch commands work without a key; LLM paths must null-check.
+ */
+export function createModel(config: IGMConfig): BaseChatModel | null {
+  const provider = resolveProvider(config);
+  if (!hasApiKey(provider)) return null;
+
+  const model = resolveModelName(config, provider);
+  const temperature = config.temperature;
+
+  if (provider === "google") {
+    const apiKey = Deno.env.get("GOOGLE_API_KEY")!.trim();
+    return new ChatGoogleGenerativeAI({
+      model,
+      apiKey,
+      temperature,
+      maxRetries: 2,
+    });
+  }
+
+  const apiKey = Deno.env.get("ANTHROPIC_API_KEY")!.trim();
+  return new ChatAnthropic({
+    model,
     apiKey,
-    temperature: config.temperature,
+    temperature,
     maxRetries: 2,
   });
+}
+
+/** Like createModel but throws a clear error for LLM call sites. */
+export function requireModel(config: IGMConfig): BaseChatModel {
+  const provider = resolveProvider(config);
+  const model = createModel(config);
+  if (!model) {
+    const envKey = provider === "google"
+      ? "GOOGLE_API_KEY"
+      : "ANTHROPIC_API_KEY";
+    throw new Error(
+      `GM: No ${provider} API key found. Set ${envKey} ` +
+        `in your .env file.`,
+    );
+  }
+  return model;
 }
 
 // ─── Config loader with default fallback ─────────────────────────────────────

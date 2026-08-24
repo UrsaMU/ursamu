@@ -26,6 +26,8 @@ const HOST_CORE = new Set([
   "bbs",
   "bbs-board",
   "bbs-post",
+  "events",
+  "event-detail",
   "settings",
   "map",
   "plugin-embed",
@@ -60,6 +62,7 @@ async function collectBridgeRoutes(): Promise<string[]> {
     "packages/jobs/src/staff-nav-bridge.ts",
     "packages/wiki/src/staff-nav-bridge.ts",
     "packages/map/staff-nav-bridge.ts",
+    "packages/events/src/staff-nav-bridge.ts",
   ];
   const routes: string[] = [];
   for (const rel of files) {

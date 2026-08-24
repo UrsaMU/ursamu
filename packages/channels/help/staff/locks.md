@@ -5,16 +5,19 @@ See also: +help staff (overview)
 
 +LOCKS
 
-  Restrict who may join or use a channel (admin+).
+One **lock** string on a channel. Checked when a
+player **joins** (login / addcom) and when they
+**speak**. Empty lock = anyone may use it.
 
 SYNTAX
-  @chancreate/lock <channel>=<lock>
-  @chanset <channel>/lock=<lock>
+  @chancreate/lock <name>=<key>
+  @chanset <name>/lock=<key>
+  @chanset <name>/lock=          clear (open)
 
-  Locks are standard UrsaMU lock strings (flags, perm, etc.).
+NOTES
+  Same key language as object locks (`+help locks`).
+  `hidden=on` hides from lists; lock still applies.
+  Fail-closed: bad/unknown funcs deny access.
 
-EXAMPLES
-  @chancreate/lock Staff=flag(wizard)
-  @chanset Public/lock=connected
-
-SEE ALSO: +help staff/chanset, +help staff/create
+SEE ALSO: +help staff/locks/keys,
++help staff/locks/examples, +help locks

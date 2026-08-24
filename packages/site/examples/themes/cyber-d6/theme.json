@@ -1,0 +1,9 @@
+{
+  "id": "cyber-d6",
+  "label": "CYBER d6",
+  "version": "1.0.0",
+  "description": "Phosphor terminal skin. Tokens copied 1:1 from CYBER d6.",
+  "css": "site.css",
+  "title": "CYBER d6",
+  "plainBg": true
+}

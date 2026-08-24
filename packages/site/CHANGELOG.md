@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.96
+
+- Utopia pinned deck on `/play` (≤900px): masthead, crew
+  ready pips, action dock. Pins hide until `utopia-feed` or
+  `utopia-week` layout arrives.
+- Layout types: `utopia-feed`, `utopia-week`,
+  `utopia-ruling`, `utopia-sphere`, `utopia-you`
+- Theme pack `examples/themes/utopia/` (RetroWave →
+  `--site-*`; glow only on masthead / SEND / rulings)
+- Cache-bust SITE_ASSET_V → 20260819deck
+
 ## 0.1.93
 
 - Mobile /play: full-height nav drawer (safe-area), SEND +

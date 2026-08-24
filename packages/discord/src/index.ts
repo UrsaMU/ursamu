@@ -1,10 +1,13 @@
 import type { IPlugin } from "@ursamu/mush";
 import { registerPluginRoute } from "@ursamu/mush";
-import { registerHelpDir } from "@ursamu/help-plugin";
-import { channelEvents } from "@ursamu/channels";
+import { registerHelpDir } from "@ursamu/help/register";import { channelEvents } from "@ursamu/channels";
 import { getBotCredentials } from "./config.ts";
 import { onGameChannelMessage } from "./channel-bridge.ts";
 import { subscribeJobHooks, unsubscribeJobHooks } from "./job-hooks.ts";
+import {
+  subscribeEventHooks,
+  unsubscribeEventHooks,
+} from "./event-hooks.ts";
 import {
   subscribePresenceHooks,
   unsubscribePresenceHooks,
@@ -64,6 +67,7 @@ const discordPlugin: IPlugin = {
     registerPluginRoute("/api/v1/discord", interactionsRoute);
 
     subscribeJobHooks();
+    subscribeEventHooks();
     subscribePresenceHooks();
     subscribeSceneDiscordHooks();
     channelEvents.on("channel:message", onChannelMessage);
@@ -89,6 +93,7 @@ const discordPlugin: IPlugin = {
 
   remove: () => {
     unsubscribeJobHooks();
+    unsubscribeEventHooks();
     unsubscribePresenceHooks();
     unsubscribeSceneDiscordHooks();
     channelEvents.off("channel:message", onChannelMessage);

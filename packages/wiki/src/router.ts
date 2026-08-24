@@ -4,7 +4,7 @@ import {
   WIKI_DIR, MAX_UPLOAD_BYTES,
   safePath, mimeForPath, serializePage,
   readPageFile, walkWiki, normalisePath,
-  mergeWikiEditMeta,
+  mergeWikiEditMeta, findHomePage, clearHomeFlagExcept,
 } from "./fs.ts";
 import type { WikiStub } from "./fs.ts";
 import { isStaffUser } from "./db.ts";
@@ -145,6 +145,11 @@ async function handleList(userId: string | null): Promise<Response> {
       draft: meta.draft === true,
       featured: meta.featured === true,
       bgImage: meta.bgImage === true,
+      home: meta.home === true,
+      /** Auto H1 on public site; default true. */
+      heading: meta.heading !== false,
+      /** Sep underline under that H1; default true. */
+      rule: meta.rule !== false,
       author: typeof meta.author === "string" ? meta.author : "",
       date: typeof meta.date === "string" ? meta.date : "",
       readLock: typeof meta.readLock === "string"
@@ -191,6 +196,8 @@ async function handleCreate(req: Request, userId: string | null): Promise<Respon
     if (e instanceof Deno.errors.AlreadyExists) return json({ error: "Page already exists" }, 409);
     throw e;
   }
+  // Only one page can be the site home — checking it here unchecks any other.
+  if (metaFields.home === true) await clearHomeFlagExcept(pagePath);
   await wikiHooks.emit("wiki:created", { path: pagePath, meta: metaFields, body: pageBody });
   return json({ path: pagePath, ...metaFields, body: pageBody }, 201);
 }
@@ -217,6 +224,16 @@ async function handleGet(wikiPath: string, guarded: string, userId: string | nul
         },
       });
     } catch { return json({ error: "Not found" }, 404); }
+  }
+
+  // "home" is a reserved alias: serve whichever page is flagged `home: true`,
+  // falling back to a literal page named "home" for back-compat.
+  if (wikiPath === "home") {
+    const flagged = await findHomePage();
+    if (flagged) {
+      if (!(await canReadPageRest(userId, flagged.meta))) return json({ error: "Forbidden" }, 403);
+      return json({ path: "home", ...flagged.meta, body: flagged.body });
+    }
   }
 
   for (const p of [safePath(`${wikiPath}.md`), safePath(`${wikiPath}/index.md`)]) {
@@ -294,6 +311,8 @@ async function handlePatch(wikiPath: string, req: Request, userId: string | null
     found,
     serializePage(updatedMeta, updatedBody),
   );
+  // Only one page can be the site home — checking it here unchecks any other.
+  if (updatedMeta.home === true) await clearHomeFlagExcept(wikiPath);
   await wikiHooks.emit("wiki:edited", {
     path: wikiPath,
     meta: updatedMeta,
