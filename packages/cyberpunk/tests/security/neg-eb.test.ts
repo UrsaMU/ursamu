@@ -8,8 +8,8 @@
  * These tests MUST FAIL against the unpatched code (RED phase).
  * After patching, all assertions pass (GREEN phase).
  */
-import { assertEquals, assertNotEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertNotEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { parsePositiveInt } from "../../engine/validation.ts";
 
 // ── Unit tests against the shared validator ────────────────────────────────

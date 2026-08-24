@@ -1,8 +1,8 @@
 /**
  * Tests — Grenade AoE per-target damage and save resolution.
  */
-import { assert, assertEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assert, assertEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { resolveGrenadeHit, resolveAoeSave } from "../engine/grenade.ts";
 import { getWeapon } from "../data/weapons.ts";
 import { defaultAmmoForWeaponType } from "../data/ammo.ts";

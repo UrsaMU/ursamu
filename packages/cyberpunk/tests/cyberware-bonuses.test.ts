@@ -2,8 +2,8 @@
  * Tests — Cyberware Passive Bonuses
  * Covers: getCyberwareSkillBonus, Grafted Muscle BODY recalc, Subdermal Armor SP
  */
-import { assertEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { getCyberwareSkillBonus, buildNewCharacter, recalcDerived, calcMaxHP, calcSWThreshold } from "../engine/character.ts";
 import { effectiveSP, ablateArmorSource } from "../engine/combat.ts";
 

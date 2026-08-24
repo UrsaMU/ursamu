@@ -278,7 +278,11 @@ Deno.test("@site — sets config value and calls sys.setConfig", OPTS, async () 
 
 Deno.test("@reboot — broadcasts and calls sys.reboot", OPTS, async () => {
   const rebootCalled = { called: false };
-  const u = makeU({ cmdName: "@reboot", args: [], rebootCalled });
+  const u = makeU({
+    cmdName: "@reboot",
+    args: ["quick"],
+    rebootCalled,
+  });
   await execReboot(u);
   assertEquals(rebootCalled.called, true);
   assertEquals(u.broadcasts.length > 0, true);
@@ -286,7 +290,11 @@ Deno.test("@reboot — broadcasts and calls sys.reboot", OPTS, async () => {
 
 Deno.test("@restart — same exec, also calls sys.reboot", OPTS, async () => {
   const rebootCalled = { called: false };
-  const u = makeU({ cmdName: "@restart", args: [], rebootCalled });
+  const u = makeU({
+    cmdName: "@restart",
+    args: ["quick"],
+    rebootCalled,
+  });
   await execReboot(u);
   assertEquals(rebootCalled.called, true);
 });

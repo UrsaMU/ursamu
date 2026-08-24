@@ -1,8 +1,8 @@
 /**
  * Tests — Smartgun Link enforcement.
  */
-import { assert, assertEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assert, assertEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { checkSmartgunLink, hasSmartgunLink } from "../engine/smartgun.ts";
 import type { ICyberware } from "../db/schemas.ts";
 

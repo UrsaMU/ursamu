@@ -14,8 +14,8 @@
  * These tests verify the invariant: rollHumanityGain("memory") always
  * returns a value in the range [1, 3].
  */
-import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { rollHumanityGain } from "../../engine/humanity.ts";
 
 describe("rollHumanityGain('memory') — RNG bias guard", () => {

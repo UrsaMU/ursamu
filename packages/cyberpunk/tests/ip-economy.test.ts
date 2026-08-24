@@ -1,8 +1,8 @@
 /**
  * Tests — Improvement Point Economy
  */
-import { assertEquals, assertStringIncludes } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertStringIncludes } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { skillIpCost, roleIpCost } from "../commands/improve.ts";
 import { mockPlayer, mockU } from "./helpers/mockU.ts";
 import type { ICPRCharacter } from "../db/schemas.ts";

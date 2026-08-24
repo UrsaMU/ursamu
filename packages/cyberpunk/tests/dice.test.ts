@@ -1,8 +1,8 @@
 /**
  * Tests — Dice Rolling Utilities
  */
-import { assertEquals, assertGreaterOrEqual, assertLessOrEqual, assertExists } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertGreaterOrEqual, assertLessOrEqual, assertExists } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { d10, d6, rollND6, rollD10Critical, skillCheck, rollDamage, applyArmor } from "../engine/dice.ts";
 
 describe("d10()", () => {

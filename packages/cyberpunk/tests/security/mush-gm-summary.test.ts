@@ -13,8 +13,8 @@
  * These tests verify the invariant: no GM summary string may contain MUSH
  * escape sequences.
  */
-import { assertEquals, assertMatch } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertMatch } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { stripMush, sanitizeGMSummary, MAX_GM_SUMMARY_LENGTH } from "../../engine/validation.ts";
 
 // ─── Invariant tests — verify the fix (call site pattern mirrors each command) ─

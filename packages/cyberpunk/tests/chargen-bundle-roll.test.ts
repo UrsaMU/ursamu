@@ -1,8 +1,8 @@
 /**
  * Tests — Friends & Enemies Bundle Roll (chargen-steps.ts)
  */
-import { assertEquals, assertStringIncludes } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertStringIncludes } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { mockU, mockPlayer } from "./helpers/mockU.ts";
 import { handleRoll, handleReroll } from "../commands/chargen-steps.ts";
 import type { ICPRCharacter } from "../db/schemas.ts";

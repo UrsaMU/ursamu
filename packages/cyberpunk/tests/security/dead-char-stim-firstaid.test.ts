@@ -17,8 +17,8 @@
  * test context), we model the exploit pattern using the same pure-function
  * guard that MUST be present in each command exec path.
  */
-import { assertEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { canReceiveHealing } from "../../engine/validation.ts";
 import { applyHealingToChar, buildNewCharacter } from "../../engine/character.ts";
 

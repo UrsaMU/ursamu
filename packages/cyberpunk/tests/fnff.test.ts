@@ -1,8 +1,8 @@
 /**
  * Tests — FNFF Utility Functions (lib/fnff.ts)
  */
-import { assertEquals, assertGreaterOrEqual } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertGreaterOrEqual } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import {
   CALLED_SHOT_EFFECT,
   CALLED_SHOT_NARRATIVE,

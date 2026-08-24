@@ -10,8 +10,8 @@
  * false if rejected by a pre-condition check. emitGMBrawlResolved is called only
  * when doBrawlMove returns true.
  */
-import { assertEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 
 // ─── Invariant tests ──────────────────────────────────────────────────────────
 // We test the pattern directly (not through the full command) because brawl.ts

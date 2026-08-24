@@ -11,8 +11,8 @@
  * These tests document the required behaviour; we verify via the exported
  * canSelfStabilize() helper from lib/validation.ts.
  */
-import { assertEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { canSelfStabilize } from "../../engine/validation.ts";
 
 describe("canSelfStabilize() — SelfStabilize guard", () => {

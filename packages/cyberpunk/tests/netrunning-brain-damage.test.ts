@@ -4,8 +4,8 @@
  * "Brain damage is applied directly to HP and is not affected by worn or
  *  implanted armor. It cannot cause a Critical Injury."
  */
-import { assertEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { applyBrainDamage } from "../engine/netrunning.ts";
 import { buildNewCharacter } from "../engine/character.ts";
 import type { IArmorState } from "../db/schemas.ts";

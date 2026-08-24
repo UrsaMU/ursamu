@@ -1,8 +1,8 @@
 /**
  * Tests — Role Bug Fixes (Bug 1–4)
  */
-import { assertEquals, assertNotEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertNotEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 
 // ---------------------------------------------------------------------------
 // Helpers — mirrors the fixed logic in commands/therapy.ts and commands/rolls.ts

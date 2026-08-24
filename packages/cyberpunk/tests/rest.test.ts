@@ -1,8 +1,8 @@
 /**
  * Tests — Wound Recovery Timer Utilities (lib/rest.ts)
  */
-import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import {
   SHORT_REST_MS,
   LONG_REST_MS,

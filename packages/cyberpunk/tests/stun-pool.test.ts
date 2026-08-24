@@ -1,8 +1,8 @@
 /**
  * Tests -- Stun Pool / Non-Lethal Damage (engine/stun.ts)
  */
-import { assertEquals, assert } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assert } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import {
   applyStunDamage,
   ensureStunPool,

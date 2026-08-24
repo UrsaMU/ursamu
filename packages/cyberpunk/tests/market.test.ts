@@ -1,8 +1,8 @@
 /**
  * Tests — Market and Economy Utilities
  */
-import { assertEquals, assertGreaterOrEqual } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertGreaterOrEqual } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import {
   canOpenNightMarket, canOpenMidnightMarket, canAfford,
   deductEB, addEB, isLifestyleOverdue, daysOverdue,

@@ -1,8 +1,8 @@
 /**
  * Tests — Crafting Utilities
  */
-import { assertEquals, assertGreaterOrEqual, assertStringIncludes } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertGreaterOrEqual, assertStringIncludes } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import {
   getMakerRank, totalMakerPoints, createCraftProject,
   materialsRequired, craftProgressCheck, fieldRepairCheck,

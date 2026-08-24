@@ -1,8 +1,8 @@
 /**
  * Tests — Environmental Hazard Calculations
  */
-import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import {
   fallDiceCount,
   rollFallDamage,

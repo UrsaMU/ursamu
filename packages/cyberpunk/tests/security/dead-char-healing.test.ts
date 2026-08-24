@@ -12,8 +12,8 @@
  * These tests document the required behaviour via the exported
  * canReceiveHealing() helper from lib/validation.ts.
  */
-import { assertEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { canReceiveHealing } from "../../engine/validation.ts";
 import { applyHealingToChar, buildNewCharacter } from "../../engine/character.ts";
 

@@ -2,7 +2,7 @@
  * Tests — Humanity Regain Utilities (lib/humanity.ts)
  */
 import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "jsr:@std/assert@^1";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { describe, it } from "@std/testing/bdd";
 import {
   HUMANITY_COOLDOWN_MS,
   HUMANITY_GAIN_TYPES,

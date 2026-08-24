@@ -14,8 +14,8 @@
  * These tests document the required behaviour via the exported
  * MAX_LOCATION_EFFECTS constant from lib/validation.ts.
  */
-import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { MAX_LOCATION_EFFECTS } from "../../engine/validation.ts";
 import { addLocationEffect } from "../../engine/fnff.ts";
 import { buildNewCharacter } from "../../engine/character.ts";

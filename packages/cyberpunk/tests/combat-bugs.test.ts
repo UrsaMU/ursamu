@@ -6,8 +6,8 @@
  *   2. Choke damage = attacker BODY, bypasses armor (SP = 0)
  *   3. Throw damage = attacker BODY, bypasses armor (SP = 0)
  */
-import { assertEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { effectiveSP } from "../engine/combat.ts";
 import { buildNewCharacter } from "../engine/character.ts";
 import type { ICPRCharacter } from "../db/schemas.ts";

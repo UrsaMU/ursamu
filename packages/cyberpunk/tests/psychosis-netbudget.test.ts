@@ -1,8 +1,8 @@
 /**
  * Tests — Cyberpsychosis penalties from humanity loss (not base EMP).
  */
-import { assertEquals } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import {
   empLostToHumanity,
   getCyberpsychosisPenalty,

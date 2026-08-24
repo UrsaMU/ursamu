@@ -8,8 +8,8 @@
  * Fix: enforce MAX_CRIT_INJURIES cap before appending.
  * These tests MUST FAIL against unpatched code (RED), pass after patch (GREEN).
  */
-import { assertEquals, assertLessOrEqual } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertLessOrEqual } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import { MAX_CRIT_INJURIES } from "../../engine/validation.ts";
 import { buildNewCharacter } from "../../engine/character.ts";
 

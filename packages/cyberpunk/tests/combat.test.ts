@@ -1,8 +1,8 @@
 /**
  * Tests — Combat Utilities
  */
-import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import {
   resolveAttack, resolveAutofire, ablateArmorState, effectiveSP,
   sortInitiative, advanceTurn, canDodgeRanged, RANGE_DV,

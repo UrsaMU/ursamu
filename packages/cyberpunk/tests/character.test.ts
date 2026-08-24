@@ -1,8 +1,8 @@
 /**
  * Tests — Character Calculation Utilities
  */
-import { assertEquals, assertGreaterOrEqual } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertGreaterOrEqual } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import {
   calcMaxHP, calcSWThreshold, calcCurrentEMP, deriveWoundState,
   woundActionPenalty, woundMovePenalty, totalDeathSavePenalty,

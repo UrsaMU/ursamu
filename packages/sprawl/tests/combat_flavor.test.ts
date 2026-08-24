@@ -25,7 +25,6 @@ function fakeResult(
     ...(over.dice as object),
   };
   return {
-    dice,
     mode: "normal",
     stat: "reaction",
     statValue: 2,
