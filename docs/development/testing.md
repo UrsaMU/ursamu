@@ -307,13 +307,19 @@ open coverage/html/index.html
 
 ## CI
 
-The project uses GitHub Actions. The workflow is at `.github/workflows/ci.yml`.
-Tests run on every push and pull request:
+The project uses GitHub Actions. The workflow is at
+`.github/workflows/ci.yml`. Tests run on every push and
+pull request:
 
 ```yaml
-- name: Run tests
-  run: deno test --allow-all --unstable-kv --no-check
+- name: Unit tests
+  run: deno test tests/ --allow-all --unstable-kv --no-check
 ```
+
+Package suites live under `packages/*/tests/` and run via
+`deno task packages:test`. They are not the merge gate.
+Playwright / e2e files stay out of CI until they have a
+dedicated job.
 
 Tests must pass before a PR can be merged.
 
