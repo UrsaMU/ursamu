@@ -37,6 +37,19 @@ export type UpdateOutcome = {
   cached?: boolean;
 };
 
+type UpdateRunner = (
+  opts?: UpdateOptions,
+) => Promise<UpdateOutcome>;
+
+let updateRunner: UpdateRunner | undefined;
+
+/** Tests replace the live git/cache path. */
+export function setCodebaseUpdateRunner(
+  fn?: UpdateRunner,
+): void {
+  updateRunner = fn;
+}
+
 export {
   applyEngineOverrides,
   bumpUrsamuImports,
@@ -377,6 +390,7 @@ async function reportLockedUrsamu(
 export async function runCodebaseUpdate(
   opts: UpdateOptions = {},
 ): Promise<UpdateOutcome> {
+  if (updateRunner) return updateRunner(opts);
   const cwd = opts.cwd ?? Deno.cwd();
   const lines: string[] = [];
   const log = opts.log;
