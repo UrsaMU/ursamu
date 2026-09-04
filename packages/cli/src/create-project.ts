@@ -316,9 +316,9 @@ export async function scaffoldProject(
     "@std/testing": "jsr:@std/testing@^1.0.17",
     "@std/testing/bdd": "jsr:@std/testing@^1.0.17/bdd",
     "@std/testing/mock": "jsr:@std/testing@^1.0.17/mock",
-    "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.6.0",
-    "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.6.0/eval",
-    "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.6.0/parse",
+    "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.7.0",
+    "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.7.0/eval",
+    "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.7.0/parse",
     "@ursamu/parser": "npm:@ursamu/parser@1.2.4",
     "@digibear/tags": "npm:@digibear/tags@1.0.0",
     "bcrypt": "npm:bcryptjs@2.4.3",
@@ -336,19 +336,45 @@ export async function scaffoldProject(
     "sucrase": "npm:sucrase@^3.35.0",
   };
 
+  // Engine pins: keep in sync with published @ursamu/mush + core.
+  // Dual-package override keys force plugin range rewrites onto one
+  // mush/core instance (see packages/mush/docs/DUAL_PACKAGE.md).
+  const MUSH = "jsr:@ursamu/mush@1.0.38";
+  const CORE = "jsr:@ursamu/core@1.0.5";
   const jsrImports: Record<string, string> = {
-    "ursamu":                  "jsr:@ursamu/mush@^1.0.30",
-    "@ursamu/mush":            "jsr:@ursamu/mush@^1.0.30",
-    "@ursamu/mush/app":        "jsr:@ursamu/mush@^1.0.30/app",
-    "@ursamu/core":            "jsr:@ursamu/core@^1.0.2",
-    "@ursamu/ursamu":          "jsr:@ursamu/mush@^1.0.30",
-    "@ursamu/ursamu/app":      "jsr:@ursamu/mush@^1.0.30/app",
-    "@std/path":               "jsr:@std/path@^0.224.0",
-    "@std/assert":             "jsr:@std/assert@^0.224.0",
-    "@std/fs":                 "jsr:@std/fs@^0.224.0",
-    "@electric-sql/pglite":    "npm:@electric-sql/pglite@^0.5.2",
-    "@nicia-ai/typegraph":     "npm:@nicia-ai/typegraph@^0.31.0",
-    "@nicia-ai/typegraph/postgres/pglite": "npm:@nicia-ai/typegraph@^0.31.0/postgres/pglite",
+    "ursamu": MUSH,
+    "@ursamu/mush": MUSH,
+    "@ursamu/mush/app": `${MUSH}/app`,
+    "@ursamu/core": CORE,
+    "@ursamu/ursamu": MUSH,
+    "@ursamu/ursamu/app": `${MUSH}/app`,
+    "@std/path": "jsr:@std/path@^0.224.0",
+    "@std/assert": "jsr:@std/assert@^0.224.0",
+    "@std/fs": "jsr:@std/fs@^0.224.0",
+    "@std/dotenv": "jsr:@std/dotenv@^0.224.0",
+    "dotenv": "jsr:@std/dotenv@^0.224.0",
+    "dotenv/load": "jsr:@std/dotenv@^0.224.0/load",
+    "@electric-sql/pglite": "npm:@electric-sql/pglite@^0.5.2",
+    "@nicia-ai/typegraph": "npm:@nicia-ai/typegraph@^0.31.0",
+    "@nicia-ai/typegraph/postgres/pglite":
+      "npm:@nicia-ai/typegraph@^0.31.0/postgres/pglite",
+    "zod": "npm:zod@4.4.3",
+    "bcrypt": "npm:bcryptjs@2.4.3",
+    "@ursamu/parser": "npm:@ursamu/parser@1.2.4",
+    "@digibear/tags": "npm:@digibear/tags@1.0.0",
+    "djwt": "jsr:@zaubrik/djwt@^3.0.2",
+    "quickjs-emscripten": "npm:quickjs-emscripten@0.29.0",
+    "sucrase": "npm:sucrase@^3.35.0",
+    "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.7.0",
+    "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.7.0/eval",
+    "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.7.0/parse",
+    // Dual-instance force (plugin publish rewrites)
+    "jsr:@ursamu/mush@^1.0.0": MUSH,
+    "jsr:@ursamu/mush@^1.0.30": MUSH,
+    "jsr:@ursamu/mush@^0.1.1": MUSH,
+    "jsr:@ursamu/mush@^0.2.0": MUSH,
+    "jsr:@ursamu/core@^1.0.0": CORE,
+    "jsr:@ursamu/core@^1.0.2": CORE,
   };
 
   function getLocalPath(pkgName: string, engineRelPath: string): string {
@@ -374,16 +400,25 @@ export async function scaffoldProject(
     const matchedOpt = optionalPackages.find((o) => o.pkgName === pkgName);
     if (isLocal) {
       localImports[pkgName] = getLocalPath(pkgName, engineRelPath);
+      if (pkgName === "@ursamu/help") {
+        localImports["@ursamu/help/register"] =
+          `${engineRelPath}/packages/help/register.ts`;
+      }
     } else if (matchedOpt) {
       jsrImports[pkgName] = matchedOpt.jsrUrl;
+      if (pkgName === "@ursamu/help") {
+        jsrImports["@ursamu/help/register"] =
+          "jsr:@ursamu/help@^1.2.0/register";
+      }
     }
   }
   const denoJson = JSON.stringify({
     nodeModulesDir: "auto",
+    // Allow brand-new JSR publishes (Deno default is 24h age gate).
+    minimumDependencyAge: "0",
     tasks: GAME_PROJECT_TASKS,
     compilerOptions: {
       lib: ["deno.window", "deno.unstable"],
-      types: ["./node_modules/@types/node/index.d.ts"],
     },
     imports: isLocal ? localImports : jsrImports,
   }, null, 2);

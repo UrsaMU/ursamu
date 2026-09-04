@@ -4,7 +4,7 @@
 ![ursamu header](https://raw.githubusercontent.com/ursamu/ursamu/main/ursamu_github_banner.png)
 
 [![JSR](https://jsr.io/badges/@ursamu/mush)](https://jsr.io/@ursamu/mush)
-[![CLI](https://img.shields.io/badge/cli-0.1.4-blue)](https://jsr.io/@ursamu/cli)
+[![CLI](https://img.shields.io/badge/cli-0.1.5-blue)](https://jsr.io/@ursamu/cli)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Deno](https://img.shields.io/badge/deno-2.x-black)](https://deno.land)
 
@@ -19,13 +19,15 @@ Need Deno 2.x: <https://deno.land>
 ## Make a game
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.4/create my-game
+deno run -A --minimum-dependency-age=0 \
+  jsr:@ursamu/cli@0.1.5/create my-game
 cd my-game
 deno task start
 ```
 
-If Deno refuses a just-published CLI version, add
-`--minimum-dependency-age=0` to the `deno run` line.
+`--minimum-dependency-age=0` allows brand-new JSR
+publishes (Deno defaults to a 24h gate). New games pin
+`@ursamu/mush@1.0.38` and `@ursamu/core@1.0.5`.
 
 | Open this | What it is |
 |-----------|------------|

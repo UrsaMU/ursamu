@@ -12,7 +12,7 @@ run it with `deno run`.
 Pin a known release in scripts and docs:
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.4/<export> …
+deno run -A jsr:@ursamu/cli@0.1.5/<export> …
 ```
 
 | Export | Entry | Use |
@@ -30,8 +30,8 @@ deno run -A jsr:@ursamu/cli@0.1.4/<export> …
 ### New game project
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.4/create <project-name>
-deno run -A jsr:@ursamu/cli@0.1.4/create <project-name> --local
+deno run -A jsr:@ursamu/cli@0.1.5/create <project-name>
+deno run -A jsr:@ursamu/cli@0.1.5/create <project-name> --local
 ```
 
 Creates a directory with a supervised UrsaMU game:
@@ -49,7 +49,7 @@ Creates a directory with a supervised UrsaMU game:
 ### In-tree plugin
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.4/create plugin <name>
+deno run -A jsr:@ursamu/cli@0.1.5/create plugin <name>
 ```
 
 Run from a game project root. Options:
@@ -66,7 +66,7 @@ Run from a game project root. Options:
 ## Interactive menu
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.4/ursamu
+deno run -A jsr:@ursamu/cli@0.1.5/ursamu
 ```
 
 Create games/plugins, manage packages, update the engine, and edit
@@ -79,13 +79,13 @@ shell scripts from a simple numbered menu.
 Manage git-based entries in `plugins.manifest.json` (when used):
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.4/plugin list
-deno run -A jsr:@ursamu/cli@0.1.4/plugin install <github-url>
-deno run -A jsr:@ursamu/cli@0.1.4/plugin install <github-url> --ref v1.2.0
-deno run -A jsr:@ursamu/cli@0.1.4/plugin update <name>
-deno run -A jsr:@ursamu/cli@0.1.4/plugin remove <name>
-deno run -A jsr:@ursamu/cli@0.1.4/plugin info <name>
-deno run -A jsr:@ursamu/cli@0.1.4/plugin search <query>
+deno run -A jsr:@ursamu/cli@0.1.5/plugin list
+deno run -A jsr:@ursamu/cli@0.1.5/plugin install <github-url>
+deno run -A jsr:@ursamu/cli@0.1.5/plugin install <github-url> --ref v1.2.0
+deno run -A jsr:@ursamu/cli@0.1.5/plugin update <name>
+deno run -A jsr:@ursamu/cli@0.1.5/plugin remove <name>
+deno run -A jsr:@ursamu/cli@0.1.5/plugin info <name>
+deno run -A jsr:@ursamu/cli@0.1.5/plugin search <query>
 ```
 
 Most new games load official packages via **JSR** in
@@ -105,8 +105,8 @@ clone failures, or semver conflicts. See
 Bump the engine import in an existing game:
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.4/update
-deno run -A jsr:@ursamu/cli@0.1.4/update --dry-run
+deno run -A jsr:@ursamu/cli@0.1.5/update
+deno run -A jsr:@ursamu/cli@0.1.5/update --dry-run
 ```
 
 ---
@@ -114,7 +114,7 @@ deno run -A jsr:@ursamu/cli@0.1.4/update --dry-run
 ## scripts
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.4/scripts list
+deno run -A jsr:@ursamu/cli@0.1.5/scripts list
 ```
 
 Lists registered script names/aliases (engine + plugins).
@@ -136,9 +136,9 @@ deno task config --set game.name "My Game"
 ## Optional global install
 
 ```bash
-deno install -Ag -n ursamu jsr:@ursamu/cli@0.1.4/ursamu
+deno install -Ag -n ursamu jsr:@ursamu/cli@0.1.5/ursamu
 # or create only:
-deno install -Ag -n ursamu-create jsr:@ursamu/cli@0.1.4/create
+deno install -Ag -n ursamu-create jsr:@ursamu/cli@0.1.5/create
 ```
 
 Then: `ursamu` / `ursamu-create my-game`.

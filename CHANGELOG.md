@@ -13,7 +13,7 @@ repo is the monorepo that publishes those packages.
 ### New
 
 - **JSR create path** — scaffold with
-  `deno run -A jsr:@ursamu/cli@0.1.4/create my-game`.
+  `deno run -A jsr:@ursamu/cli@0.1.5/create my-game`.
   Default plugins include help, channels, builder, bbs,
   mail, wiki, staff web, and the public site (`/play`).
   `--local` still links a monorepo checkout.
