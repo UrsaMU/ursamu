@@ -1,7 +1,7 @@
 // +approve -- promote chargen draft to live sheet; complete CGEN job.
 // Player always gets a live send and @mail.
 
-import { header, footer, type IUrsamuSDK } from "@ursamu/ursamu";
+import { header, footer, type IUrsamuSDK } from "@ursamu/mush";
 import { approvePlayer } from "../chargen/approve_core.ts";
 import {
   parseTargetAndNotes,

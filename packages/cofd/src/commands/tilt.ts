@@ -2,7 +2,7 @@
 // Tilts award no Beats on resolution per CoFD 2e core p.282. /clear is the
 // end-of-scene sweep.
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   addTilt,
   clearTilts,

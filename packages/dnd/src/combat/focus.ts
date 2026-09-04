@@ -8,7 +8,7 @@
  *   +attack 2.goblin     second goblin in the room
  *   +attack #142         dbref
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   listNameMatches,
   parseNameOrdinal,

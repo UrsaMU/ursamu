@@ -44,7 +44,6 @@
     "@std/testing/bdd": "jsr:@std/testing@^0.224.0/bdd",
     "@std/path": "jsr:@std/path@^0.224.0",
     "@std/fs": "jsr:@std/fs@^0.224.0",
-    "@ursamu/ursamu": "jsr:@ursamu/mush@^0.1.3",
     "@ursamu/mush": "jsr:@ursamu/mush@^0.1.3",
     "@ursamu/help-plugin": "../help/mod.ts",
     "@ursamu/help": "../help/mod.ts",

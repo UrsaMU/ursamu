@@ -1,6 +1,6 @@
 // Staff +debt/call and /clear.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   findDebt,
   setDebtStatus,

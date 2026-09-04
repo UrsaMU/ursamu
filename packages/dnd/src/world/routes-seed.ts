@@ -1,7 +1,7 @@
 /**
  * Materialize overland road legs between seeded towns.
  */
-import { DBO, dbojs } from "@ursamu/ursamu";
+import { DBO, dbojs } from "@ursamu/mush";
 import {
   createExit,
   createRoom,

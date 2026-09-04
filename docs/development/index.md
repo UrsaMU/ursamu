@@ -64,9 +64,6 @@ The engine is organized as a monorepo with two published packages:
 - **`@ursamu/mush`** (`packages/mush/`) — the MUSH world layer built on top of core:
   `IDBObj`, flag system, lock evaluation, TinyMUX softcode engine, `addCmd`, and the
   full `IUrsamuSDK`. This is what plugins and game scripts import.
-- **`@ursamu/ursamu`** — a backwards-compat shim that re-exports everything from
-  `@ursamu/mush`. Existing plugins importing `jsr:@ursamu/mush` continue to work.
-  New projects should prefer `jsr:@ursamu/mush`.
 
 Package tests live alongside their source:
 

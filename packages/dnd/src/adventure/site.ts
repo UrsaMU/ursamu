@@ -1,7 +1,7 @@
 /**
  * Materialize / reset adventure site instances in the world DB.
  */
-import { createObj, dbojs, DBO } from "@ursamu/ursamu";
+import { createObj, dbojs, DBO } from "@ursamu/mush";
 import { defaultSheet, migrateSheet } from "../stats/dnd_sheet.ts";
 import { NPC_TEMPLATES } from "../combat/npc-templates.ts";
 import { attacksFromTemplate } from "../combat/npc-attacks.ts";

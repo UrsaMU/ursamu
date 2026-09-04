@@ -5,8 +5,8 @@
  * the flag before each command runs and switches display helpers to the
  * UTF-8 glyph table (box-drawing + block elements) or the Latin-1 default.
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   ARR, ERR, OK, bar, hdr, val, dim,
   frameTop, frameBot, scan, pill, gauge, runWithMode,

@@ -1,4 +1,4 @@
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 
 /**
  * @parent <target>[=<parent>]

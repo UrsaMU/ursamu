@@ -1,8 +1,8 @@
 /**
  * +scavenge -- Zone Scavenging and Loot System
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import { getZone, rollLoot, ZONES as ZONE_CATALOG } from "../data/scavenge-tables.ts";
 import { rollEBRange } from "../engine/economy.ts";

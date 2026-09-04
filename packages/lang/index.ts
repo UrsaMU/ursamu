@@ -1,6 +1,6 @@
 import "./commands.ts";
-import type { IPlugin } from "@ursamu/ursamu";
-import { getConfig } from "@ursamu/ursamu";
+import type { IPlugin } from "@ursamu/mush";
+import { getConfig } from "@ursamu/mush";
 import * as dpath from "@std/path";
 import denoConfig from "./deno.json" with { type: "json" };
 import { loadLanguages, setLanguagesDir } from "./src/langStore.ts";

@@ -3,7 +3,7 @@
  * No draft required; works after approval too.
  * Lists paginate: +chargen/list backgrounds 2
  */
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   ERR,
   dim,

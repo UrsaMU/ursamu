@@ -4,7 +4,7 @@
  * (importing header from the package hits a dual-package empty template).
  */
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   dayPeriod,
   formatClock12,

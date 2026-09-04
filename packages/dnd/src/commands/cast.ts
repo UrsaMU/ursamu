@@ -1,7 +1,7 @@
 /**
  * +cast — catalog spells, concentration, combat turn advance.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import { currentActor } from "@ursamu/combat";
 import { migrateSheet, type DndSheet } from
   "../stats/dnd_sheet.ts";

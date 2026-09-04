@@ -1,7 +1,7 @@
 /**
  * Vendor gameHooks — CPR eurodollars + gear adapters.
  */
-import { gameHooks } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
 import type { ICPRCharacter, IGearItem } from
   "../../db/schemas.ts";
 import { getWeapon } from "../../data/weapons.ts";

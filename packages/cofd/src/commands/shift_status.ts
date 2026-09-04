@@ -1,6 +1,6 @@
 // Status / list / info branches for +shift.
 
-import { divider, type IUrsamuSDK, type IDBObj } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK, type IDBObj } from "@ursamu/mush";
 import {
   ANIMAL_FORMS,
   findAnimal,

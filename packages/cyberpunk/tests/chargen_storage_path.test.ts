@@ -2,7 +2,7 @@
  * Web chargen must store on data.cpr (hydrate path), not top-level state.cpr.
  */
 import { assertEquals } from "@std/assert";
-import { rewriteStatePaths } from "@ursamu/ursamu";
+import { rewriteStatePaths } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

@@ -1,6 +1,6 @@
 // +dream — Oneiromancy light (Bastions, Ivory/Horn, weave).
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   dreamFormLines,
   enterHorn,

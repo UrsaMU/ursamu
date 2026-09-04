@@ -2,8 +2,8 @@
  * +attack/called, +suppress -- FNFF Optional Combat Rules
  * CPR Core Chapter 13 -- called shots and area suppression.
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import { resolveAttack, effectiveSP, ablateArmorState, facedownTotal } from "../engine/combat.ts";
 import { rollD10Critical } from "../engine/dice.ts";

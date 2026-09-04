@@ -2,7 +2,7 @@
  * Pronouns from object SEX attribute (TinyMUX-compatible).
  * SEX: male/m, female/f, plural/they/t → they/them, else it.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 export type PronounSex = "male" | "female" | "neutral" | "plural";
 

@@ -752,7 +752,7 @@ log "HEAD: \$(git log -1 --oneline 2>/dev/null || echo 'not a git repo')"
 
 if [ "\$MODE" = "check" ]; then
   deno run -A --unstable-kv --minimum-dependency-age=0 \\
-    jsr:@ursamu/ursamu/cli update --dry-run 2>/dev/null \\
+    jsr:@ursamu/cli update --dry-run 2>/dev/null \\
     || log "tip: run 'ursamu update --dry-run' for pin check"
   exit 0
 fi
@@ -833,7 +833,7 @@ PY
 if command -v deno >/dev/null 2>&1; then
   log "bumping JSR pins (ursamu update)..."
   deno run -A --unstable-kv --minimum-dependency-age=0 \\
-    jsr:@ursamu/ursamu/cli update 2>&1 \\
+    jsr:@ursamu/cli update 2>&1 \\
     || log "ursamu update finished with warnings"
 fi
 
@@ -1186,7 +1186,7 @@ ${name}/
 Add plugins to \`src/plugins/\`:
 
 \`\`\`bash
-deno run -A jsr:@ursamu/ursamu/cli create plugin my-feature
+deno run -A jsr:@ursamu/cli create plugin my-feature
 \`\`\`
 
 ## Documentation
@@ -1208,8 +1208,8 @@ export function pluginClaude(name: string, standalone: boolean): string {
     .replace(/^[a-z]/, (c) => c.toUpperCase());
 
   const imports = standalone
-    ? `import { addCmd, DBO, gameHooks, registerPluginRoute } from "jsr:@ursamu/ursamu";
-import type { IPlugin, IUrsamuSDK, IDBObj, SessionEvent } from "jsr:@ursamu/ursamu";`
+    ? `import { addCmd, DBO, gameHooks, registerPluginRoute } from "jsr:@ursamu/mush";
+import type { IPlugin, IUrsamuSDK, IDBObj, SessionEvent } from "jsr:@ursamu/mush";`
     : `import { addCmd }              from "ursamu/commands";
 import { DBO }                 from "ursamu/database";
 import { gameHooks }           from "ursamu";
@@ -1375,7 +1375,7 @@ The \`lock:\` field on every \`addCmd\` is evaluated against the acting player b
 **Registering a custom lockfunc in your plugin:**
 
 \`\`\`typescript
-import { registerLockFunc } from "jsr:@ursamu/ursamu";
+import { registerLockFunc } from "jsr:@ursamu/mush";
 
 // Call in your plugin's module scope (alongside addCmd — NOT inside init())
 registerLockFunc("tribe", (enactor, _target, args) =>
@@ -1716,7 +1716,7 @@ async function ensureLoaded() {
 
 async function execCmd(raw: string, player: IDBObj): Promise<string[]> {
   await ensureLoaded();
-  const { cmds } = await import("jsr:@ursamu/ursamu");
+  const { cmds } = await import("jsr:@ursamu/mush");
   const output: string[] = [];
   for (const cmd of cmds) {
     const m = raw.trim().match(cmd.pattern);
@@ -1789,7 +1789,7 @@ export function gameAgents(name: string): string {
   return `# ${name} — AI Agent Instructions
 
 This repository contains game-specific files for an UrsaMU server built on
-jsr:@ursamu/ursamu.
+jsr:@ursamu/mush.
 
 ## Development Constraints
 - **Line Length**: Enforce a maximum line width of 78 characters on all
@@ -1819,18 +1819,18 @@ export function gameClaude(name: string): string {
 
 ## What This Is
 
-A UrsaMU game server built on \`jsr:@ursamu/ursamu\`. UrsaMU is a TypeScript/Deno
+A UrsaMU game server built on \`jsr:@ursamu/mush\`. UrsaMU is a TypeScript/Deno
 MUSH-like engine with a full TinyMUX 2.x softcode evaluator, plugin system,
 WebSocket API, and optional Telnet sidecar.
 
 This repo contains **only game-specific code** — plugins, softcode scripts,
-chargen, help files, and configuration. The engine lives at \`jsr:@ursamu/ursamu\`.
+chargen, help files, and configuration. The engine lives at \`jsr:@ursamu/mush\`.
 
 ## Tech Stack
 
 | Layer | Tech |
 |---|---|
-| Engine | \`jsr:@ursamu/ursamu\` (v2.x) |
+| Engine | \`jsr:@ursamu/mush\` (v2.x) |
 | Runtime | Deno |
 | Database | Deno KV (embedded) |
 | Softcode | TinyMUX 2.x evaluator (built into engine) |

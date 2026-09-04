@@ -1,7 +1,7 @@
 /**
  * Shared load/save helpers for rules commands.
  */
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import { migrateSheet, type DndSheet } from
   "../stats/dnd_sheet.ts";
 import { syncGoldField } from "../stats/currency.ts";

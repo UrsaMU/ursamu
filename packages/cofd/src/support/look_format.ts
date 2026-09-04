@@ -1,7 +1,7 @@
 // CoFD CONFORMAT: inventory list, concealment, equip tags, NPCs.
 // Fae sight uses maskName via resolveItemLookName.
 
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import { divider, getConfig, dbrefWithFlags } from "@ursamu/mush";
 import { formatContentItems } from "./look_format_items.ts";
 

@@ -2,7 +2,7 @@
 // Items are real UrsaMU objects; this section queries the carrier's contents.
 // When u is absent (offline tests) the section renders nothing.
 
-import { divider } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import {
   displayName,
   equippedArmorEntry,

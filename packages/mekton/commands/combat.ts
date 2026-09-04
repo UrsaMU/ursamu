@@ -1,5 +1,5 @@
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { chars } from "../schema.ts";
 import type { IMektonChar, WoundLocation } from "../schema.ts";
 import { applyDamage, combatStatus, LOCATION_LABELS, resolveAttack, emitCombatEvent } from "../combat.ts";

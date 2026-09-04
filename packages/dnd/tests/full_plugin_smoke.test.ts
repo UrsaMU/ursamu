@@ -5,7 +5,7 @@
 import { assert, assertEquals } from "@std/assert";
 import { walk } from "@std/fs";
 import { basename, join } from "@std/path";
-import { cmds } from "@ursamu/ursamu";
+import { cmds } from "@ursamu/mush";
 import { plugin } from "../index.ts";
 import {
   initDndCombat,
@@ -110,7 +110,7 @@ import {
 import { routeHandler } from "../routes.ts";
 import { meta } from "../src/chargen/http.ts";
 import { executeDndAttack } from "../src/combat/resolve.ts";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 const HELP = join(import.meta.dirname!, "../help");

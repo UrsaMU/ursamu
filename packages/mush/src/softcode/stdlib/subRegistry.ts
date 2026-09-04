@@ -3,7 +3,7 @@
 // add custom substitutions without forking the engine.
 //
 // Usage (in a plugin):
-//   import { registerSub } from "jsr:@ursamu/ursamu";
+//   import { registerSub } from "jsr:@ursamu/mush";
 //   registerSub("$", async (ctx) => String((ctx.actor.state as any)?.gold ?? 0));
 //   → %$ now expands to the actor's gold value in any softcode expression.
 

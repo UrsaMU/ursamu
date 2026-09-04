@@ -1,6 +1,6 @@
 // Shared types for sheet section renderers.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { CofdSheet } from "../../stats/sheet.ts";
 import type { CofdTemplate } from "../../gamelines/templates.ts";
 

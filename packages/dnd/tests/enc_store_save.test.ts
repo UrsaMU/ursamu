@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

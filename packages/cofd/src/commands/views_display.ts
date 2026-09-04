@@ -5,7 +5,7 @@ import {
   footer,
   dbrefWithFlags,
   type IUrsamuSDK,
-} from "@ursamu/ursamu";
+} from "@ursamu/mush";
 import { getRoomViews, type RoomView, type RoomViews } from "../views/index.ts";
 import { canSeeView, visibleViews, type Place } from "./views_lib.ts";
 

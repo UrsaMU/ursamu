@@ -1,7 +1,7 @@
 /**
  * +adv — procedural delves. +chest/+altar alias open/use.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   adventureBySlug,
   catalogSummary,

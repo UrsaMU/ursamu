@@ -266,7 +266,7 @@ export const wsService: {
 /**
  * PluginConfigManager — minimal stub exported for compatibility with
  * external plugins (e.g. ursamu-sgp-plugin) that import this class from
- * `@ursamu/ursamu`. The real implementation lives inside those plugins;
+ * `@ursamu/mush`. The real implementation lives inside those plugins;
  * this stub satisfies the named-export requirement so Deno's module loader
  * does not abort on import.
  */

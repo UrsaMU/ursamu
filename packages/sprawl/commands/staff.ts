@@ -1,6 +1,6 @@
 /** +staff — grant cash, gear, AP; hub for staff tools. */
-import { addCmd } from "@ursamu/ursamu";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   ARR,
   ERR,

@@ -1,4 +1,4 @@
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 
 export interface ILifepathSibling {
   gender: "male" | "female";

@@ -1,6 +1,6 @@
 /** +paradox — AI fights with Paradoxware (Nodejacker). */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   ARR,
   ERR,

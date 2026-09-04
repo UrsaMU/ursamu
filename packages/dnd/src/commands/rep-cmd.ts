@@ -1,7 +1,7 @@
 /**
  * +rep — faction reputation + unlock titles.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   FACTIONS,
   formatRepLine,

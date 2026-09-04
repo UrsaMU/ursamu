@@ -1,4 +1,4 @@
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { IMektonChar, WoundLocation } from "./schema.ts";
 import { derivedStats, skillPointsSpent, effectiveMA } from "./derived.ts";
 import { combatStatus, LOCATION_LABELS } from "./combat.ts";

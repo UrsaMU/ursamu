@@ -1,6 +1,6 @@
 // +vitae — Vampire Vitae pool: view, spend, heal, blush, boost.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   isVampireSheet,
   spendVitae,

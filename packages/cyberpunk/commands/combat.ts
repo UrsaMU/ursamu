@@ -1,8 +1,8 @@
 /**
  * +init, +attack, +pass, +hold -- Combat Tracker and Attack Resolution
  */
-import { addCmd, DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type {
   ICPRCharacter,
   ICPRNpc,

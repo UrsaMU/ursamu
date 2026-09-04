@@ -1,6 +1,6 @@
 // +icon — Icons (lost pieces of self, CtL).
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   activeIcons,
   findIcon,

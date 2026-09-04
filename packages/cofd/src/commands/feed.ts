@@ -1,6 +1,6 @@
 // +feed — slake Vitae from animal, human, or Kindred blood.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   applyFeed,
   parseFeedSource,

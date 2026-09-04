@@ -31,7 +31,7 @@
 //  11. Increment encounter appliedDefense for target
 //  12. Output
 
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import {
   type CofdSheet,
   defaultSheet,

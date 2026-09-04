@@ -1,6 +1,6 @@
 /** +desc — d66/custom base; gear names always woven live. */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   footer,
   ARR,

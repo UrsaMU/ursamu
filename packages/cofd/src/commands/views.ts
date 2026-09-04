@@ -1,6 +1,6 @@
 // +views -- detail views on places, optional locks.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   viewSlug,
   validateViewName,

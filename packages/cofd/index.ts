@@ -37,7 +37,7 @@
 
 import "./commands.ts";
 
-import type { IDBObj, IPlugin, MoveEvent, ObjectMovedEvent } from "@ursamu/ursamu";
+import type { IDBObj, IPlugin, MoveEvent, ObjectMovedEvent } from "@ursamu/mush";
 import {
   registerPluginRoute,
   gameHooks,
@@ -46,7 +46,7 @@ import {
   sessions,
   registerFormatHandler,
   unregisterFormatHandler,
-} from "@ursamu/ursamu";
+} from "@ursamu/mush";
 import { itemData } from "./src/equipment/objects.ts";
 import {
   cofdConformatHandler,

@@ -1,7 +1,7 @@
 /**
  * +money, +xp — purse and experience.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   getXpRequired,
   addXp,

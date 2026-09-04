@@ -1,8 +1,7 @@
 {
   "imports": {
-    "@ursamu/ursamu": "../mush/mod.ts",
-    "ursamu": "../mush/mod.ts",
     "@ursamu/mush": "../mush/mod.ts",
+    "ursamu": "../mush/mod.ts",
     "@ursamu/combat": "../combat/mod.ts",
     "@ursamu/jobs": "../jobs/mod.ts",
     "@ursamu/jobs-plugin": "../jobs/mod.ts",

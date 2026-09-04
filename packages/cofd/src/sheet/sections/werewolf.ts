@@ -5,7 +5,7 @@
 // sections. Renown dots live in the shared powers section. This
 // section renders Gifts and Rites in a 2-column dotted-leader layout.
 
-import { divider } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import { findFacet, findRite } from "../../dictionary/index.ts";
 import { formatDottedStatLine } from "../../support/format.ts";
 import type { SheetContext, SheetSection } from "./types.ts";

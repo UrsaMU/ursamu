@@ -1,6 +1,6 @@
 // Command modules — each import triggers addCmd() calls at module load.
 
-import { registerCmdMiddleware, dbojs } from "@ursamu/ursamu";
+import { registerCmdMiddleware, dbojs } from "@ursamu/mush";
 import { runWithMode } from "./commands/chargen.ts";
 
 /**

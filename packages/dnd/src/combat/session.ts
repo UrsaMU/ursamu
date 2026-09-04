@@ -19,7 +19,7 @@ import {
   footer,
   type IDBObj,
   type IUrsamuSDK,
-} from "@ursamu/ursamu";
+} from "@ursamu/mush";
 import {
   dndEncounterStore,
   initDndCombat,

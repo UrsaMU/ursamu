@@ -8,7 +8,7 @@ import {
   sessions,
   type IDBObj,
   type IUrsamuSDK,
-} from "@ursamu/ursamu";
+} from "@ursamu/mush";
 import type { DndSheet } from "../stats/dnd_sheet.ts";
 import { CLASS_METADATA } from "../data/catalog.ts";
 import {

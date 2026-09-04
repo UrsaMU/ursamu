@@ -5,8 +5,8 @@
  * default contents listing. When the enactor has a CofD sheet, route
  * to +gear view instead.
  */
-import { gameHooks } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { gearView } from "../commands/gear.ts";
 
 type InventoryShowCtx = {

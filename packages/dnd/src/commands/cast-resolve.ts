@@ -1,7 +1,7 @@
 /**
  * Spell effect resolution for +cast.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   getAbilityMod,
   getProficiencyBonus,

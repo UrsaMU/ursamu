@@ -1,7 +1,7 @@
 // +combat command -- CoFD 2e encounter management.
 // Tracks initiative order, turns, Defense, and ambush resolution.
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   addParticipant,
   advanceTurn,

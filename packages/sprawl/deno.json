@@ -28,11 +28,14 @@
       "CHANGELOG.md",
       "LICENSE"
     ],
-    "exclude": ["tests", "books", "tools"]
+    "exclude": [
+      "tests",
+      "books",
+      "tools"
+    ]
   },
   "imports": {
     "ursamu": "../mush/mod.ts",
-    "@ursamu/ursamu": "../mush/mod.ts",
     "@ursamu/mush": "../mush/mod.ts",
     "@ursamu/help": "../help/mod.ts",
     "@ursamu/help/register": "../help/register.ts",

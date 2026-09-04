@@ -1,6 +1,6 @@
 // +dream road travel / staff road graph.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   addRoadLink,
   findLink,

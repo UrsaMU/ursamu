@@ -1,6 +1,6 @@
 // Carry-cap rot + legacy satchel migration for fruit objects.
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   destroyItem,
   itemData,

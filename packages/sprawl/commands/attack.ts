@@ -1,6 +1,6 @@
 /** +attack — Dangerous combat + specialty (shotgun/mono/ammo). */
-import { addCmd, gameHooks } from "@ursamu/ursamu";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, gameHooks } from "@ursamu/mush";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   ARR,
   ERR,

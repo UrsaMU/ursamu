@@ -2,8 +2,8 @@
  * Engine builtins used by showcases (use, inv, look).
  * Registered via shim addCmd so JSON can say: "cmd": "use yeheyuan"
  */
-import { addCmd, gameHooks } from "@ursamu/ursamu";
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import { addCmd, gameHooks } from "@ursamu/mush";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import { isHiddenInVehicle } from "../integrations/look.ts";
 import { itemData } from "../engine/items.ts";
 import { isVehicle, vehicleLabel } from "../engine/vehicles.ts";

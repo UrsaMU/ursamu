@@ -1,8 +1,8 @@
 /**
  * +role -- Role Ability Commands for All 10 CPR Roles
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import { getRole, ROLES } from "../data/roles.ts";
 import { rollD10Critical, skillCheck } from "../engine/dice.ts";

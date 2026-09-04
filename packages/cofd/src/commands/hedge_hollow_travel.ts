@@ -1,6 +1,6 @@
 // +hedge/escape and Easy Access (/access).
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   hollowHas,
   isHollowOwner,

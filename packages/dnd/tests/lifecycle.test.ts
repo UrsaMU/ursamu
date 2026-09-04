@@ -2,7 +2,7 @@
  * Plugin lifecycle: init wires hooks/guards; remove tears them down.
  */
 import { assertEquals, assert } from "@std/assert";
-import { gameHooks, cmds, addCmd } from "@ursamu/ursamu";
+import { gameHooks, cmds, addCmd } from "@ursamu/mush";
 import {
   initVendorHooks,
   removeVendorHooks,

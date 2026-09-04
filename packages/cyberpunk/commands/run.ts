@@ -1,8 +1,8 @@
 /**
  * +run — AI-GM mission runner (end-to-end gigs).
  */
-import { addCmd, DBO, gameHooks } from "@ursamu/ursamu";
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import { addCmd, DBO, gameHooks } from "@ursamu/mush";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import type {
   ICPRCharacter,
   IMissionRun,

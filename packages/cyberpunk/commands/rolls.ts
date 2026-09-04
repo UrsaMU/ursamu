@@ -1,8 +1,8 @@
 /**
  * +roll -- CPR Skill Check and Dice Rolling
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, StatKey } from "../db/schemas.ts";
 import { skillCheck, rollD10Critical, rollND6 } from "../engine/dice.ts";
 import { SKILLS, skillDisplayName, getSkill } from "../data/skills.ts";

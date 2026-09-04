@@ -1,7 +1,7 @@
 // Powers section: 2-column dotted-leader list under a template-aware header
 // (Disciplines / Arcana / Contracts / Renown).
 
-import { divider } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import { formatDottedStatLine } from "../../support/format.ts";
 import type { SheetSection, SheetContext } from "./types.ts";
 

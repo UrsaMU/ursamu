@@ -3,7 +3,7 @@
 // Row 2: Initiative | Speed | Defense
 // Row 3 (if applicable): <Power Stat> | <Energy pool current/max> | empty
 
-import { divider } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import { formatDottedLine } from "../../support/format.ts";
 import { equippedArmorEntry } from "../../equipment/index.ts";
 import {

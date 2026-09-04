@@ -1,7 +1,7 @@
 /**
  * +spells — browse SRD spell catalog.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   SPELLS,
   spellBySlug,

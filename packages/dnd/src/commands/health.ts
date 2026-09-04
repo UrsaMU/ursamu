@@ -1,4 +1,4 @@
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import { getAbilityMod, migrateSheet } from "../stats/dnd_sheet.ts";
 import { applyDamage, applyHeal } from "../stats/vitality.ts";
 import { maybeProcessPlayerDeath } from

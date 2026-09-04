@@ -1,7 +1,7 @@
 /**
  * Chargen + sheet HTTP helpers for /api/v1/dnd/*.
  */
-import { dbojs } from "@ursamu/ursamu";
+import { dbojs } from "@ursamu/mush";
 import {
   DND_ABILITIES,
   DND_SKILLS,

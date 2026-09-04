@@ -1,7 +1,7 @@
 // Renders character generation per-stage instructions, current values,
 // and progress. All screens target ≤22 content lines (24-line terminal).
 
-import { header, footer, divider } from "@ursamu/ursamu";
+import { header, footer, divider } from "@ursamu/mush";
 import {
   COFD_MENTAL_SKILLS,
   COFD_PHYSICAL_SKILLS,

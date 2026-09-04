@@ -1,8 +1,8 @@
 /**
  * +bench / +repair -- Tech offline workshop and item repair commands.
  */
-import { addCmd, DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, IBench, IRepairJob, IGearItem } from "../db/schemas.ts";
 import { techRepairSpeed } from "../engine/roleCapacity.ts";
 import { bar, div, hdr, val, acc, dim, ARR, ERR, OK, row, tbl } from "./chargen.ts";

@@ -1,8 +1,8 @@
 /**
  * +eb, +lifestyle, +drug -- Economy, Lifestyle, and Drug Commands
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import { LIFESTYLES } from "../data/lifestyles.ts";
 import { applyDrug, pruneExpiredEffects, isDrugActive, purgeAllDrugEffects } from "../engine/economy.ts";

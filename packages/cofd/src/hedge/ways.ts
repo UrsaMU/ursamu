@@ -1,6 +1,6 @@
 // Hedgeway DBO CRUD and open/close lifecycle.
 
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 import type { HedgeConfig, Hedgeway, HedgewayState } from "./types.ts";
 import {
   HEDGE_CONFIG_ID,

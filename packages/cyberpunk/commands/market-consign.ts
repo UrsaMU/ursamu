@@ -2,8 +2,8 @@
  * +consign -- Consignment system for Fixer Night Markets
  * Players submit gear for a Fixer to sell; Fixer approves/declines.
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, IGearItem, IConsignRequest } from "../db/schemas.ts";
 import { bar, hdr, val, acc, dim, ARR, ERR, OK, row, tbl } from "./chargen.ts";
 import { marketDB, listingDB, consignDB } from "./market-browse.ts";

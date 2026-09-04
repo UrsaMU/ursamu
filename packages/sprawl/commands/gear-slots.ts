@@ -2,8 +2,8 @@
  * wear / wield / stow — equip slots (also +gear/wear…).
  * Top-level verbs so players find them without hunting +gear.
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   ARR,
   ERR,

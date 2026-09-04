@@ -13,7 +13,7 @@ import {
 } from "../engine/npcs.ts";
 import { ammoSpecialty } from "../engine/specialty-combat.ts";
 import { ANTAGONISTS } from "../engine/catalog.ts";
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

@@ -1,7 +1,7 @@
 /**
  * Spawn a loot item (weapon/armor/potion/gp pile) into a location.
  */
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 
 export async function spawnLootItem(
   u: IUrsamuSDK,

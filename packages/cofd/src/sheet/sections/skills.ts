@@ -3,7 +3,7 @@
 // inline; the resulting line lists are zipped side-by-side so a column
 // with extra specialties just runs longer than its neighbors.
 
-import { divider } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import {
   COFD_MENTAL_SKILLS,
   COFD_PHYSICAL_SKILLS,

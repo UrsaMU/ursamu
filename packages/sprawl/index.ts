@@ -4,14 +4,14 @@
  */
 import "./commands.ts";
 
-import type { IPlugin, SessionEvent } from "@ursamu/ursamu";
-import { gameHooks, registerPluginRoute } from "@ursamu/ursamu";
+import type { IPlugin, SessionEvent } from "@ursamu/mush";
+import { gameHooks, registerPluginRoute } from "@ursamu/mush";
 import { registerHelpDir } from "@ursamu/help/register";
 import { registerJobBuckets } from "@ursamu/jobs";
 import { routeHandler } from "./routes.ts";
 import { sprawlSystem } from "./engine/gm-bridge.ts";
 import { getChar } from "./engine/sheet-io.ts";
-import { dbojs } from "@ursamu/ursamu";
+import { dbojs } from "@ursamu/mush";
 import {
   initInventoryHooks,
   removeInventoryHooks,

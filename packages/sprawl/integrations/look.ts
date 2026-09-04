@@ -7,8 +7,8 @@ import {
   gameHooks,
   registerFormatHandler,
   unregisterFormatHandler,
-} from "@ursamu/ursamu";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+} from "@ursamu/mush";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { getChar, getInventory } from "../engine/sheet-io.ts";
 import {
   frameStreetLook,

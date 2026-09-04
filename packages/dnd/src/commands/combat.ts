@@ -3,7 +3,7 @@
  * Attack/kill/loot/cast live in their own modules — do not
  * re-register them here (legacy room-state combat is gone).
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import { currentActor } from "@ursamu/combat";
 import { defaultSheet } from "../stats/dnd_sheet.ts";
 import { NPC_TEMPLATES } from "../combat/npc-templates.ts";

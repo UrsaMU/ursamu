@@ -52,5 +52,7 @@
         "recommended"
       ]
     }
-  }
+  },
+  "description": "UrsaMU CLI \u2014 create games, manage plugins, update engine pins",
+  "license": "MIT"
 }

@@ -1,7 +1,7 @@
 // Support for CofD district traits and parent inheritance.
 // Adapted from Damnation City (NWoD) to Chronicles of Darkness (CofD).
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 export interface SafehouseLimits {
   sizeMax?: number;

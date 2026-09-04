@@ -12,7 +12,7 @@
 //   - queryByLocation(rid)   dbojs.query that matches both flat and nested
 //                            storage formats (handles mock + prod).
 
-import { dbojs, type IDBObj } from "@ursamu/ursamu";
+import { dbojs, type IDBObj } from "@ursamu/mush";
 
 interface RawEngineObj {
   id: string;

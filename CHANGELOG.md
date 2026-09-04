@@ -432,10 +432,10 @@ REST endpoint `GET /api/v1/scenes/:id/export?format=markdown|json` for exporting
 
 ### Developer Experience
 
-- `deno task init` (or `dx jsr:@ursamu/ursamu init`) — interactive project wizard with `make-wizard` bootstrap script
+- `deno task init` (or `dx jsr:@ursamu/mush init`) — interactive project wizard with `make-wizard` bootstrap script
 - `deno task test` — 296 passing tests, 0 failures
 - Docker + `docker-compose.yaml` support
-- JSR package: `jsr:@ursamu/ursamu`
+- JSR package: `jsr:@ursamu/mush`
 
 ### Bug Fixes (pre-1.0)
 

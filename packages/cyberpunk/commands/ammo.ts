@@ -5,8 +5,8 @@
  *   state.cpr.ammoLoaded   Record<weaponName, ammoType>. Absence => "basic".
  *   state.cpr.gear         IGearItem[]. Ammo packs live here as type "ammo".
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, IGearItem } from "../db/schemas.ts";
 import {
   AMMO, getAmmo, ammoForWeaponType, defaultAmmoForWeaponType,

@@ -2,7 +2,7 @@
  * Typed emit helpers for all CPR game hooks.
  * Use these instead of raw gameHooks.emit() to get compile-time payload checking.
  */
-import { gameHooks } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
 import type {
   ICPRAttackPayload,
   ICPRWoundPayload,

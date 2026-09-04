@@ -295,16 +295,18 @@ export async function scaffoldProject(
   );
 
   const localImports: Record<string, string> = {
-    "ursamu":                  `${engineRelPath}/mod.ts`,
-    "ursamu/":                 `${engineRelPath}/`,
-    "@ursamu/mush":            `${engineRelPath}/packages/mush/mod.ts`,
-    "@ursamu/core":            `${engineRelPath}/packages/core/mod.ts`,
-    "@ursamu/ursamu":          `${engineRelPath}/mod.ts`,
-    "@ursamu/ursamu/app":
+    "ursamu": `${engineRelPath}/packages/mush/mod.ts`,
+    "ursamu/": `${engineRelPath}/packages/mush/`,
+    "@ursamu/mush": `${engineRelPath}/packages/mush/mod.ts`,
+    "@ursamu/mush/": `${engineRelPath}/packages/mush/`,
+    "@ursamu/core": `${engineRelPath}/packages/core/mod.ts`,
+    "@ursamu/mush/app":
       `${engineRelPath}/packages/mush/src/app.ts`,
-    "@ursamu/ursamu/channels":
+    "@ursamu/channels":
+      `${engineRelPath}/packages/channels/mod.ts`,
+    "@ursamu/channels/channel-events":
       `${engineRelPath}/packages/channels/src/channel-events.ts`,
-    "@ursamu/ursamu/jobs":
+    "@ursamu/jobs":
       `${engineRelPath}/packages/jobs/mod.ts`,
     "@std/assert": "jsr:@std/assert@^0.224.0",
     "@std/flags": "jsr:@std/flags@^0.224.0",
@@ -346,8 +348,6 @@ export async function scaffoldProject(
     "@ursamu/mush": MUSH,
     "@ursamu/mush/app": `${MUSH}/app`,
     "@ursamu/core": CORE,
-    "@ursamu/ursamu": MUSH,
-    "@ursamu/ursamu/app": `${MUSH}/app`,
     "@std/path": "jsr:@std/path@^0.224.0",
     "@std/assert": "jsr:@std/assert@^0.224.0",
     "@std/fs": "jsr:@std/fs@^0.224.0",
@@ -444,7 +444,7 @@ export async function scaffoldProject(
     console.log(`
 Test project "${name}" created with local engine linkage!
 
-Imports resolve to: ${engineRelPath}/mod.ts
+Imports resolve to: ${engineRelPath}/packages/mush/mod.ts
 
   cd ${name}
   deno task server   # main server (watch mode)

@@ -3,8 +3,8 @@
  * dispatched by the current engine pipeline (native addCmd wins), so
  * this plugin replaces stock say/pose cmds at init.
  */
-import { addCmd, cmds, gameHooks } from "@ursamu/ursamu";
-import type { ICmd, IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, cmds, gameHooks } from "@ursamu/mush";
+import type { ICmd, IUrsamuSDK } from "@ursamu/mush";
 import { garble } from "./garble.ts";
 import {
   connectedListeners,

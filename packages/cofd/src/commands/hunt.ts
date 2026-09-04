@@ -1,6 +1,6 @@
 // +hunt — Wild Hunt loop and Huntsman powers (CtL p.262+).
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import { isChangelingSheet, isMienActive } from "../form/index.ts";
 import {
   activateHuntsmanPower,

@@ -5,7 +5,7 @@
 | Requirement | Version | Notes |
 |-------------|---------|-------|
 | Deno | ≥ 1.40 | Runtime |
-| UrsaMU | ≥ 2.6 | `@ursamu/ursamu` / monorepo mush |
+| UrsaMU | ≥ 2.6 | `@ursamu/mush` / monorepo mush |
 | Peers | help, combat ≥0.8, vendor ≥1.1, jobs ≥1.0 | |
 
 ## Install (monorepo)

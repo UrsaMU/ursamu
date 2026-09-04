@@ -1,6 +1,6 @@
 // +fetch — Fetch doubles and Echoes (CtL p.233+).
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   activateEcho,
   buildFetchSheet,

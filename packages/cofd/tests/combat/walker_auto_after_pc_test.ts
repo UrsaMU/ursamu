@@ -12,7 +12,7 @@ import { endTurnAndWalk } from "../../src/combat/auto.ts";
 import { advanceTurnSmart } from "../../src/combat/walker.ts";
 import { mockU, MockObjectStore } from "../helpers/mockU.ts";
 import { defaultSheet } from "../../src/stats/index.ts";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

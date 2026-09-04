@@ -1,6 +1,6 @@
 // Shared +views helpers (place resolve, lock check, storage).
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   getRoomViews,
   type RoomView,

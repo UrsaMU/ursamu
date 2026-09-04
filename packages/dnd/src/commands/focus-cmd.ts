@@ -1,7 +1,7 @@
 /**
  * +focus — sticky combat target for +attack / +kill.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   clearFocus,
   readFocus,

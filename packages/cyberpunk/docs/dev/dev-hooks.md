@@ -9,7 +9,7 @@ STEPS
   4. Document the event in `ai-gm-hooks.md`
 
 AUGMENT PATTERN (hooks/augment.ts)
-  declare module "@ursamu/ursamu" {
+  declare module "@ursamu/mush" {
     interface GameHookMap {
       "cpr:my:event": { actorId: string; value: number };
     }

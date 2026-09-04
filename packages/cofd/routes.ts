@@ -20,7 +20,7 @@
  *   POST /api/v1/cofd/approve         -> staff approve PC
  *   POST /api/v1/cofd/themes          -> staff spawn themes
  */
-import { dbojs } from "@ursamu/ursamu";
+import { dbojs } from "@ursamu/mush";
 import { registerCustomTheme, type ThemeEntry } from "./src/combat/themes.ts";
 import {
   getChargen,

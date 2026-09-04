@@ -2,8 +2,8 @@
  * +hazard -- GM Environmental Hazard Tools
  * Source: CPR Core p.199-206
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import { applyDamageToChar } from "../engine/character.ts";
 import { div, lbl, val, acc, dim, ERR, OK, row } from "./chargen.ts";

@@ -7,7 +7,7 @@
  * Telnet still gets chrome text. Web/Flutter sessions get
  * `{ type: "layout", meta: { type: "sprawl", kind, data } }`.
  */
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import type { ISprawlChar } from "../db/schemas.ts";
 import type { IActionResult } from "../engine/action.ts";
 import { displayName, itemData } from "../engine/items.ts";

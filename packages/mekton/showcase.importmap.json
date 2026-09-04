@@ -1,9 +1,8 @@
 {
   "imports": {
-    "@ursamu/ursamu": "./tools/ursamu-shim.ts",
-    "jsr:@ursamu/ursamu": "./tools/ursamu-shim.ts",
-    "ursamu": "./tools/ursamu-shim.ts",
     "@ursamu/mush": "../mush/mod.ts",
+    "jsr:@ursamu/mush": "./tools/ursamu-shim.ts",
+    "ursamu": "./tools/ursamu-shim.ts",
     "@ursamu/core": "../core/mod.ts",
     "@ursamu/cli": "../cli/mod.ts",
     "@ursamu/help-plugin": "jsr:@ursamu/help@^0.1.2",

@@ -1,8 +1,8 @@
 /**
  * look — Room and player look command, CPR display scheme.
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 
 type IDBObj = IUrsamuSDK["me"];
 import type { ICPRCharacter, IGearItem, ICyberware } from "../db/schemas.ts";

@@ -1,7 +1,7 @@
 /**
  * +condition, +inspiration — conditions and heroic inspiration.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   addCondition,
   removeCondition,

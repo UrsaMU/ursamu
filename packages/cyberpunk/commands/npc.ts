@@ -2,8 +2,8 @@
  * +npc — spawn / list / AI / destroy street antagonists.
  * Objects: flags npc+thing, state.cprNpc (+ aiKey for walker).
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import type { ICPRNpc } from "../db/schemas.ts";
 import {
   NPC_TEMPLATES,

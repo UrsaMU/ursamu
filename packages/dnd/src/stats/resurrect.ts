@@ -5,8 +5,8 @@
  * Cheap (+res me, no spell): home, lose gear on corpse, some XP
  * and a cut of the multi-coin purse (cp/sp/ep/gp/pp).
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
-import { getConfig } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
+import { getConfig } from "@ursamu/mush";
 import { migrateSheet, type DndSheet } from "./dnd_sheet.ts";
 import { defaultDeath, isDead } from "./death.ts";
 import {

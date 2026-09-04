@@ -1,5 +1,5 @@
 import { assertEquals, assert } from "@std/assert";
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 import { isHiddenInVehicle } from "../integrations/look.ts";
 import { defaultChar } from "../db/schemas.ts";
 

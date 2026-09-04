@@ -10,11 +10,11 @@
 
 import "./commands.ts";
 
-import type { IPlugin } from "@ursamu/ursamu";
+import type { IPlugin } from "@ursamu/mush";
 import { registerHelpDir } from "@ursamu/help/register";
 import { registerJobBuckets } from "@ursamu/jobs";
 import { registerPluginRoute, gameHooks } from
-  "@ursamu/ursamu";
+  "@ursamu/mush";
 import { routeHandler } from "./routes.ts";
 import {
   initDndCombat,

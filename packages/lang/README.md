@@ -1,6 +1,6 @@
 # ursamu-language-plugin
 
-> Per-listener language garbling for [UrsaMU](https://jsr.io/@ursamu/ursamu).
+> Per-listener language garbling for [UrsaMU](https://jsr.io/@ursamu/mush).
 > Players learn languages on a 0–100 skill scale; every `say` and `pose` is
 > re-rendered for each listener so that the *same line of speech* looks
 > different to a fluent speaker, a beginner, and someone who doesn't know
@@ -94,7 +94,7 @@ skill levels, and a side-by-side "two listeners hear the same say" demo.
 | Layer        | Tech                                           |
 |--------------|------------------------------------------------|
 | Runtime      | [Deno](https://deno.com) ≥ 1.45 (uses `--unstable-kv`) |
-| Host engine  | [`@ursamu/ursamu`](https://jsr.io/@ursamu/ursamu) ^2.3 |
+| Host engine  | [`@ursamu/mush`](https://jsr.io/@ursamu/mush) ^2.3 |
 | Language     | TypeScript (ESM, JSR-published)                |
 | Storage      | Player `data.languages` on the UrsaMU object DB |
 

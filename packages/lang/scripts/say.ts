@@ -1,6 +1,6 @@
 /// <reference types="./global.d.ts" />
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
-import { gameHooks } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
+import { gameHooks } from "@ursamu/mush";
 
 /**
  * sgp-language: say.ts

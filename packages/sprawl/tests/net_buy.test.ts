@@ -13,7 +13,7 @@ import {
   resolveMarketRef,
 } from "../commands/market.ts";
 import { buyStreetItem } from "../commands/gear-buy.ts";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

@@ -9,7 +9,7 @@ Emit this event to register a game system at runtime. The system is registered
 immediately — no restart needed.
 
 ```typescript
-import { gameHooks } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
 
 await gameHooks.emit("gm:system:register" as never, {
   system: {
@@ -40,7 +40,7 @@ For cold-start persistence, also write the record to the
 it on startup:
 
 ```typescript
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 
 const gmCustomSystems = new DBO("server.gm.custom_systems");
 const existing = await gmCustomSystems.findOne({ id: "my-game" });

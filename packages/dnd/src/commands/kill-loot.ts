@@ -1,7 +1,7 @@
 /**
  * +kill — execute unconscious monsters (shared with auto-death).
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import { migrateSheet } from "../stats/dnd_sheet.ts";
 import { roomIdOf } from "../combat/session.ts";
 import { resolveCombatTarget } from "../combat/focus.ts";

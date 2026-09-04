@@ -13,7 +13,7 @@ import {
   validateTownMap,
   formatMapSummary,
 } from "../src/world/map-seed.ts";
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

@@ -1,8 +1,8 @@
 /**
  * +market -- Fixer Night Market and Trading Commands
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, IMarket, IListing, IGearItem } from "../db/schemas.ts";
 import {
   canOpenNightMarket, canOpenMidnightMarket, resolveHaggle,

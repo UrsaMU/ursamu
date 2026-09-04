@@ -1,5 +1,5 @@
-import { addCmd } from "@ursamu/ursamu";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { getLang, listLangs, loadLanguages } from "./src/langStore.ts";
 import {
   clampSkill,

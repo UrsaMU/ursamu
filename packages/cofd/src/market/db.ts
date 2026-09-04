@@ -1,6 +1,6 @@
 // Goblin Market DBO CRUD.
 
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 import type { GoblinMarket, MarketListing } from "./types.ts";
 import { findMarketGood } from "./catalog.ts";
 

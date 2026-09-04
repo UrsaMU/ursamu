@@ -154,7 +154,7 @@ async function scaffoldStandalone(
   const imports: Record<string, string> = {
     ursamu: "jsr:@ursamu/mush",
     "@ursamu/mush": "jsr:@ursamu/mush",
-    "@ursamu/ursamu": "jsr:@ursamu/ursamu",
+    "@ursamu/mush": "jsr:@ursamu/mush",
   };
   if (ui.adminEmbed) {
     imports["@ursamu/web"] = "jsr:@ursamu/web";

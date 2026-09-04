@@ -4,7 +4,7 @@
 // The Arcane line is also omitted for mortal templates, which never earn
 // Arcane Experience (docs/xp-beats-spec.md s1.3).
 
-import { divider } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import { ljust } from "../../support/format.ts";
 import { XP_COSTS } from "../../xp/costs.ts";
 import type { SheetContext, SheetSection } from "./types.ts";

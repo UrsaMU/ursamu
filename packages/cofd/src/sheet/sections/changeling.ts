@@ -4,7 +4,7 @@
 // (Wyrd/Glamour/Clarity) already render in the header and Advantages
 // sections. This section lists Contracts and active Icons.
 
-import { divider } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import type { SheetContext, SheetSection } from "./types.ts";
 import { activeIcons, readIcons } from "../../icon/index.ts";
 

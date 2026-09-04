@@ -2,8 +2,8 @@
  * +humanity -- Humanity Regain from Non-Therapy Sources
  * CPR Core p.229 -- Regaining Humanity through positive experiences.
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import { recalcDerived } from "../engine/character.ts";
 import {

@@ -79,7 +79,7 @@ ursamu_free_ports() {
 
 ursamu_find_supervisor() {
   # Sets ENTRY to local start.ts or JSR
-  ENTRY="jsr:@ursamu/ursamu/start"
+  ENTRY="jsr:@ursamu/cli/start"
   local probe
   probe="$(pwd)"
   while [ "$probe" != "/" ]; do

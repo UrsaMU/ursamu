@@ -5,7 +5,7 @@
 // add their own section files under `./sections/` and append themselves to
 // `defaultSections` -- no need to touch this file.
 
-import { footer } from "@ursamu/ursamu";
+import { footer } from "@ursamu/mush";
 import { migrateSheet, type CofdSheet } from "../stats/sheet.ts";
 import { COFD_TEMPLATES } from "../gamelines/templates.ts";
 import {
@@ -28,7 +28,7 @@ export async function formatSheet(
   actorId: string,
   sheet: CofdSheet,
   sections: SheetSection[] = defaultSections,
-  u?: import("@ursamu/ursamu").IUrsamuSDK,
+  u?: import("@ursamu/mush").IUrsamuSDK,
 ): Promise<string> {
   sheet = migrateSheet(sheet);
   const tKey = sheet.template.toLowerCase().trim();

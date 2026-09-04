@@ -1,7 +1,7 @@
 /**
  * +road — overland routes between towns.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import { listRoutes, routeBySlug } from "../world/routes.ts";
 import {
   ENCOUNTERS,

@@ -33,7 +33,7 @@ log "HEAD: $(git log -1 --oneline 2>/dev/null || echo 'not a git repo')"
 
 if [ "$MODE" = "check" ]; then
   deno run -A --unstable-kv --minimum-dependency-age=0 \
-    jsr:@ursamu/ursamu/cli update --dry-run 2>/dev/null \
+    jsr:@ursamu/cli update --dry-run 2>/dev/null \
     || log "tip: run 'ursamu update --dry-run' for pin check"
   exit 0
 fi
@@ -114,7 +114,7 @@ PY
 if command -v deno >/dev/null 2>&1; then
   log "bumping JSR pins (ursamu update)..."
   deno run -A --unstable-kv --minimum-dependency-age=0 \
-    jsr:@ursamu/ursamu/cli update 2>&1 \
+    jsr:@ursamu/cli update 2>&1 \
     || log "ursamu update finished with warnings"
 fi
 

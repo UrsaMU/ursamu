@@ -1,8 +1,8 @@
 /**
  * +pharma -- Pharmaceutical Synthesis (Medtech Ability)
  */
-import { addCmd, DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { bar, div, hdr, lbl, val, acc, dim, ARR, ERR, OK, row, wrap, grid } from "./chargen.ts";
 import type { ICPRCharacter, IPharmaProject } from "../db/schemas.ts";
 import { getDrug, synthesisDrugs } from "../data/drugs.ts";

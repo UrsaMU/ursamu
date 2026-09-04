@@ -1,6 +1,6 @@
 /** +vehicle +drive +chase — hulls, Metal Express mods, maneuvers. */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   footer,
   ARR,

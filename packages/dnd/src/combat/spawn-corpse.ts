@@ -1,7 +1,7 @@
 /**
  * Corpse + drop table spawn after a monster kill.
  */
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { DndSheet } from "../stats/dnd_sheet.ts";
 import type { DropConfig } from "./npc-templates.ts";
 

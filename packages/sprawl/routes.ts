@@ -1,5 +1,5 @@
 /** REST /api/v1/sprawl — sheet, catalog, gig room art. */
-import { dbojs } from "@ursamu/ursamu";
+import { dbojs } from "@ursamu/mush";
 import { readSprawl } from "./db/schemas.ts";
 import {
   ANTAGONISTS,

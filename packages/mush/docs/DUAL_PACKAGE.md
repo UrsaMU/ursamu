@@ -16,7 +16,7 @@ range onto one concrete version:
   "imports": {
     "@ursamu/mush": "jsr:@ursamu/mush@1.0.0",
     "ursamu": "jsr:@ursamu/mush@1.0.0",
-    "@ursamu/ursamu": "jsr:@ursamu/mush@1.0.0",
+    "@ursamu/mush": "jsr:@ursamu/mush@1.0.0",
     "jsr:@ursamu/mush@^0.1.1": "jsr:@ursamu/mush@1.0.0",
     "jsr:@ursamu/mush@^0.1.28": "jsr:@ursamu/mush@1.0.0",
     "jsr:@ursamu/mush@^0.2.0": "jsr:@ursamu/mush@1.0.0",

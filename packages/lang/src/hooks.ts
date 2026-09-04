@@ -9,8 +9,8 @@
  *     ctx.skill = 100;
  *   });
  */
-import { gameHooks } from "@ursamu/ursamu";
-import type { IDBObj } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
+import type { IDBObj } from "@ursamu/mush";
 
 export interface LangGetActiveCtx {
   player: IDBObj;

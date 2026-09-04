@@ -1,6 +1,6 @@
 // DESCFORMAT: wrap + fae dual desc + optional +views banner.
 
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import { resolveLookDesc } from "./perception.ts";
 import { visibleViews } from "../commands/views_lib.ts";
 

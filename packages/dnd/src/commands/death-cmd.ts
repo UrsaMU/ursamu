@@ -1,7 +1,7 @@
 /**
  * +deathsave / +ds / +res — dying, death, resurrection.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import { migrateSheet } from "../stats/dnd_sheet.ts";
 import {
   formatDeathStatus,

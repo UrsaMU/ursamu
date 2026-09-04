@@ -69,8 +69,7 @@ mail, wiki, staff web, public site.
 | `@ursamu/site` | Public site + `/play` |
 | `@ursamu/web` | Staff console at `/admin/` |
 
-Games import `jsr:@ursamu/mush`. Older `jsr:@ursamu/ursamu` still
-works as a shim.
+Games import `jsr:@ursamu/mush`.
 
 Official plugins and TTRPG systems live under `packages/` and publish
 as `@ursamu/*`. Catalog:

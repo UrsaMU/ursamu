@@ -1,6 +1,6 @@
 // +hedge/route and +hedge/luxury Hollow enhancements.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   hollowHas,
   isHollowOwner,

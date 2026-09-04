@@ -2,8 +2,8 @@
  * Chopshop Shop Commands — open/close/list/buy/sell
  * Handlers for the persistent chopshop room feature.
  */
-import { DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { bar, div, hdr, lbl, val, acc, dim, bad, ARR, ERR, OK, row, tbl, wrap } from "./chargen.ts";
 import type { ICPRCharacter, IChopshop, IExtractedChrome } from "../db/schemas.ts";
 import { getCyberware } from "../data/cyberware.ts";

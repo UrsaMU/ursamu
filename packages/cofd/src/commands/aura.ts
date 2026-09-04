@@ -1,6 +1,6 @@
 // +aura — project Predatory Aura (VtR 2e).
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   AURA_FLAVORS,
   findAuraFlavor,

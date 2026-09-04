@@ -27,7 +27,7 @@ import {
   removeCprCombat,
 } from "../src/combat/ports.ts";
 import { executeCprAttack } from "../src/combat/resolve.ts";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type { ICyberware, ICPRNpc } from "../db/schemas.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

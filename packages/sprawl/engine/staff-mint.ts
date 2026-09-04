@@ -1,7 +1,7 @@
 /**
  * Staff free catalog mint (Things, augs, shards, net).
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type { ISprawlChar } from "../db/schemas.ts";
 import { createItem, displayName } from "./items.ts";
 import { stockKind } from "./market-stock.ts";

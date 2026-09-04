@@ -1,7 +1,7 @@
 /**
  * Apply rolled event boons/risks to player sheet.
  */
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { EventBand } from "./events.ts";
 import {
   addCoins,

@@ -2,7 +2,7 @@
  * Bridge legacy CofD AI context (selfActor + CofdSheet) to
  * @ursamu/combat EvalCtx (selfView + healthFrac).
  */
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 import type { CofdSheet } from "../../stats/index.ts";
 import type {
   AiDecision,

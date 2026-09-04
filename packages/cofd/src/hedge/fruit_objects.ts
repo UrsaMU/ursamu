@@ -1,6 +1,6 @@
 // Goblin fruit as real game objects (cofd_item kind goblin-fruit).
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   destroyItem,
   itemData,

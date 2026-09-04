@@ -1,7 +1,7 @@
 /**
  * Shared combat start + hostile-room helpers for delves.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   announceTurn,
   beginOnly,

@@ -2,13 +2,13 @@
  * MISSION job bucket → AP grant on close/resolve (AP-only advance).
  */
 import { jobHooks, type IJob } from "@ursamu/jobs";
-import { dbojs, gameHooks } from "@ursamu/ursamu";
+import { dbojs, gameHooks } from "@ursamu/mush";
 import { getChar, saveChar } from "../engine/sheet-io.ts";
 import {
   grantAp,
   missionCloseAp,
 } from "../engine/advance-rules.ts";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 void saveChar;
 

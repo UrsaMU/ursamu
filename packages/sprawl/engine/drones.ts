@@ -2,7 +2,7 @@
  * Personal drones as Things (kind=drone).
  * Deploy one active drone; use effect by slug.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type { ISprawlChar, SprawlItemData } from
   "../db/schemas.ts";
 import { itemData, writeItemData, destroyItem } from "./items.ts";

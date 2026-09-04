@@ -1,6 +1,6 @@
 /** +scene — scene/encounter breaks (edge + optional DoT). */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import {
   ARR,
   ERR,

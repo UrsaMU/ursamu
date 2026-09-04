@@ -2,7 +2,7 @@
  * Staff-configurable images for gig room types (by slug).
  * Stored in DBO sprawl.gig_room_art.
  */
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 import { GIG_ROOMS } from "./catalog.ts";
 
 export type GigRoomArtDoc = {

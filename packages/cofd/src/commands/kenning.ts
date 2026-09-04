@@ -1,7 +1,7 @@
 // +kenning — fae perception roll (Wits + Wyrd).
 // CtL simplified: dedicated kenning instead of a manual +roll.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { isChangelingSheet } from "../form/index.ts";
 import {
   migrateSheet,

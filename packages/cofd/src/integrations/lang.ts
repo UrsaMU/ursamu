@@ -1,4 +1,4 @@
-import { gameHooks, type IDBObj } from "@ursamu/ursamu";
+import { gameHooks, type IDBObj } from "@ursamu/mush";
 import type { CofdSheet } from "../stats/sheet.ts";
 
 /**

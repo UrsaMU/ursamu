@@ -1,7 +1,7 @@
 /**
  * Test helpers — Mock UrsaMU SDK context
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 export function mockPlayer(overrides: Partial<IDBObj> = {}): IDBObj {
   return {

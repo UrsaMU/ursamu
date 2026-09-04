@@ -16,7 +16,7 @@ import {
   rollUsesDice,
 } from "../engine/items.ts";
 import { overloadFrom } from "../db/schemas.ts";
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -307,7 +307,7 @@ function mockUWithStore() {
     },
     send: () => {},
   };
-  return { u: u as unknown as import("@ursamu/ursamu").IUrsamuSDK, objs };
+  return { u: u as unknown as import("@ursamu/mush").IUrsamuSDK, objs };
 }
 
 Deno.test("createItem + consumeUse depletes and destroys", OPTS, async () => {

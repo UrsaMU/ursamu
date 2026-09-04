@@ -1,7 +1,7 @@
 /**
  * +party — invite allies for delve coordination.
  */
-import { addCmd, DBO, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO, type IUrsamuSDK } from "@ursamu/mush";
 import { roomIdOf } from "../combat/session.ts";
 
 interface PartyRec {

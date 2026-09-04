@@ -164,7 +164,7 @@ export function formatDottedLine(
 // Engine layout chrome — honors game.layout.* mushcode templates
 // first, then registerHeader stacks / defaults. Same path as help,
 // bbs, and native commands. Do not hardcode a CoFD color theme here.
-// Import from @ursamu/mush (not @ursamu/ursamu) so showcase shims
+// Import from @ursamu/mush (not @ursamu/mush) so showcase shims
 // that re-export this module cannot create a circular import.
 export {
   header,

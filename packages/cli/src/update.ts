@@ -28,7 +28,7 @@ Options:
   --dry-run    Show what would change without writing anything
   -h, --help   Show this help message
 
-Run from your game project root. Updates the jsr:@ursamu/ursamu import in
+Run from your game project root. Updates the jsr:@ursamu/mush import in
 deno.json to the latest published version and re-caches entry-point files.
 `);
   Deno.exit(0);
@@ -60,13 +60,13 @@ if (!imports) {
   Deno.exit(1);
 }
 
-// Accept any of: "jsr:@ursamu/ursamu", "jsr:@ursamu/ursamu@x.y.z", local paths (../ursamu/mod.ts)
+// Accept any of: "jsr:@ursamu/mush", "jsr:@ursamu/mush@x.y.z", local paths (../ursamu/mod.ts)
 const URSAMU_RE = /^jsr:@ursamu\/ursamu(@[^\s]*)?$/;
-const importKey = Object.keys(imports).find((k) => k === "ursamu" || k === "@ursamu/ursamu");
+const importKey = Object.keys(imports).find((k) => k === "ursamu" || k === "@ursamu/mush");
 
 if (!importKey) {
   console.error("Error: No ursamu import found in deno.json imports.");
-  console.error(`Expected a key "ursamu" or "@ursamu/ursamu" pointing to jsr:@ursamu/ursamu`);
+  console.error(`Expected a key "ursamu" or "@ursamu/mush" pointing to jsr:@ursamu/mush`);
   Deno.exit(1);
 }
 
@@ -75,7 +75,7 @@ const isLocal = currentSpecifier.startsWith(".") || currentSpecifier.startsWith(
 
 if (!isLocal && !URSAMU_RE.test(currentSpecifier)) {
   console.error("Error: No ursamu import found in deno.json imports.");
-  console.error(`Expected a key "ursamu" or "@ursamu/ursamu" pointing to jsr:@ursamu/ursamu`);
+  console.error(`Expected a key "ursamu" or "@ursamu/mush" pointing to jsr:@ursamu/mush`);
   Deno.exit(1);
 }
 
@@ -105,9 +105,9 @@ if (isLocal) {
   const currentVersionMatch = currentSpecifier.match(/@(\d+\.\d+\.\d+)/);
   const currentVersion = currentVersionMatch ? currentVersionMatch[1] : null;
 
-  console.log("Checking JSR for the latest @ursamu/ursamu release...");
+  console.log("Checking JSR for the latest @ursamu/mush release...");
   try {
-    const res = await fetch("https://jsr.io/@ursamu/ursamu/meta.json");
+    const res = await fetch("https://jsr.io/@ursamu/mush/meta.json");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const meta = await res.json() as { latest: string };
     latestVersion = meta.latest;
@@ -121,26 +121,26 @@ if (isLocal) {
   if (currentVersion === latestVersion) {
     console.log(`Already up to date (${latestVersion}).`);
   } else {
-    const newSpecifier = `jsr:@ursamu/ursamu@${latestVersion}`;
+    const newSpecifier = `jsr:@ursamu/mush@${latestVersion}`;
     console.log(`  ${currentSpecifier} → ${newSpecifier}`);
     imports[importKey] = newSpecifier;
-    // Keep @ursamu/ursamu in sync — plugins import this specifier directly,
+    // Keep @ursamu/mush in sync — plugins import this specifier directly,
     // and a version mismatch means two separate module instances with separate
     // cmds/cmdParser state, causing addCmd registrations to be invisible.
-    if (importKey !== "@ursamu/ursamu" && "@ursamu/ursamu" in imports) {
-      imports["@ursamu/ursamu"] = newSpecifier;
+    if (importKey !== "@ursamu/mush" && "@ursamu/mush" in imports) {
+      imports["@ursamu/mush"] = newSpecifier;
     }
     denoJsonDirty = true;
   }
 }
 
 // ── 4b. ensure plugin-required import mappings are present ────────────────────
-// Plugins use bare specifiers like "@ursamu/ursamu" and "@std/path" that must
+// Plugins use bare specifiers like "@ursamu/mush" and "@std/path" that must
 // be resolvable from the game project's import map.
 const REQUIRED_IMPORTS: Record<string, string> = {
   // Must match the ursamu version exactly — different versions = different module
   // instances = plugins' addCmd calls land on a separate cmds array.
-  "@ursamu/ursamu": imports[importKey] ?? "jsr:@ursamu/ursamu",
+  "@ursamu/mush": imports[importKey] ?? "jsr:@ursamu/mush",
   "@std/path":      "jsr:@std/path@^0.224.0",
   "@std/assert":    "jsr:@std/assert@^0.224.0",
   "@std/fs":        "jsr:@std/fs@^0.224.0",
@@ -153,13 +153,13 @@ for (const [key, val] of Object.entries(REQUIRED_IMPORTS)) {
   }
 }
 
-// Always keep @ursamu/ursamu in sync with ursamu regardless of whether a
+// Always keep @ursamu/mush in sync with ursamu regardless of whether a
 // version bump happened — catches stale values left by older update runs.
 const ursamuSpecifier = imports[importKey];
-if (ursamuSpecifier && imports["@ursamu/ursamu"] && imports["@ursamu/ursamu"] !== ursamuSpecifier) {
-  imports["@ursamu/ursamu"] = ursamuSpecifier;
+if (ursamuSpecifier && imports["@ursamu/mush"] && imports["@ursamu/mush"] !== ursamuSpecifier) {
+  imports["@ursamu/mush"] = ursamuSpecifier;
   denoJsonDirty = true;
-  console.log(`  ${green("✓")} Synced @ursamu/ursamu → ${bold(ursamuSpecifier)}`);
+  console.log(`  ${green("✓")} Synced @ursamu/mush → ${bold(ursamuSpecifier)}`);
 }
 
 // ── 5. merge tasks ────────────────────────────────────────────────────────────
@@ -228,7 +228,7 @@ if (denoJsonDirty) {
       const currentVersionMatch = currentSpecifier.match(/@(\d+\.\d+\.\d+)/);
       const currentVersion = currentVersionMatch ? currentVersionMatch[1] : null;
       if (currentVersion && currentVersion !== latestVersion) {
-        console.log(`\nUpdated @ursamu/ursamu ${currentVersion} → ${latestVersion}`);
+        console.log(`\nUpdated @ursamu/mush ${currentVersion} → ${latestVersion}`);
         console.log(`Changelog: https://github.com/UrsaMU/ursamu/releases/tag/v${latestVersion}`);
       }
     }
@@ -390,7 +390,7 @@ try {
       }
     } else {
       // Fetch from JSR
-      const url = `https://jsr.io/@ursamu/ursamu/${latestVersion}/scripts/${name}`;
+      const url = `https://jsr.io/@ursamu/mush/${latestVersion}/scripts/${name}`;
       const res = await fetch(url);
       if (!res.ok) {
         console.warn(`  Warning: could not fetch scripts/${name} (${res.status}) — skipping.`);

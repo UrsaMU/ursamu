@@ -1,6 +1,6 @@
 // +staffkit — one-shot staff splat kit for lock / system tests.
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { defaultSheet, refreshAdvantages } from "../stats/index.ts";
 import { assignDormHome } from "../support/dorm.ts";
 import { syncSightFlags } from "../support/sight.ts";

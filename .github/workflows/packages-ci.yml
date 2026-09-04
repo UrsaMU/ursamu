@@ -249,5 +249,16 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282
         with: { deno-version: v2.x }
+      # Package githubRepository must be UrsaMU/ursamu for OIDC.
+      # Optional: repo secret JSR_TOKEN (jsrp_…) — see scripts/jsr-link-cli.sh
       - name: Publish
-        run: deno publish --allow-slow-types --no-check --allow-dirty
+        env:
+          JSR_TOKEN: ${{ secrets.JSR_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${JSR_TOKEN:-}" ]]; then
+            deno publish --allow-slow-types --no-check --allow-dirty \
+              --token "$JSR_TOKEN"
+          else
+            deno publish --allow-slow-types --no-check --allow-dirty
+          fi

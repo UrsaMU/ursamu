@@ -1,6 +1,6 @@
 // +market — Goblin Markets (CtL).
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   applyBuySideEffects,
   findMarketGood,

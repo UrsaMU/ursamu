@@ -7,7 +7,7 @@
  *
  * Call registerWithGM() once from plugin init(). It is idempotent.
  */
-import { gameHooks } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
 
 // --- CPR RED system prompt ----------------------------------------------------
 

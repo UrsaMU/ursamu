@@ -1,8 +1,8 @@
 /**
  * +bodysculpt -- Bodysculpting and Exotic Modification Commands
  */
-import { addCmd, DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { bar, div, hdr, lbl, val, acc, bad, dim, ARR, ERR, OK, row, wrap, grid } from "./chargen.ts";
 import type { ICPRCharacter, IBodysculpt } from "../db/schemas.ts";
 import { applyHumanityLoss } from "../engine/cyberpsychosis.ts";

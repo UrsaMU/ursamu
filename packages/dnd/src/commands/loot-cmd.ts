@@ -1,7 +1,7 @@
 /**
  * +loot / +get — corpses and gold piles.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import { migrateSheet } from "../stats/dnd_sheet.ts";
 import { addCoins } from "../stats/currency.ts";
 import { roomIdOf } from "../combat/session.ts";

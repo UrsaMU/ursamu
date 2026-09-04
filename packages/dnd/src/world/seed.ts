@@ -7,7 +7,7 @@ import {
   DBO,
   getConfig,
   setConfig,
-} from "@ursamu/ursamu";
+} from "@ursamu/mush";
 import { defaultSheet, migrateSheet } from "../stats/dnd_sheet.ts";
 import { NPC_TEMPLATES } from "../combat/npc-templates.ts";
 import type {

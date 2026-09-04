@@ -1,6 +1,6 @@
 // Staff switches for +icon.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   addIcon,
   findIcon,

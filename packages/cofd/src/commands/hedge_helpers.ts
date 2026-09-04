@@ -1,6 +1,6 @@
 // Shared helpers for +hedge command.
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   migrateSheet,
   type CofdSheet,

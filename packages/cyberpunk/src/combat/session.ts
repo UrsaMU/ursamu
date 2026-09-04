@@ -6,7 +6,7 @@ import {
   endFight,
   type Encounter,
 } from "@ursamu/combat";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { rollD10Critical } from "../../engine/dice.ts";
 import type { ICombatActor, ICombatState } from
   "../../db/schemas.ts";

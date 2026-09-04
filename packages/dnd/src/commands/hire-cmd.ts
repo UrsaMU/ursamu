@@ -1,7 +1,7 @@
 /**
  * +hire — cheap companion NPCs that count toward delve party size.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import { migrateSheet, defaultSheet } from
   "../stats/dnd_sheet.ts";
 import { spendCoins, formatPurse } from

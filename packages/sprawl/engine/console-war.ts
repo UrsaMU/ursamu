@@ -1,7 +1,7 @@
 /**
  * Contested PC-vs-PC console war (breach their deck).
  */
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ISprawlChar } from "../db/schemas.ts";
 import { getChar, saveChar } from "./sheet-io.ts";
 import {

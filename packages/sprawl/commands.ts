@@ -1,5 +1,5 @@
 // Command modules — each import triggers addCmd() at module load.
-import { registerCmdMiddleware, dbojs } from "@ursamu/ursamu";
+import { registerCmdMiddleware, dbojs } from "@ursamu/mush";
 import { runWithMode } from "./commands/chrome.ts";
 
 /**

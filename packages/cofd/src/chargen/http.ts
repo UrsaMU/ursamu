@@ -3,7 +3,7 @@
  * Auth is already gated (userId non-null) before these run.
  */
 
-import { dbojs } from "@ursamu/ursamu";
+import { dbojs } from "@ursamu/mush";
 import {
   COFD_ATTRIBUTES,
   COFD_MERITS,

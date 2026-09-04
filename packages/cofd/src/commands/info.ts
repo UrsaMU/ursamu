@@ -1,6 +1,6 @@
 // +info command implementation: detail lookup across CoFD catalogs.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { renderInfo } from "../info/index.ts";
 
 export function infoExec(u: IUrsamuSDK) {

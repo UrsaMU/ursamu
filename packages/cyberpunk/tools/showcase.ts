@@ -225,7 +225,7 @@ async function ensureCmdsLoaded() {
 async function execCmd(raw: string, player: IDBObj, roomCfg?: ShowcaseRoom): Promise<string[]> {
   await ensureCmdsLoaded();
   const { cmds } = await import(
-    "https://jsr.io/@ursamu/ursamu/2.0.0/src/services/commands/cmdParser.ts"
+    "https://jsr.io/@ursamu/mush/2.0.0/src/services/commands/cmdParser.ts"
   );
   const output: string[] = [];
   for (const cmd of cmds) {
