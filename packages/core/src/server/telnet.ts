@@ -142,8 +142,23 @@ async function handleTelnetConnection(conn: Deno.TcpConn): Promise<void> {
       if (nawsSeq !== null) {
         const parsed = parseNawsBytes(nawsSeq);
         if (parsed) {
+          const { clampTermWidth, clampTermHeight } = await import(
+            "./websocket.ts"
+          );
           const session = sessions.get(socketId);
-          if (session) session.meta.termWidth = parsed.width;
+          if (session) {
+            const w = clampTermWidth(parsed.width);
+            const h = clampTermHeight(parsed.height);
+            if (w != null) session.meta.termWidth = w;
+            if (h != null) session.meta.termHeight = h;
+            if (w != null || h != null) {
+              await gameHooks.emit("session:termSize", {
+                socketId,
+                termWidth: session.meta.termWidth,
+                termHeight: session.meta.termHeight,
+              });
+            }
+          }
         }
       }
 

@@ -37,8 +37,38 @@ export function isRateLimitedForAuth(socketId: string): boolean {
 
 export function clampTermWidth(w: unknown): number | null {
   if (typeof w !== "number" || !Number.isFinite(w)) return null;
-  if (w < 40 || w > 250) return null;
-  return w;
+  const n = Math.trunc(w);
+  if (n < 40 || n > 250) return null;
+  return n;
+}
+
+export function clampTermHeight(h: unknown): number | null {
+  if (typeof h !== "number" || !Number.isFinite(h)) return null;
+  const n = Math.trunc(h);
+  if (n < 1 || n > 255) return null;
+  return n;
+}
+
+/** Apply clamped term size onto session.meta. Returns true if any set. */
+export function applySessionTermSize(
+  socketId: string,
+  width?: unknown,
+  height?: unknown,
+): boolean {
+  const session = sessions.get(socketId);
+  if (!session) return false;
+  let changed = false;
+  const w = clampTermWidth(width);
+  if (w != null) {
+    session.meta.termWidth = w;
+    changed = true;
+  }
+  const h = clampTermHeight(height);
+  if (h != null) {
+    session.meta.termHeight = h;
+    changed = true;
+  }
+  return changed;
 }
 
 function sendToSocket(socketId: string, msg: string): void {
@@ -121,10 +151,52 @@ async function handleAuth(socketId: string, raw: string): Promise<boolean> {
   }
 }
 
+/** Handle sidecar/client term-size packets (empty msg + data.termWidth). */
+async function handleTermSizePacket(
+  socketId: string,
+  raw: string,
+): Promise<boolean> {
+  try {
+    const data = JSON.parse(raw) as Record<string, unknown>;
+    if (!data || typeof data !== "object") return false;
+    const payload = (data.data && typeof data.data === "object")
+      ? data.data as Record<string, unknown>
+      : data;
+    if (
+      payload.termWidth === undefined &&
+      payload.termHeight === undefined
+    ) {
+      return false;
+    }
+    // Empty command line with term size only — not player input.
+    const msg = data.msg;
+    if (typeof msg === "string" && msg.trim() !== "") return false;
+
+    const changed = applySessionTermSize(
+      socketId,
+      payload.termWidth,
+      payload.termHeight,
+    );
+    if (changed) {
+      sessions.touch(socketId);
+      await gameHooks.emit("session:termSize", {
+        socketId,
+        termWidth: sessions.get(socketId)?.meta?.termWidth,
+        termHeight: sessions.get(socketId)?.meta?.termHeight,
+        cid: typeof payload.cid === "string" ? payload.cid : undefined,
+      });
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function handleMessage(socketId: string, raw: string): Promise<void> {
   if (raw.length > MAX_MSG_BYTES) return;
 
   if (await handleAuth(socketId, raw)) return;
+  if (await handleTermSizePacket(socketId, raw)) return;
 
   const input = parseInput(raw).trim();
   if (!input) return;

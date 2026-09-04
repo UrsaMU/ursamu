@@ -70,8 +70,13 @@ EXAMPLES
     if (!destination) { u.send(`Could not find destination: ${destName}`); return; }
     const canEnter = (await u.canEdit(u.me, destination)) || destination.flags.has("enter_ok");
     if (!canEnter) { u.send("Permission denied (destination check)."); return; }
-    u.teleport(target.id, destination.id);
-    u.send(`You teleport ${u.util.displayName(target, u.me)} to ${u.util.displayName(destination, u.me)}.`);
+    await Promise.resolve(
+      u.teleport(target.id, destination.id),
+    );
+    u.send(
+      `You teleport ${u.util.displayName(target, u.me)} to ` +
+        `${u.util.displayName(destination, u.me)}.`,
+    );
   },
 });
 

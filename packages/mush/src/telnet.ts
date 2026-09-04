@@ -406,11 +406,15 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
       if (nawsSeq !== null) {
         const parsed = parseNawsBytes(nawsSeq);
         if (parsed && cid) {
-          // Forward termWidth to the WS hub so the player's DB record can be updated
+          // Forward size to WS hub → session meta + player DB
           if (sock && (sock as WebSocket).readyState === WebSocket.OPEN) {
             (sock as WebSocket).send(JSON.stringify({
               msg: "",
-              data: { cid, termWidth: parsed.width }
+              data: {
+                cid,
+                termWidth: parsed.width,
+                termHeight: parsed.height,
+              },
             }));
           }
         }

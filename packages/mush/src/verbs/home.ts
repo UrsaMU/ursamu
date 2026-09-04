@@ -7,10 +7,13 @@ import {
   sendListLayout,
 } from "./cmd-ui.ts";
 
-export function execHome(u: IUrsamuSDK): void {
+export async function execHome(u: IUrsamuSDK): Promise<void> {
   const actor = u.me;
-  const homeId = (actor.state.home as string) || "1";
-  u.teleport(actor.id, homeId);
+  const homeId = String(
+    (actor.state.home as string) || "1",
+  );
+  // teleport → moveObject: leave/arrive + look
+  await Promise.resolve(u.teleport(actor.id, homeId));
   u.send("There's no place like home...");
 }
 

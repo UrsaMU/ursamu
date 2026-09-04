@@ -53,14 +53,59 @@ export function registerCaretExecutor(fn: CaretExecutorFn): void {
  *
  * Returns all matches (an object may have multiple matching `^` attrs).
  */
+// deno-lint-ignore no-explicit-any
+type CaretDb = {
+  // Real DBO uses typed Query<T>; keep loose for callers.
+  // deno-lint-ignore no-explicit-any
+  query: (...args: any[]) => Promise<IDBOBJ[]>;
+  // deno-lint-ignore no-explicit-any
+  queryOne: (...args: any[]) => Promise<IDBOBJ | null | undefined>;
+};
+
 export async function findCaretMatches(
-  roomId:        string,
-  text:          string,
-  speakerId:     string,
-  dbojs:         { query: (q: unknown) => Promise<IDBOBJ[]> },
+  roomId: string,
+  text: string,
+  speakerId: string,
+  dbojs: CaretDb,
   masterRoomId?: string,
 ): Promise<CaretMatch[]> {
   const hits: CaretMatch[] = [];
+
+  const scanCaretChain = async (
+    leaf: IDBOBJ,
+    cur: IDBOBJ,
+    visited: Set<string>,
+  ) => {
+    const attrs =
+      (cur.data?.attributes as
+        | Array<{ name: string; value: string }>
+        | undefined) ?? [];
+    for (const attr of attrs) {
+      if (!attr.name.startsWith("^")) continue;
+      const slashIdx = attr.name.indexOf("/", 1);
+      const pattern = slashIdx === -1
+        ? attr.name.slice(1)
+        : attr.name.slice(1, slashIdx);
+      const captures = matchGlob(pattern.trim(), text);
+      if (captures !== null) {
+        hits.push({
+          obj: leaf,
+          attrName: attr.name,
+          attrValue: attr.value,
+          captures,
+        });
+      }
+    }
+    const flagStr = (cur.flags || "").toLowerCase();
+    if (flagStr.split(/\s+/).includes("no_inherit")) return;
+    const parentId = cur.data?.parent as string | undefined;
+    if (!parentId) return;
+    visited.add(cur.id);
+    if (visited.has(parentId)) return;
+    const parent = await dbojs.queryOne({ id: parentId });
+    if (!parent) return;
+    await scanCaretChain(leaf, parent as IDBOBJ, visited);
+  };
 
   const scanContents = async (locId: string) => {
     const contents = await dbojs.query({ location: locId });
@@ -70,18 +115,7 @@ export async function findCaretMatches(
       const flagStr = (obj.flags || "").toLowerCase();
       if (!flagStr.includes("monitor")) continue;
 
-      const attrs = (obj.data?.attributes as Array<{ name: string; value: string }> | undefined) ?? [];
-      for (const attr of attrs) {
-        if (!attr.name.startsWith("^")) continue;
-
-        const slashIdx = attr.name.indexOf("/", 1);
-        const pattern  = slashIdx === -1 ? attr.name.slice(1) : attr.name.slice(1, slashIdx);
-
-        const captures = matchGlob(pattern.trim(), text);
-        if (captures !== null) {
-          hits.push({ obj, attrName: attr.name, attrValue: attr.value, captures });
-        }
-      }
+      await scanCaretChain(obj, obj, new Set());
     }
   };
 
@@ -102,11 +136,11 @@ export async function findCaretMatches(
  * handlers are caught and logged so they never interrupt the caller.
  */
 export async function fireCaretPatterns(
-  roomId:        string,
-  text:          string,
-  speakerId:     string,
-  socketId:      string,
-  dbojs:         { query: (q: unknown) => Promise<IDBOBJ[]> },
+  roomId: string,
+  text: string,
+  speakerId: string,
+  socketId: string,
+  dbojs: CaretDb,
   masterRoomId?: string,
 ): Promise<void> {
   const matches = await findCaretMatches(roomId, text, speakerId, dbojs, masterRoomId);

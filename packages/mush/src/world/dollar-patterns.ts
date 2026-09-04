@@ -68,27 +68,57 @@ export function matchGlob(pattern: string, input: string): string[] | null {
 }
 
 export interface DollarMatch {
-  obj:      IDBOBJ;
-  attr:     IAttribute;
+  obj: IDBOBJ;
+  attr: IAttribute;
   captures: string[];
 }
 
+// Real DBO uses typed Query<T>; keep loose for callers.
+// deno-lint-ignore no-explicit-any
+type DollarDb = {
+  // deno-lint-ignore no-explicit-any
+  query: (...args: any[]) => Promise<IDBOBJ[]>;
+  // deno-lint-ignore no-explicit-any
+  queryOne: (...args: any[]) => Promise<IDBOBJ | null | undefined>;
+};
+
 /**
  * Scan an object's attributes for `$pattern` attrs that match `input`.
+ * Local attrs first; then parents (same order as getAttribute).
  * Returns the first match found, or null.
  */
-function scanObj(obj: IDBOBJ, input: string): DollarMatch | null {
+async function scanObj(
+  obj: IDBOBJ,
+  input: string,
+  dbojs: DollarDb,
+  visited: Set<string> = new Set(),
+): Promise<DollarMatch | null> {
   const attrs = (obj.data?.attributes as IAttribute[] | undefined) ?? [];
   for (const attr of attrs) {
     if (!attr.name.startsWith("$")) continue;
 
     const slashIdx = attr.name.indexOf("/", 1);
-    const pattern  = slashIdx === -1 ? attr.name.slice(1) : attr.name.slice(1, slashIdx);
+    const pattern = slashIdx === -1
+      ? attr.name.slice(1)
+      : attr.name.slice(1, slashIdx);
 
     const captures = matchGlob(pattern.trim(), input);
     if (captures !== null) return { obj, attr, captures };
   }
-  return null;
+
+  const flags = String(obj.flags ?? "").toLowerCase();
+  if (flags.split(/\s+/).includes("no_inherit")) return null;
+
+  const parentId = obj.data?.parent as string | undefined;
+  if (!parentId) return null;
+  visited.add(obj.id);
+  if (visited.has(parentId)) return null;
+  const parent = await dbojs.queryOne({ id: parentId });
+  if (!parent) return null;
+  // Match is attributed to the leaf object that received the command.
+  const hit = await scanObj(parent as IDBOBJ, input, dbojs, visited);
+  if (!hit) return null;
+  return { obj, attr: hit.attr, captures: hit.captures };
 }
 
 /**
@@ -103,13 +133,10 @@ function scanObj(obj: IDBOBJ, input: string): DollarMatch | null {
  * Returns the first match found, or null if nothing matches.
  */
 export async function findDollarPattern(
-  actor:        IDBOBJ,
-  input:        string,
+  actor: IDBOBJ,
+  input: string,
   masterRoomId: string,
-  dbojs:        {
-    query:    (q: unknown) => Promise<IDBOBJ[]>;
-    queryOne: (q: unknown) => Promise<IDBOBJ | null | undefined>;
-  },
+  dbojs: DollarDb,
 ): Promise<DollarMatch | null> {
   const candidates: IDBOBJ[] = [];
 
@@ -133,7 +160,7 @@ export async function findDollarPattern(
   }
 
   for (const obj of candidates) {
-    const hit = scanObj(obj, input);
+    const hit = await scanObj(obj, input, dbojs);
     if (hit) return hit;
   }
   return null;

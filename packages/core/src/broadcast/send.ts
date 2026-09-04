@@ -29,9 +29,8 @@ export function trackedSockets(): ReadonlySet<string> {
 }
 
 /**
- * Telnet keeps the classic 78-column wrap. Web clients size their own
- * column in the browser — hard-wrapping at 78 makes ASCII/look output
- * look prematurely broken in a wide center pane.
+ * Telnet keeps column wrap. Web clients size their own column in the
+ * browser — hard-wrapping makes ASCII/look output look broken.
  */
 export function shouldWordWrap(socketId: string): boolean {
   const ct = sessions.get(socketId)?.meta?.clientType;
@@ -39,8 +38,21 @@ export function shouldWordWrap(socketId: string): boolean {
   return true;
 }
 
+/** Effective wrap width: session NAWS termWidth, else 78. */
+export function resolveWrapWidth(socketId?: string): number {
+  if (!socketId) return 78;
+  const w = sessions.get(socketId)?.meta?.termWidth;
+  if (typeof w === "number" && Number.isFinite(w)) {
+    const n = Math.trunc(w);
+    if (n >= 40 && n <= 250) return n;
+  }
+  return 78;
+}
+
 function prepareOutbound(socketId: string, msg: string): string {
-  const body = shouldWordWrap(socketId) ? wordWrap(msg) : msg;
+  const body = shouldWordWrap(socketId)
+    ? wordWrap(msg, resolveWrapWidth(socketId))
+    : msg;
   return _formatter(socketId, body);
 }
 

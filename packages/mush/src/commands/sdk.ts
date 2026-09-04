@@ -174,6 +174,12 @@ async function targetFn(
     return resolveRoom(actor.location);
   }
 
+  // #dbref — numeric or slug object ids
+  const hashMatch = q.match(/^#(.+)$/);
+  if (hashMatch) {
+    const raw = await dbojs.queryOne({ id: hashMatch[1] });
+    if (raw) return hydrate(raw);
+  }
   const idMatch = q.match(/^#?(\d+)$/);
   if (idMatch) {
     const raw = await dbojs.queryOne({ id: idMatch[1] });
@@ -226,6 +232,15 @@ export async function createNativeSDK(
   const sess = sessions.get(socketId);
   const clientType =
     (sess?.meta?.clientType as string | undefined) || "telnet";
+  // Live NAWS overrides DB until persist lands (same session).
+  const tw = sess?.meta?.termWidth;
+  const th = sess?.meta?.termHeight;
+  if (typeof tw === "number" && tw >= 40 && tw <= 250) {
+    me.state = { ...me.state, termWidth: Math.trunc(tw) };
+  }
+  if (typeof th === "number" && th >= 1 && th <= 255) {
+    me.state = { ...me.state, termHeight: Math.trunc(th) };
+  }
 
   const u: IUrsamuSDK = {
     state,
@@ -528,9 +543,14 @@ export async function createNativeSDK(
     },
 
     teleport: async (targetStr: string, destination: string) => {
-      const tarObj = await dbojs.queryOne({ id: targetStr });
-      if (!tarObj) return;
-      await dbojs.modify({ id: tarObj.id }, "$set", { location: destination } as Partial<IDBOBJ>);
+      const { moveObject } = await import("../world/move.ts");
+      await moveObject({
+        targetId: targetStr,
+        destinationId: destination,
+        cause: "teleport",
+        actorId: me.id,
+        look: true,
+      });
     },
 
     checkLock: async (target: string | IDBObj, lock: string) => {
@@ -948,10 +968,14 @@ export async function createNativeSDK(
     trigger: async (targetStr: string, attr: string, args?: string[]) => {
       const tarObj = await dbojs.queryOne({ id: targetStr });
       if (!tarObj) return;
-      const attrs = (tarObj.data?.attributes as Array<{ name: string; value: string }> | undefined) || [];
-      const attrData = attrs.find((a) => a.name.toUpperCase() === attr.toUpperCase());
+      const { getAttribute } = await import(
+        "../world/get-attribute.ts"
+      );
+      const attrData = await getAttribute(tarObj, attr);
       if (!attrData) return;
-      const { runSoftcodeSimple } = await import("../softcode/engine.ts");
+      const { runSoftcodeSimple } = await import(
+        "../softcode/engine.ts"
+      );
       await runSoftcodeSimple(attrData.value, {
         actorId: actorId,
         executorId: tarObj.id,
@@ -960,18 +984,29 @@ export async function createNativeSDK(
       });
     },
 
-    eval: async (targetStr: string, attr: string, args?: string[]): Promise<string> => {
+    eval: async (
+      targetStr: string,
+      attr: string,
+      args?: string[],
+    ): Promise<string> => {
       let tarObj = await dbojs.queryOne({ id: targetStr });
       if (!tarObj) {
         tarObj = (await dbojs.queryOne({
-          "data.name": new RegExp(`^${targetStr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
+          "data.name": new RegExp(
+            `^${targetStr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+            "i",
+          ),
         })) || undefined;
       }
       if (!tarObj) return "";
-      const attrs = (tarObj.data?.attributes as Array<{ name: string; value: string }> | undefined) || [];
-      const attrData = attrs.find((a) => a.name.toUpperCase() === attr.toUpperCase());
+      const { getAttribute } = await import(
+        "../world/get-attribute.ts"
+      );
+      const attrData = await getAttribute(tarObj, attr);
       if (!attrData) return "";
-      const { runSoftcodeSimple } = await import("../softcode/engine.ts");
+      const { runSoftcodeSimple } = await import(
+        "../softcode/engine.ts"
+      );
       const result = await runSoftcodeSimple(attrData.value, {
         actorId: actorId,
         executorId: tarObj.id,
@@ -985,7 +1020,9 @@ export async function createNativeSDK(
       if (!str) return "";
       if (!me.id || me.id === "#-1") return str;
       try {
-        const { runSoftcodeSimple } = await import("../softcode/engine.ts");
+        const { runSoftcodeSimple } = await import(
+          "../softcode/engine.ts"
+        );
         return await runSoftcodeSimple(str, {
           actorId: me.id,
           executorId: me.id,
@@ -994,7 +1031,10 @@ export async function createNativeSDK(
         });
       } catch (e: unknown) {
         console.error("[evalString]", e);
-        return str;
+        const { formatEvalError } = await import(
+          "../softcode/eval-errors.ts"
+        );
+        return formatEvalError(e);
       }
     },
 

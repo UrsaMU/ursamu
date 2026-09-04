@@ -4,9 +4,12 @@
  * Handles worker messages that route output to players:
  *   send, broadcast, room:broadcast, teleport, patch
  */
-import { send as coreSend, broadcastAll, notify as coreNotify } from "@ursamu/core";
+import {
+  send as coreSend,
+  broadcastAll,
+  notify as coreNotify,
+} from "@ursamu/core";
 import { gameHooks } from "@ursamu/core";
-import { dbojs } from "../../world/dbobjs.ts";
 import type { SDKContext } from "../sdk-service.ts";
 
 type Msg = Record<string, unknown>;
@@ -33,21 +36,31 @@ export function handleNotify(msg: Msg, worker: globalThis.Worker): void {
 }
 
 /** Route a "broadcast" message to all connected sockets. */
-export function handleBroadcast(msg: Msg): void {
+export async function handleBroadcast(msg: Msg): Promise<void> {
   const message = msg.message as string | undefined;
-  if (message) broadcastAll(message);
+  if (!message) return;
+  const { handleCemitSentinel, isCemitSentinel } = await import(
+    "../cemit.ts"
+  );
+  if (isCemitSentinel(message)) {
+    await handleCemitSentinel(message);
+    return;
+  }
+  broadcastAll(message);
 }
 
 /** Broadcast a message to all players in a specific room. */
 export async function handleRoomBroadcast(msg: Msg): Promise<void> {
-  const message    = msg.message  as string | undefined;
-  const room       = msg.room     as string | undefined;
-  const excludeIds = Array.isArray(msg.exclude) ? (msg.exclude as string[]) : [];
+  const message = msg.message as string | undefined;
+  const room = msg.room as string | undefined;
+  const excludeIds = Array.isArray(msg.exclude)
+    ? (msg.exclude as string[])
+    : [];
   if (!message || !room) return;
 
-  const players = await dbojs.query({ $and: [{ location: room }, { flags: /connected/i }] });
-  const targets = players.filter(p => !excludeIds.includes(p.id)).map(p => p.id);
-  if (targets.length > 0) coreSend(targets, message);
+  const { sendToRoom } = await import("../../world/move.ts");
+  const exclude = excludeIds[0];
+  await sendToRoom(room, message, exclude);
 }
 
 /** Update an in-memory context state property from a "patch" message. */
@@ -97,40 +110,24 @@ export async function emitResultHooks(
   }
 }
 
-/** Move an entity to a new location, notifying rooms and triggering auto-look. */
-export function handleTeleport(msg: Msg, context: SDKContext | undefined): void {
+/** Move an entity: leave/arrive + look via shared moveObject. */
+export function handleTeleport(
+  msg: Msg,
+  context: SDKContext | undefined,
+): void {
   if (!msg.target || !msg.destination) return;
-  void context;
+  const actorId = context?.id as string | undefined;
 
   (async () => {
     try {
-      const target = await dbojs.queryOne({ id: msg.target as string });
-      const dest   = await dbojs.queryOne({ id: msg.destination as string });
-      if (!target || !dest) return;
-
-      const mk = (o: { data?: Record<string, unknown> }) =>
-        String(o.data?.moniker ?? o.data?.name ?? "Unknown");
-
-      const sourceId = target.location;
-      if (sourceId) {
-        const sourcePlayers = await dbojs.query({
-          $and: [{ location: sourceId }, { flags: /connected/i }, { id: { $ne: target.id } }],
-        });
-        if (sourcePlayers.length > 0) {
-          coreSend(sourcePlayers.map(p => p.id), `${mk(target)} has left.`);
-        }
-      }
-
-      await dbojs.modify({ id: target.id }, "$set", { location: msg.destination as string });
-
-      const destPlayers = await dbojs.query({
-        $and: [{ location: msg.destination as string }, { flags: /connected/i }, { id: { $ne: target.id } }],
+      const { moveObject } = await import("../../world/move.ts");
+      await moveObject({
+        targetId: String(msg.target),
+        destinationId: String(msg.destination),
+        cause: "teleport",
+        actorId,
+        look: true,
       });
-      if (destPlayers.length > 0) {
-        const sourceRoom = sourceId ? await dbojs.queryOne({ id: sourceId }) : null;
-        const fromStr    = sourceRoom?.data?.name ? ` from ${sourceRoom.data.name}` : "";
-        coreSend(destPlayers.map(p => p.id), `${mk(target)} has arrived${fromStr}.`);
-      }
     } catch (e: unknown) {
       console.error("[SandboxHandlers] teleport error:", e);
     }

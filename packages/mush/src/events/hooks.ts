@@ -5,32 +5,9 @@ import { gameHooks, getConfig } from "@ursamu/core";
 import { SDKService } from "../softcode/sdk-service.ts";
 import type { IDBOBJ } from "../world/types.ts";
 import type { ObjectDestroyedEvent, SayEvent, PoseEvent } from "./types.ts";
-import type { IAttribute } from "../world/types.ts";
 import { notifyRoomDisconnect } from "./disconnect-notice.ts";
-
-/**
- * Recursively fetch a named attribute from an object, walking its parent chain.
- * Returns `undefined` when not found; cycles are detected via a visited set.
- */
-export const getAttribute = async (
-  obj:     IDBOBJ,
-  attr:    string,
-  visited: Set<string> = new Set(),
-): Promise<IAttribute | undefined> => {
-  const attribute = obj.data?.attributes?.find(
-    (a: IAttribute) => a.name.toLowerCase() === attr.toLowerCase(),
-  );
-  if (attribute) return attribute;
-
-  if (obj.data?.parent) {
-    const parentId = obj.data.parent as string;
-    visited.add(obj.id);
-    if (visited.has(parentId)) return undefined;
-    const parent = await dbojs.queryOne({ id: parentId });
-    if (parent) return getAttribute(parent as IDBOBJ, attr, visited);
-  }
-  return undefined;
-};
+export { getAttribute } from "../world/get-attribute.ts";
+import { getAttribute } from "../world/get-attribute.ts";
 
 // Helper to check if attribute is softcode (starts with $ or is otherwise a softcode attribute)
 function isAttrSoftcode(attr: { value?: string } | null): boolean {
@@ -61,19 +38,35 @@ const _onSay = async (e: SayEvent) => {
   if (!e.roomId) return;
   // Heard text for say: the full formatted line as players see it
   const heard = `${e.actorName} says, "${e.message}"`;
-  const masterRoomId = getConfig<string>("game.masterRoom") || undefined;
-  // deno-lint-ignore no-explicit-any
-  await fireCaretPatterns(e.roomId, heard, e.actorId, e.socketId || "", dbojs as any, masterRoomId).catch(
-    err => console.error("[Hooks] ^-pattern error on player:say:", err)
+  const masterRoomId = getConfig<string>("game.masterRoom") ||
+    undefined;
+  await fireCaretPatterns(
+    e.roomId,
+    heard,
+    e.actorId,
+    e.socketId || "",
+    dbojs,
+    masterRoomId,
+  ).catch(
+    (err) =>
+      console.error("[Hooks] ^-pattern error on player:say:", err),
   );
 };
 
 const _onPose = async (e: PoseEvent) => {
   if (!e.roomId) return;
-  const masterRoomId = getConfig<string>("game.masterRoom") || undefined;
-  // deno-lint-ignore no-explicit-any
-  await fireCaretPatterns(e.roomId, e.content, e.actorId, e.socketId || "", dbojs as any, masterRoomId).catch(
-    err => console.error("[Hooks] ^-pattern error on player:pose:", err)
+  const masterRoomId = getConfig<string>("game.masterRoom") ||
+    undefined;
+  await fireCaretPatterns(
+    e.roomId,
+    e.content,
+    e.actorId,
+    e.socketId || "",
+    dbojs,
+    masterRoomId,
+  ).catch(
+    (err) =>
+      console.error("[Hooks] ^-pattern error on player:pose:", err),
   );
 };
 
