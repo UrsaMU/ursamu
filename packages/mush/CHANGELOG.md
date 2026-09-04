@@ -1,3 +1,29 @@
+## 1.0.37
+
+- `moveObject`: teleport/home leave+arrive + auto-look;
+  room sends use socket ids (exclude honored).
+- Softcode `#slug` dbrefs (not only `#digits`); tags still work.
+- Softcode / `@cemit` deliver via `rooms.broadcast` + channel header.
+- look: empty `db.search` must not wipe preloaded contents
+  (dark exits / flag-code look tests).
+- Depends on `@ursamu/core@^1.0.3` (NAWS / term size).
+
+## 1.0.36
+
+- Softcode eval errors surface as `#-1 …` (never echo input).
+- `attr(name,>N)` lock comparisons; case-insensitive keys.
+- NAWS width/height → session + player; `width()`/`height()`
+  softcode; telnet word-wrap uses live termWidth.
+
+## 1.0.35
+
+- Softcode `get` / `xget` / `u` / `hasattr` walk `@parent`
+  chains (same resolver as exit msgs / world layer).
+- Shared `getAttribute` / `getAttributeValue` in
+  `world/get-attribute.ts`; `no_inherit` stops the walk.
+- `$pattern` and `^pattern` dispatch also scan parents.
+- SDK `u.trigger` / `u.eval` resolve attrs via parent walk.
+
 ## 1.0.34
 
 - Shared interactive command UI helpers (`cmd-ui.ts`):

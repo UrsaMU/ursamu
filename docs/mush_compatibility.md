@@ -219,11 +219,13 @@ lock: "connected && (flag(wizard) || attr(tribe, glasswalker))"
 
 ---
 
-## Planned Enhancements
+## Terminal size (NAWS)
 
-| Feature | Notes |
-|---------|-------|
-| Terminal/screen settings | Width detection via Telnet NAWS, persistent pager settings |
+Telnet NAWS (RFC 1073) sets `session.meta.termWidth` /
+`termHeight` (clamped 40–250 × 1–255). Values persist on the
+player as `data.termWidth` / `data.termHeight`. Softcode
+`width()` / `height()` and telnet word-wrap use the live size
+(default 78×24 when unset).
 ---
 
 ## Connecting with a Traditional MU* Client

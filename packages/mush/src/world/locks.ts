@@ -62,11 +62,60 @@ export async function callLockFunc(
 registerBuiltin("flag", (enactor, _target, args) =>
   enactor.flags.has((args[0] ?? "").trim().toLowerCase()));
 
+/** Case-insensitive own-property lookup on enactor.state. */
+function stateAttr(
+  state: Record<string, unknown> | undefined,
+  name: string,
+): unknown {
+  if (!state || !name) return undefined;
+  if (Object.hasOwn(state, name)) return state[name];
+  const want = name.toLowerCase();
+  for (const k of Object.keys(state)) {
+    if (k.toLowerCase() === want) return state[k];
+  }
+  return undefined;
+}
+
+/**
+ * Compare lock attr values. Supports bare equality and
+ * prefixed ops: >, <, >=, <=, =, !=, <>.
+ */
+export function compareLockAttrValue(
+  actual: string,
+  wantRaw: string,
+): boolean {
+  const want = wantRaw.trim();
+  const cmp = want.match(/^(>=|<=|!=|<>|>|<|=)(.*)$/);
+  if (cmp) {
+    const op = cmp[1];
+    const rhs = cmp[2].trim();
+    const numWant = parseFloat(rhs);
+    const numAct = parseFloat(actual);
+    const bothNum = !Number.isNaN(numWant) && !Number.isNaN(numAct) &&
+      /^-?\d+(\.\d+)?$/.test(rhs) &&
+      /^-?\d+(\.\d+)?$/.test(actual.trim());
+    if (bothNum) {
+      if (op === ">=") return numAct >= numWant;
+      if (op === "<=") return numAct <= numWant;
+      if (op === ">") return numAct > numWant;
+      if (op === "<") return numAct < numWant;
+      if (op === "=") return numAct === numWant;
+      if (op === "!=" || op === "<>") return numAct !== numWant;
+    }
+    if (op === "=") return actual === rhs;
+    if (op === "!=" || op === "<>") return actual !== rhs;
+    return false;
+  }
+  return actual === want;
+}
+
 registerBuiltin("attr", (enactor, _target, args) => {
   const attrName = (args[0] ?? "").trim();
-  if (!Object.hasOwn(enactor.state, attrName)) return false;
+  if (!attrName) return false;
+  const actual = stateAttr(enactor.state, attrName);
+  if (actual === undefined) return false;
   if (args.length < 2) return true;
-  return String(enactor.state[attrName]) === args[1].trim();
+  return compareLockAttrValue(String(actual), args[1] ?? "");
 });
 
 registerBuiltin("type", (enactor, _target, args) =>
@@ -352,24 +401,9 @@ const checkAtom = async (
     const colon = atom.indexOf(":");
     const attr = atom.slice(0, colon);
     const val = atom.slice(colon + 1);
-    const actualVal =
-      enactor.state?.[attr] ??
-      enactor.state?.[attr.toLowerCase()];
+    const actualVal = stateAttr(enactor.state, attr);
     if (actualVal === undefined) return false;
-
-    const cmpMatch = val.match(/^(>=|<=|>|<)(.+)$/);
-    if (cmpMatch) {
-      const [, op, numStr] = cmpMatch;
-      const numVal = parseFloat(numStr);
-      const actualNum = parseFloat(String(actualVal));
-      if (!isNaN(numVal) && !isNaN(actualNum)) {
-        if (op === ">=") return actualNum >= numVal;
-        if (op === "<=") return actualNum <= numVal;
-        if (op === ">") return actualNum > numVal;
-        if (op === "<") return actualNum < numVal;
-      }
-    }
-    return String(actualVal) === val;
+    return compareLockAttrValue(String(actualVal), val);
   }
 
   // +FLAG or bare FLAG / power word (wizard, builder+, connected).

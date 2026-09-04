@@ -162,6 +162,12 @@ export const initializeEngine = async (
     await loadCmds();
   }
 
+  // NAWS / client term size → player data.termWidth/Height
+  const { wireTermSizePersistence } = await import(
+    "./session/term-size.ts"
+  );
+  wireTermSizePersistence();
+
   // Soft-register packaged help (optional @ursamu/help)
   try {
     const { registerHelpDir } = await import(

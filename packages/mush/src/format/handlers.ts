@@ -52,12 +52,15 @@ export function registerFormatTemplate(
   const handler: FormatHandler = async (u, target, defaultArg) => {
     const { runSoftcodeSimple } = await import("../softcode/engine.ts");
     const out = await runSoftcodeSimple(mushSource, {
-      actorId:    u.me.id,
+      actorId: u.me.id,
       executorId: target.id,
-      args:       [defaultArg],
-      socketId:   u.socketId,
+      args: [defaultArg],
+      socketId: u.socketId,
     });
-    return out ?? null;
+    if (out == null || out === "" || out.startsWith("#-1")) {
+      return null;
+    }
+    return out;
   };
   registerFormatHandler(slot, handler);
   return handler;
@@ -83,6 +86,10 @@ export async function runPluginFormatHandlers(
   return null;
 }
 
+function isSoftcodeFailure(out: string): boolean {
+  return out.startsWith("#-1");
+}
+
 export async function resolveFormat(
   u: IUrsamuSDK,
   target: IDBObj,
@@ -93,17 +100,31 @@ export async function resolveFormat(
     try {
       const raw = await u.attr.get(target.id, slot);
       if (raw != null && raw !== "") {
-        const { runSoftcodeSimple } = await import("../softcode/engine.ts");
-        return await runSoftcodeSimple(raw, {
-          actorId:    u.me.id,
+        const { runSoftcodeSimple } = await import(
+          "../softcode/engine.ts"
+        );
+        const out = await runSoftcodeSimple(raw, {
+          actorId: u.me.id,
           executorId: target.id,
-          args:       [defaultArg],
-          socketId:   u.socketId,
+          args: [defaultArg],
+          socketId: u.socketId,
         });
+        // Parse/eval failures surface as #-1 … — fall through like throw
+        if (out != null && isSoftcodeFailure(out)) {
+          console.warn(
+            `[resolveFormat ${slot}] softcode eval failed ` +
+              `on #${target.id}: ${out}`,
+          );
+        } else if (out != null && out !== "") {
+          return out;
+        }
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      console.warn(`[resolveFormat ${slot}] softcode eval failed on #${target.id}: ${msg}`);
+      console.warn(
+        `[resolveFormat ${slot}] softcode eval failed ` +
+          `on #${target.id}: ${msg}`,
+      );
     }
   }
   return await runPluginFormatHandlers(slot, u, target, defaultArg);

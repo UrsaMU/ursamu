@@ -18,6 +18,7 @@ import {
   restoreRegisters,
   toLibCtx,
 } from "./context.ts";
+import { getAttributeValue } from "../world/get-attribute.ts";
 
 // Import all UrsaMU stdlib modules (side-effect registrations into _registry).
 import "./stdlib/index.ts";
@@ -43,10 +44,25 @@ const bridgeAccessor: ObjectAccessor = {
     const ctx = _activeCtx;
     if (!ctx) return null;
     const e = expr.trim().toLowerCase();
-    if (e === "me")      return ctx.executor.id;
-    if (e === "here")    return ctx.executor.location ?? null;
+    if (e === "me") return ctx.executor.id;
+    if (e === "here") return ctx.executor.location ?? null;
     if (e === "enactor") return ctx.enactor;
-    if (/^#(-?\d+)$/.test(expr)) return expr.slice(1);
+    const raw = expr.trim();
+    if (raw.startsWith("#") && raw.length > 1) {
+      const idOrTag = raw.slice(1);
+      const byId = await ctx.db.queryById(idOrTag);
+      if (byId) return byId.id;
+      if (!/^\d+$/.test(idOrTag)) {
+        const personal = await ctx.db.getPlayerTagById(
+          ctx.enactor,
+          idOrTag,
+        );
+        if (personal) return personal;
+        const global = await ctx.db.getTagById(idOrTag);
+        if (global) return global;
+      }
+      return null;
+    }
     const obj = await ctx.db.queryByName(expr);
     return obj?.id ?? null;
   },
@@ -124,9 +140,7 @@ const bridgeAccessor: ObjectAccessor = {
   async findObject(_from: string, expr: string): Promise<string | null> {
     const ctx = _activeCtx;
     if (!ctx) return null;
-    if (/^#(-?\d+)$/.test(expr)) return expr.slice(1);
-    const obj = await ctx.db.queryByName(expr);
-    return obj?.id ?? null;
+    return bridgeAccessor.resolveTarget(_from, expr);
   },
   async getTag(name: string): Promise<string | null> {
     const ctx = _activeCtx;
@@ -393,6 +407,9 @@ export async function runSoftcode(
   _activeCtx = ctx;
   try {
     return await _engine.evalString(code, toLibCtx(ctx));
+  } catch (e: unknown) {
+    const { formatEvalError } = await import("./eval-errors.ts");
+    return formatEvalError(e);
   } finally {
     _activeCtx = null;
   }
@@ -442,7 +459,7 @@ export async function runSoftcodeSimple(
       lcon:              async (locId) => (await dbojs.query({ location: locId })).map(hydrate),
       lwho:              async () => (await dbojs.query({ flags: /connected/i })).filter((r) => r.flags.includes("player")).map(hydrate),
       lattr:             async (objId) => { const r = await dbojs.queryOne({ id: objId }); return ((r?.data?.attributes as Array<{ name: string }> | undefined) ?? []).map((a) => a.name); },
-      getAttribute:      async (obj, attr) => { const attrs = (obj.state?.attributes as Array<{ name: string; value: string }> | undefined) ?? []; return attrs.find((a) => a.name.toUpperCase() === attr.toUpperCase())?.value ?? null; },
+      getAttribute: (obj, attr) => getAttributeValue(obj, attr),
       getTagById:        async () => null,
       getPlayerTagById:  async () => null,
       lsearch:           async () => [],
@@ -456,22 +473,52 @@ export async function runSoftcodeSimple(
     },
     output: {
       send: (msg: string, targetId?: string) => {
-        const dest = targetId ?? opts.socketId ?? opts.actorId;
-        send([dest], msg);
+        void (async () => {
+          const { handleCemitSentinel, isCemitSentinel } = await import(
+            "./cemit.ts"
+          );
+          if (isCemitSentinel(msg)) {
+            await handleCemitSentinel(msg);
+            return;
+          }
+          const { socketsForPlayer } = await import(
+            "../world/move.ts"
+          );
+          const dest = targetId ?? opts.socketId ?? opts.actorId;
+          const socks = dest
+            ? socketsForPlayer(dest)
+            : [];
+          const targets = socks.length
+            ? socks
+            : (dest ? [dest] : []);
+          if (targets.length) send(targets, msg);
+        })().catch(console.error);
       },
       roomBroadcast: (msg: string, roomId: string, excludeId?: string) => {
-        dbojs.query({ location: roomId }).then((contents) => {
-          for (const c of contents) {
-            if (c.flags.includes("connected") && c.id !== excludeId) {
-              send([c.id], msg);
-            }
-          }
-        }).catch(console.error);
+        void (async () => {
+          const { sendToRoom } = await import("../world/move.ts");
+          await sendToRoom(roomId, msg, excludeId);
+        })().catch(console.error);
       },
       broadcast: (msg: string) => {
-        dbojs.query({ flags: /connected/i }).then((players) => {
-          for (const p of players) send([p.id], msg);
-        }).catch(console.error);
+        void (async () => {
+          const { handleCemitSentinel, isCemitSentinel } = await import(
+            "./cemit.ts"
+          );
+          if (isCemitSentinel(msg)) {
+            await handleCemitSentinel(msg);
+            return;
+          }
+          const { socketsForPlayer } = await import(
+            "../world/move.ts"
+          );
+          const players = await dbojs.query({ flags: /connected/i });
+          const socks = new Set<string>();
+          for (const p of players) {
+            for (const s of socketsForPlayer(p.id)) socks.add(s);
+          }
+          if (socks.size) send([...socks], msg);
+        })().catch(console.error);
       },
     },
   };

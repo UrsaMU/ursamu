@@ -67,7 +67,10 @@ class LocalSandbox {
 
         if (type === "send")           { handleSend(msg, context); return; }
         if (type === "notify")         { handleNotify(msg, worker); return; }
-        if (type === "broadcast")      { handleBroadcast(msg); return; }
+        if (type === "broadcast") {
+          await handleBroadcast(msg);
+          return;
+        }
         if (type === "room:broadcast") { await handleRoomBroadcast(msg); return; }
         if (type === "teleport")       { handleTeleport(msg, context); return; }
 

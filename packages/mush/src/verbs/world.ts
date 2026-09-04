@@ -57,7 +57,7 @@ export async function execTeleport(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
-  u.teleport(target.id, destination.id);
+  await Promise.resolve(u.teleport(target.id, destination.id));
   u.send(
     `You teleport ${u.util.displayName(target, actor)} to ` +
       `${u.util.displayName(destination, actor)}.`,
@@ -109,7 +109,7 @@ export async function execTel(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
-  await u.db.modify(target.id, "$set", { location: dest.id });
+  await Promise.resolve(u.teleport(target.id, dest.id));
   u.send(`You are teleported to ${dest.name || dest.id}.`, target.id);
   u.send(
     `You teleport ${target.name || target.id} to ${dest.name || dest.id}.`,

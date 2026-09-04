@@ -108,20 +108,34 @@ export async function execWall(u: IUrsamuSDK): Promise<void> {
 export async function execCemit(u: IUrsamuSDK): Promise<void> {
   const arg = u.cmd.args[0] || "";
   const eqIdx = arg.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: @cemit <channel>=<message>"); return; }
+  if (eqIdx === -1) {
+    u.send("Usage: @cemit <channel>=<message>");
+    return;
+  }
 
   const chanName = arg.slice(0, eqIdx).trim();
   const message = await u.evalString(arg.slice(eqIdx + 1));
-  if (!chanName || !message) { u.send("Usage: @cemit <channel>=<message>"); return; }
+  if (!chanName || !message) {
+    u.send("Usage: @cemit <channel>=<message>");
+    return;
+  }
 
-  const chans = (await u.chan.list()) as Array<{ name: string; header?: string; alias?: string }>;
+  const { deliverCemit } = await import("../softcode/cemit.ts");
+  const chans = (await u.chan.list()) as Array<{
+    name: string;
+    header?: string;
+    alias?: string;
+  }>;
   const chan = chans.find(
     (c) =>
       c.name.toLowerCase() === chanName.toLowerCase() ||
-      c.alias?.toLowerCase() === chanName.toLowerCase()
+      c.alias?.toLowerCase() === chanName.toLowerCase(),
   );
-  if (!chan) { u.send(`Channel '${chanName}' not found.`); return; }
-  u.broadcast(`${chan.header || `[${chan.name}]`} ${message}`);
+  if (!chan) {
+    u.send(`Channel '${chanName}' not found.`);
+    return;
+  }
+  await deliverCemit(chan.name, message);
   u.send(`Message sent to channel ${chan.name}.`);
 }
 

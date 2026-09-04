@@ -9,7 +9,7 @@
  *   pemit(player, message)         — send to named player
  *   remit(room, message)           — broadcast to room (all contents)
  *   oemit(player, message)         — broadcast to room, excluding player
- *   cemit(channel, message)        — send to channel (stub: not yet wired)
+ *   cemit(channel, message)        — send to channel (rooms + header)
  *   emit(message)                  — broadcast to executor's room
  *   npemit(player, message)        — pemit without player name prefix
  *   trigger(obj/attr[, args...])   — trigger an attribute (via @trigger wire)
@@ -20,19 +20,32 @@ import type { IDBObj } from "../../world/types.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────
 
-async function resolveObj(ref: string, ctx: EvalContext): Promise<IDBObj | null> {
+async function resolveObj(
+  ref: string,
+  ctx: EvalContext,
+): Promise<IDBObj | null> {
   const r = ref.trim();
   if (!r) return null;
-  if (r.toLowerCase() === "me")      return ctx.executor;
-  if (r.toLowerCase() === "here")    return await ctx.db.queryById(ctx.executor.location ?? "") ?? null;
+  if (r.toLowerCase() === "me") return ctx.executor;
+  if (r.toLowerCase() === "here") {
+    return await ctx.db.queryById(ctx.executor.location ?? "") ??
+      null;
+  }
   if (r.toLowerCase() === "enactor") return ctx.actor;
-  if (/^#(-?\d+)$/.test(r))         return await ctx.db.queryById(r.slice(1));
-  if (/^#[a-zA-Z]/.test(r)) {
-    const tagName  = r.slice(1);
-    const personalId = await ctx.db.getPlayerTagById(ctx.actor.id, tagName);
-    if (personalId) return await ctx.db.queryById(personalId);
-    const globalId = await ctx.db.getTagById(tagName);
-    return globalId ? await ctx.db.queryById(globalId) : null;
+  if (r.startsWith("#") && r.length > 1) {
+    const idOrTag = r.slice(1);
+    const byId = await ctx.db.queryById(idOrTag);
+    if (byId) return byId;
+    if (!/^\d+$/.test(idOrTag)) {
+      const personalId = await ctx.db.getPlayerTagById(
+        ctx.actor.id,
+        idOrTag,
+      );
+      if (personalId) return await ctx.db.queryById(personalId);
+      const globalId = await ctx.db.getTagById(idOrTag);
+      return globalId ? await ctx.db.queryById(globalId) : null;
+    }
+    return null;
   }
   return await ctx.db.queryByName(r);
 }

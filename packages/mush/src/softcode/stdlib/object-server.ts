@@ -173,9 +173,27 @@ register("hasrxlevel",   async () => "0");
 register("hastxlevel",   async () => "0");
 register("listrlevels",  async () => "");
 register("terminfo",     async () => "");
-register("height",       async () => "24");
-register("width",        async () => "80");
-register("colordepth",   async () => "16");
+register("height", async (_a, ctx) => {
+  const uctx = ctx as unknown as {
+    executor?: { state?: Record<string, unknown> };
+  };
+  const h = uctx.executor?.state?.termHeight;
+  if (typeof h === "number" && Number.isFinite(h) && h >= 1 && h <= 255) {
+    return String(Math.trunc(h));
+  }
+  return "24";
+});
+register("width", async (_a, ctx) => {
+  const uctx = ctx as unknown as {
+    executor?: { state?: Record<string, unknown> };
+  };
+  const w = uctx.executor?.state?.termWidth;
+  if (typeof w === "number" && Number.isFinite(w) && w >= 40 && w <= 250) {
+    return String(Math.trunc(w));
+  }
+  return "78";
+});
+register("colordepth", async () => "16");
 register("isobjid",      async (a) => /^#\d+$/.test(a[0] ?? "") ? "1" : "0");
 register("bittype",      async () => "0");
 

@@ -29,17 +29,24 @@ export async function resolveObj(ref: string, ctx: EvalContext): Promise<IDBObj 
   let result: IDBObj | null = null;
   if (r.toLowerCase() === "here") {
     result = await ctx.db.queryById(ctx.executor.location ?? "") ?? null;
-  } else if (/^#(-?\d+)$/.test(r)) {
-    result = await ctx.db.queryById(r.slice(1));
-  } else if (/^#[a-zA-Z]/.test(r)) {
-    // #tagname — check actor's personal tags first, then global tags
-    const tagName = r.slice(1);
-    const personalId = await ctx.db.getPlayerTagById(ctx.actor.id, tagName);
-    if (personalId) {
-      result = await ctx.db.queryById(personalId);
-    } else {
-      const globalId = await ctx.db.getTagById(tagName);
-      result = globalId ? await ctx.db.queryById(globalId) : null;
+  } else if (r.startsWith("#") && r.length > 1) {
+    const idOrTag = r.slice(1);
+    // Exact dbref first (numeric or slug ids like "room_limbo")
+    result = await ctx.db.queryById(idOrTag);
+    if (!result && !/^\d+$/.test(idOrTag)) {
+      // #tagname — personal tags, then global
+      const personalId = await ctx.db.getPlayerTagById(
+        ctx.actor.id,
+        idOrTag,
+      );
+      if (personalId) {
+        result = await ctx.db.queryById(personalId);
+      } else {
+        const globalId = await ctx.db.getTagById(idOrTag);
+        result = globalId
+          ? await ctx.db.queryById(globalId)
+          : null;
+      }
     }
   } else {
     result = await ctx.db.queryByName(r);

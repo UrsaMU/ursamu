@@ -41,8 +41,9 @@ arguments and return a boolean.
 | Lockfunc | Example | Passes when |
 |----------|---------|-------------|
 | `flag(name)` | `flag(wizard)` | enactor has the named flag |
-| `attr(name)` | `attr(tribe)` | enactor.state has own-property `name` |
-| `attr(name, value)` | `attr(class, warrior)` | `state[name] === value` (case-insensitive key) |
+| `attr(name)` | `attr(tribe)` | enactor.state has own-property `name` (case-insensitive key) |
+| `attr(name, value)` | `attr(class, warrior)` | `state[name] === value` |
+| `attr(name, op)` | `attr(level,>4)` | numeric compare: `>`, `<`, `>=`, `<=`, `=`, `!=` / `<>` |
 | `type(name)` | `type(player)` | enactor has the type flag (player/room/thing/exit) |
 | `is(#id)` | `is(#5)` | enactor's dbref is `#5` |
 | `holds(#id)` | `holds(#12)` | enactor's inventory includes `#12` |

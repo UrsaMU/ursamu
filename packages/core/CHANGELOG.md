@@ -3,6 +3,19 @@
 All notable changes to `@ursamu/core` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.3] - 2026-09-04
+
+### Added
+
+- `clampTermHeight`, `applySessionTermSize`, `resolveWrapWidth`
+- `session:termSize` hook (NAWS / client size updates)
+- WS packets with `data.termWidth` / `termHeight` update session
+
+### Changed
+
+- Telnet word-wrap uses session `termWidth` when set (else 78)
+- NAWS stores width and height on session.meta
+
 ## [1.0.2] - 2026-08-05
 
 ### Fixed

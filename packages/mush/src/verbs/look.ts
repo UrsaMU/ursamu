@@ -476,7 +476,11 @@ async function hydrateLookContents(
 ): Promise<void> {
   try {
     const found = await u.db.search({ location: target.id });
-    if (Array.isArray(found)) target.contents = found;
+    // Empty search must not wipe preloaded contents (tests, lagging
+    // adapters). Prefer DB when it returns at least one object.
+    if (Array.isArray(found) && found.length > 0) {
+      target.contents = found;
+    }
   } catch {
     /* keep target.contents if already set */
   }

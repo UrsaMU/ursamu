@@ -290,7 +290,13 @@ export async function handleEventsMessage(
         const { fireCaretPatterns } = await import("../../world/caret-patterns.ts");
         const speakerId = d.speakerId ?? (context?.id as string | undefined) ?? "";
         const socketId  = (context?.socketId as string | undefined) ?? "";
-        await fireCaretPatterns(d.roomId, d.text, speakerId, socketId, dbojs as { query: (q: unknown) => Promise<IDBOBJ[]> }).catch(
+        await fireCaretPatterns(
+          d.roomId,
+          d.text,
+          speakerId,
+          socketId,
+          dbojs,
+        ).catch(
           (e: unknown) => console.error("[events:emit room:text]", e),
         );
       }
