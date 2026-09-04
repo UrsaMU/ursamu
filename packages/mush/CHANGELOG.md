@@ -1,3 +1,7 @@
+## 1.0.38
+
+- Depend on `@ursamu/core@^1.0.5` (NAWS APIs actually on JSR).
+
 ## 1.0.37
 
 - `moveObject`: teleport/home leave+arrive + auto-look;

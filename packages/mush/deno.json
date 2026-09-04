@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/mush",
-  "version": "1.0.37",
+  "version": "1.0.38",
   "exports": {
     ".": "./mod.ts",
     "./app": "./src/app.ts",
@@ -21,7 +21,7 @@
   },
   "imports": {
     "@ursamu/mush": "./mod.ts",
-    "@ursamu/core": "jsr:@ursamu/core@^1.0.3",
+    "@ursamu/core": "jsr:@ursamu/core@^1.0.5",
     "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.7.0",
     "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.7.0/eval",
     "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.7.0/parse",
