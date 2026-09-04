@@ -1,7 +1,7 @@
 /**
  * +attune / +magic — magic items.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import { migrateSheet } from "../stats/dnd_sheet.ts";
 import {
   applyAttune,

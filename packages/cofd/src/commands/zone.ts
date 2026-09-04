@@ -2,7 +2,7 @@
 // wandering NPCs. v1 surface: create, add rooms, populate, wander on/off,
 // list, show, destroy.
 
-import { divider, type IDBObj, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IDBObj, type IUrsamuSDK } from "@ursamu/mush";
 import {
   addRoomsToZone,
   addSpawnRule,

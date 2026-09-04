@@ -192,7 +192,7 @@ UrsaMU is at **v2.6.0** — production-ready since v2.0.0.
 - **Core systems**: complete — 102 native commands, full TinyMUX 2.x softcode (250+ functions), sandbox, WebSocket, Telnet sidecar, Discord bridge, scenes, channels, zone system, format-handler pipeline, security hardening
 - **Plugin system**: atomic fail-fast installs with semver constraints and rollback (v2.6.0); typed `IPlugin` lifecycle and `gameHooks` declaration merging
 - **Stdlib (v2.5.1+)**: Noise, PRNG, physics, spatial, interpolation, vector primitives re-exported from `mod.ts`
-- **Status**: actively maintained, published on JSR as `@ursamu/ursamu`
+- **Status**: actively maintained, published on JSR as `@ursamu/mush`
 
 The project is open-source under the MIT License. Contributions are welcome!
 ---

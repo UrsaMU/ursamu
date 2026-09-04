@@ -4,7 +4,7 @@
 // (see docs/xp-beats-spec.md s2). The standard and Arcane tracks are kept
 // strictly separate.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { addBeats } from "../xp/beats.ts";
 import {
   refreshAdvantages,

@@ -2,7 +2,7 @@
  * +staffkit — staff overview for D&D (chargen, XP, delves).
  */
 import { addCmd, header, footer, type IUrsamuSDK } from
-  "@ursamu/ursamu";
+  "@ursamu/mush";
 import { listOpenCgen } from "../chargen/job_helpers.ts";
 import { approvePlayer } from "../chargen/approve_core.ts";
 import { migrateSheet, defaultSheet } from

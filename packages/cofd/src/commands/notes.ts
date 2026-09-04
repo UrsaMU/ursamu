@@ -1,6 +1,6 @@
 // +notes -- character notes with public/private visibility.
 
-import { header, footer, divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { header, footer, divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   noteSlug,
   validateName,

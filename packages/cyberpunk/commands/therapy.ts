@@ -1,8 +1,8 @@
 /**
  * +therapy -- Humanity Recovery and Cyberpsychosis Treatment
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import { therapyDV, applyTherapy, cyberpsychosisSeverity } from "../engine/cyberpsychosis.ts";
 import { recalcDerived } from "../engine/character.ts";

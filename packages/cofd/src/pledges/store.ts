@@ -1,6 +1,6 @@
 // Store management for Pledges using DBO.
 
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 import type { PledgeRecord } from "./types.ts";
 
 // deno-lint-ignore no-explicit-any

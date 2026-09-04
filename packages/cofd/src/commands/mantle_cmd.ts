@@ -1,6 +1,6 @@
 // +mantle — show seasonal Mantle bonuses; claim court Glamour beat.
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   mantleBonusHelp,
   mantleConvertClarity,

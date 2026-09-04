@@ -2,7 +2,7 @@
  * CofD initiative formula only.
  * Engine activate/sort lives in @ursamu/combat.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type { CofdSheet } from "../stats/index.ts";
 import {
   isWeaponType,

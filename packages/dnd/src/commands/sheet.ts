@@ -1,4 +1,4 @@
-import { addCmd, type IUrsamuSDK, header, divider, footer } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK, header, divider, footer } from "@ursamu/mush";
 import {
   defaultSheet,
   type DndAbility,

@@ -1,7 +1,7 @@
 /**
  * Shared use logic for object:use hook, +lazarus, +drug/use.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   ARR,
   ERR,

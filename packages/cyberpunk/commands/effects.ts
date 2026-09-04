@@ -4,8 +4,8 @@
  * The actual tick happens from the combat turn loop (see engine/effects.ts
  * tickAmmoEffects). This command is a player-facing view + a manual snuff.
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, IAmmoEffectState } from "../db/schemas.ts";
 import { extinguishBurn, effectLabel } from "../engine/effects.ts";
 import { rollD10Critical } from "../engine/dice.ts";

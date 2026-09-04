@@ -1,6 +1,6 @@
 // +xp command: view pools, spend XP to raise traits, and show the cost table.
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import { spendXp } from "../xp/spend.ts";
 import { XP_COSTS } from "../xp/costs.ts";
 import type { CofdSheet } from "../stats/index.ts";

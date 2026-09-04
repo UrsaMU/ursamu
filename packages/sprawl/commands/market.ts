@@ -2,8 +2,8 @@
  * +market — street price browser + buy.
  * Lists are fixed-column tables; buy accepts # from last list.
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   ARR,
   ERR,

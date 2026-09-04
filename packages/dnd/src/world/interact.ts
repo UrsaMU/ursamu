@@ -2,7 +2,7 @@
  * Interactive world props: subtle desc cues + no-get locks.
  * No banner-style >> hints — weave into description instead.
  */
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 
 // deno-lint-ignore no-explicit-any
 type Any = any;

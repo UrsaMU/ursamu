@@ -2,7 +2,7 @@
 // Hob Alarm combat cue: see checkHobAlarmOnEnter in
 // hedge_helpers (fires on moveActor into a Hollow).
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   addHollowEnhancement,
   findHollowEnhancement,

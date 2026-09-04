@@ -1,6 +1,6 @@
 // Staff/builder +hedge: create, link, destroy, ways list.
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   createHedgeway,
   defaultHedgeRoom,

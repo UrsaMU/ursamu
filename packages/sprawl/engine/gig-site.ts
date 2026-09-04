@@ -2,7 +2,7 @@
  * Instanced gig site room — one room per run, look/image
  * updates per node, destroyed on leave/complete.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type { IActiveGig, ISprawlChar } from "../db/schemas.ts";
 import { getGigRoomArt } from "./gig-art.ts";
 import {

@@ -11,7 +11,7 @@ import {
   initDndCombat,
 } from "../src/combat/ports.ts";
 import { defaultSheet } from "../src/stats/dnd_sheet.ts";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

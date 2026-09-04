@@ -1,6 +1,6 @@
 // +bedlam — Incite Bedlam (CtL p.110).
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   isChangelingSheet,
   pandemoniacalBonus,

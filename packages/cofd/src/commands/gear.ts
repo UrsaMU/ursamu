@@ -6,7 +6,7 @@
 // Native get/drop/give handle item movement -- /drop, /pickup, and /give
 // switches were removed in the durability/ammo pass.
 
-import { divider, type IUrsamuSDK, type IDBObj } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK, type IDBObj } from "@ursamu/mush";
 import {
   carriedItems,
   consumeReload,

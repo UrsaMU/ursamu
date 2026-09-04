@@ -8,7 +8,7 @@ import {
   header,
   divider,
   footer,
-} from "@ursamu/ursamu";
+} from "@ursamu/mush";
 import {
   gearByName,
   gearToDndState,

@@ -199,7 +199,7 @@ PLUGIN-REGISTERED SUBSTITUTIONS
 
 Plugins can register custom substitution codes via registerSoftcodeSub():
 
-  import { registerSoftcodeSub } from "jsr:@ursamu/ursamu";
+  import { registerSoftcodeSub } from "jsr:@ursamu/mush";
 
   registerSoftcodeSub("myplugin_ver", async (ctx) => "1.0.0");
 

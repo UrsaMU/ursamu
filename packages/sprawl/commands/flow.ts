@@ -1,6 +1,6 @@
 /** +flow +corp +npc — atlas, corps, room NPC objects. */
-import { addCmd } from "@ursamu/ursamu";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   footer,
   ARR,

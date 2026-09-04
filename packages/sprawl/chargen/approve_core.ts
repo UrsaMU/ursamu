@@ -1,7 +1,7 @@
 /**
  * Shared approve / reject — +chargen switches, job:closed hook.
  */
-import { dbojs, send, sessions } from "@ursamu/ursamu";
+import { dbojs, send, sessions } from "@ursamu/mush";
 import type { ISprawlChar } from "../db/schemas.ts";
 import { CHARGEN } from "../engine/catalog.ts";
 import { completeCgenJob } from "./complete_cgen_job.ts";

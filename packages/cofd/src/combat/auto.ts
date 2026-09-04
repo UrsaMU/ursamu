@@ -10,7 +10,7 @@
 //   4. endTurnAndWalk(...)       runs the AI walker after the PC's instant
 //                                action consumes their turn
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   addParticipant,
   advanceTurn,

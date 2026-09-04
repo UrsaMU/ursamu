@@ -1,7 +1,7 @@
 /**
  * +level — level-up with ASI/feat and optional spell pick.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   DND_ABILITIES,
   migrateSheet,

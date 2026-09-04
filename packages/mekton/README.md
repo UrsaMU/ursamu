@@ -102,5 +102,5 @@ deno test mekton-zeta/tests/ --allow-net --allow-read --allow-env --allow-write 
 
 - Commands registered via `addCmd()` are not unregistered on plugin removal.
 - REST routes persist until server restart.
-- `IGameSystem` is defined locally in `types.ts` (not yet in `jsr:@ursamu/ursamu` v2.x).
+- `IGameSystem` is defined locally in `types.ts` (not yet in `jsr:@ursamu/mush` v2.x).
 - Psionics (P12) and Mecha construction (P13) are deferred to future phases.

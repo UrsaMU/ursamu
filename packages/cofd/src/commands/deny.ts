@@ -1,7 +1,7 @@
 // +deny -- return chargen draft; comment on open CGEN job.
 // +unapprove is an alias. Player gets live send and @mail.
 
-import { header, footer, type IUrsamuSDK } from "@ursamu/ursamu";
+import { header, footer, type IUrsamuSDK } from "@ursamu/mush";
 import type { CofdCgState } from "../chargen/index.ts";
 import { sendCofdMail } from "../integrations/mail.ts";
 import {

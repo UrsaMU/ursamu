@@ -6,7 +6,7 @@
 // the SDK surface (u.me.state.cofd / target.state.cofd); writes target
 // "data.cofd" -- writing to "state.cofd" silently drops the data.
 
-import { divider, type IDBObj, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IDBObj, type IUrsamuSDK } from "@ursamu/mush";
 import {
   abandonManeuver,
   applyHardLeverage,

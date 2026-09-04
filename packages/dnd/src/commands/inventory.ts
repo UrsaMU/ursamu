@@ -1,7 +1,7 @@
 /**
  * D&D inventory commands: list, wield, wear, remove, item/create.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import { getAbilityMod, migrateSheet } from
   "../stats/dnd_sheet.ts";
 import {

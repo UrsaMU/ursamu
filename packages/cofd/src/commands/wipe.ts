@@ -1,6 +1,6 @@
 // +cg/wipe — staff full character reset (sheet + chargen + approval).
 
-import { header, footer, type IUrsamuSDK } from "@ursamu/ursamu";
+import { header, footer, type IUrsamuSDK } from "@ursamu/mush";
 import { wipeCharacter } from "../chargen/wipe_core.ts";
 import { parseTargetAndNotes } from "./approve_job.ts";
 

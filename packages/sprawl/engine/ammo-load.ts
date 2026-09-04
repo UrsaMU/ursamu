@@ -2,7 +2,7 @@
  * Load specialty ammo into a firearm Thing.
  * Resolves gun + ammo from inventory / catalog / market names.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   AMMO,
   MARKET,

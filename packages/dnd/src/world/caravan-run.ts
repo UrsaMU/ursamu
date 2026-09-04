@@ -1,7 +1,7 @@
 /**
  * Persist caravan escort state on player.
  */
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   type CaravanRun,
   caravanBySlug,

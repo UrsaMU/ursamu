@@ -1,6 +1,6 @@
 // Staff +hedge/set, /setway, and /season.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   defaultHedgeRoom,
   findHedgewayById,

@@ -6,7 +6,7 @@ import {
   restoreSpeechCmds,
 } from "../src/speech.ts";
 import { mockPlayer, mockU } from "./helpers/mockU.ts";
-import { cmds } from "@ursamu/ursamu";
+import { cmds } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

@@ -825,16 +825,17 @@ Authentication: pass `Authorization: Bearer <jwt>` header.
 
 ## Plugin Coupling Patterns
 
-### Rule: never use `@ursamu/ursamu/*` sub-paths inside `src/plugins/`
+### Rule: never hang other plugins off `@ursamu/mush/*` sub-paths
 
-When running the engine directly, Deno resolves `@ursamu/ursamu` from the
-local `deno.json` — not from JSR. A sub-path export that is absent from the
-local `deno.json` will halt startup even if the published JSR version has it.
+Engine imports use `@ursamu/mush` / `@ursamu/core`. Other plugins are their
+own packages (`@ursamu/jobs`, `@ursamu/help`, …). Do not invent engine
+sub-paths for plugin code — they will fail at startup.
 
 | Context | Correct import |
 |---|---|
 | Plugin importing another **bundled** plugin | Relative: `../../jobs/mod.ts` |
-| External plugin (separate repo) importing engine types | Sub-path: `@ursamu/ursamu/jobs` |
+| External plugin importing engine types | `jsr:@ursamu/mush` |
+| External plugin importing jobs API | `jsr:@ursamu/jobs` |
 
 ### Two strategies for plugin-to-plugin communication
 
@@ -875,7 +876,7 @@ declare module "../../../services/Hooks/GameHooks.ts" {
 await gameHooks.emit("job:created", job);   // fires AFTER jobHooks subscribers
 
 // In plugin B (discord) — no jobs import needed:
-import { gameHooks } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
 gameHooks.on("job:created", async (job) => { /* post to webhook */ });
 ```
 
@@ -889,16 +890,15 @@ Loose coupling means:
 **Symptom** (`deno task start`):
 ```
 Error loading plugin from .../discord/index.ts:
-  TypeError: Unknown export './jobs' for '@ursamu/ursamu'.
+  TypeError: Unknown export './jobs' for '@ursamu/mush'.
 ```
 
-**Root cause**: `discord/src/job-hooks.ts` imported `jobHooks` from
-`@ursamu/ursamu/jobs`. When running the engine directly, `@ursamu/ursamu`
-resolves to the local `deno.json` whose exports did not include `./jobs`.
+**Root cause**: `discord/src/job-hooks.ts` treated jobs as an engine
+sub-path (`@ursamu/mush/jobs`) instead of its own package or hooks.
+`@ursamu/mush` has no `./jobs` export.
 
-**Wrong fix**: Add `"./jobs": "..."` to `deno.json` exports and leave the
-cross-plugin import as-is. This silences the error locally but doesn't address
-the architectural problem.
+**Wrong fix**: Add `"./jobs": "..."` to mush `deno.json` exports and leave
+the cross-plugin import as-is. That couples plugins into the engine package.
 
 **Right fix (applied)**:
 1. `GameHookMap` changed from `type` to `interface` — enables declaration merging.

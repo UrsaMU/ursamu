@@ -2,7 +2,7 @@
  * Tests for src/cli/create.ts — project scaffolding and plugin creation.
  *
  * All tests spawn create.ts as a subprocess so we exercise the real CLI
- * exactly as `dx jsr:@ursamu/ursamu init <name>` does.
+ * exactly as `dx jsr:@ursamu/mush init <name>` does.
  */
 import { assertEquals, assertStringIncludes, assert } from "@std/assert";
 import { join } from "@std/path";

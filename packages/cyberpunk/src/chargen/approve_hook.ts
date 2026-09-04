@@ -3,7 +3,7 @@
  * Submit leaves play locked (pending); this unlocks the sheet.
  */
 import { jobHooks, type IJob } from "@ursamu/jobs";
-import { dbojs, rewriteStatePaths } from "@ursamu/ursamu";
+import { dbojs, rewriteStatePaths } from "@ursamu/mush";
 import type { ICPRCharacter } from "../../db/schemas.ts";
 import { approveDraft } from "../../engine/chargen-ops.ts";
 import { emitChargenComplete } from "../../engine/emitters.ts";

@@ -2,7 +2,7 @@
  * Owned vehicles (kind=vehicle Things) + Metal Express mods.
  * Garage lives on the player; activeVehicleId is boarded hull.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type {
   ISprawlChar,
   SprawlItemData,

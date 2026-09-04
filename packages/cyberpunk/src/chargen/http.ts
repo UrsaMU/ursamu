@@ -1,7 +1,7 @@
 /**
  * HTTP handlers for /api/v1/cpr/* chargen and sheet.
  */
-import { dbojs, rewriteStatePaths } from "@ursamu/ursamu";
+import { dbojs, rewriteStatePaths } from "@ursamu/mush";
 import type { ICPRCharacter } from "../../db/schemas.ts";
 import { buildNewCharacter } from "../../engine/character.ts";
 import { ROLES } from "../../data/roles.ts";

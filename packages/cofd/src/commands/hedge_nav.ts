@@ -1,6 +1,6 @@
 // +hedge/travel — navigate the Hedge (chase vs Hedge).
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { addCondition } from "../subsystems/conditions.ts";
 import { executeRoll } from "../roller/index.ts";
 import {

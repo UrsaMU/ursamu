@@ -1,7 +1,7 @@
 /**
  * +caravan — escort jobs along seeded roads.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   caravanBySlug,
   listCaravans,

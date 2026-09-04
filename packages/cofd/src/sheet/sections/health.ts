@@ -1,6 +1,6 @@
 // Health section: damage track boxes, wound penalty, and status line.
 
-import { divider } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import { healthMax, woundPenalty } from "../../health/index.ts";
 import type { HealthTrack } from "../../stats/sheet.ts";
 import type { SheetContext, SheetSection } from "./types.ts";

@@ -3,7 +3,7 @@
 
 import { allNpcsDown, endEncounter } from "@ursamu/combat";
 import { healthMax } from "../health/index.ts";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { cofdEncounterStore } from "./encounter.ts";
 import type { Encounter, Participant } from "./types.ts";
 import { dropLoot } from "./loot.ts";

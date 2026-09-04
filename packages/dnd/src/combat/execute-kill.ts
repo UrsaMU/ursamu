@@ -1,7 +1,7 @@
 /**
  * Shared monster execute — +kill and auto-death on 0 HP.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { migrateSheet, type DndSheet } from
   "../stats/dnd_sheet.ts";
 import {

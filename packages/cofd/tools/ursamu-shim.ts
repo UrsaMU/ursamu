@@ -1,4 +1,4 @@
-// tools/ursamu-shim.ts -- Showcase shim for @ursamu/ursamu.
+// tools/ursamu-shim.ts -- Showcase shim for @ursamu/mush.
 //
 // Re-exports the real package so the showcase gets genuine implementations
 // of header(), footer(), divider(), and all types. Only two symbols are

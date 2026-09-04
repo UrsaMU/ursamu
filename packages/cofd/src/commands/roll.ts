@@ -8,7 +8,7 @@
 //   rote rerolls               -- appended as "rote(...)" after the main dice
 //   willpower spend            -- "rolls/wp" prefix
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { defaultSheet, type CofdSheet } from "../stats/index.ts";
 import { parseRollExpression, executeRoll, type AgainThreshold } from "../roller/index.ts";
 import { equippedWeaponEntry } from "../equipment/index.ts";

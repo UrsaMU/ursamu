@@ -1,7 +1,7 @@
 /**
  * Underworld room — spirits wait here until raised.
  */
-import { createObj, dbojs } from "@ursamu/ursamu";
+import { createObj, dbojs } from "@ursamu/mush";
 
 const UW_NAME = "The Grey Veil";
 const UW_KEY = "dnd-underworld";

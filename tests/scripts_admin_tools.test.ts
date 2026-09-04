@@ -32,6 +32,7 @@ function makeU(opts: {
   targetFn?: (callIdx: number) => IDBObj | undefined;
   searchResults?: IDBObj[][];
   modifyCalls?: Array<[string, string, unknown]>;
+  teleportCalls?: Array<[string, string]>;
   forceCalls?: Array<{ tId: string; cmd: string }>;
   setGameTimeCalls?: IGameTime[];
   currentGameTime?: IGameTime;
@@ -57,6 +58,14 @@ function makeU(opts: {
     send: (m: string, target?: string) => sent.push({ msg: m, target }),
     forceAs: async (tId: string, cmd: string) => {
       opts.forceCalls?.push({ tId, cmd });
+    },
+    teleport: (targetId: string, destId: string) => {
+      opts.teleportCalls?.push([targetId, destId]);
+      opts.modifyCalls?.push([
+        targetId,
+        "$set",
+        { location: destId },
+      ]);
     },
     db: {
       search: async (_q: unknown) => {
@@ -110,12 +119,14 @@ Deno.test("@tel — target not found", OPTS, async () => {
   assertStringIncludes(u.sent.map((r) => r.msg).join(" "), "can't find");
 });
 
-Deno.test("@tel — admin moves player, db.modify called with new location", OPTS, async () => {
+Deno.test("@tel — admin moves player via teleport", OPTS, async () => {
+  const teleportCalls: Array<[string, string]> = [];
   const modifyCalls: Array<[string, string, unknown]> = [];
   let call = 0;
   const u = makeU({
     flags: ["admin"],
     args: [`${TARGET_ID}=${DEST_ID}`],
+    teleportCalls,
     modifyCalls,
     targetFn: () => {
       call++;
@@ -125,6 +136,8 @@ Deno.test("@tel — admin moves player, db.modify called with new location", OPT
     },
   });
   await execTel(u);
+  assertEquals(teleportCalls.length, 1);
+  assertEquals(teleportCalls[0], [TARGET_ID, DEST_ID]);
   assertEquals(modifyCalls.length, 1);
   assertEquals(modifyCalls[0][0], TARGET_ID);
   assertEquals(modifyCalls[0][1], "$set");

@@ -2,7 +2,7 @@
  * Party / crew support for auto-gigs.
  * Leader holds the run; crew share site + turn-in pay.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type {
   IActiveGig,
   IGigInvite,
@@ -14,7 +14,7 @@ import {
   type GigReward,
   rewardsForGig,
 } from "./gigs.ts";
-import { dbojs } from "@ursamu/ursamu";
+import { dbojs } from "@ursamu/mush";
 
 export function leaderIdOf(gig: IActiveGig): string {
   return gig.leaderId || (gig.crewIds?.[0] ?? "");

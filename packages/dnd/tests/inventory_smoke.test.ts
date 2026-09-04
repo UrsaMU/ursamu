@@ -7,7 +7,7 @@ import {
   itemKind,
   uniqueById,
 } from "../src/commands/inventory-show.ts";
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

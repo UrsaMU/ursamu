@@ -1,8 +1,8 @@
 /**
  * +armor -- Armor Management
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, IArmorState } from "../db/schemas.ts";
 import { getArmor } from "../data/armor.ts";
 import { ARMOR_CATALOG } from "../data/armor.ts";

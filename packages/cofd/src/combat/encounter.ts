@@ -14,7 +14,7 @@ import {
   type CombatPorts,
   type EncounterStore,
 } from "@ursamu/combat";
-import { DBO, type IDBObj, type IUrsamuSDK } from "@ursamu/ursamu";
+import { DBO, type IDBObj, type IUrsamuSDK } from "@ursamu/mush";
 import type { Encounter, Participant } from "./types.ts";
 import { computeCofdInitiative } from "./initiative.ts";
 

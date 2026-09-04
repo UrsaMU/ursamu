@@ -17,7 +17,7 @@ import type {
   ICPRGMPayload,
 } from "../db/schemas.ts";
 
-declare module "jsr:@ursamu/ursamu" {
+declare module "jsr:@ursamu/mush" {
   interface GameHookMap {
     // -- Combat ----------------------------------------------------------
     "cpr:combat:start": (payload: {

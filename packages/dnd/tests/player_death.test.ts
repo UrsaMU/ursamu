@@ -15,7 +15,7 @@ import {
   resurrectPlayer,
 } from "../src/stats/resurrect.ts";
 import { totalCp } from "../src/stats/currency.ts";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

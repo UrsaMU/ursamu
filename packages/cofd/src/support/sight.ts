@@ -1,6 +1,6 @@
 // Flag-gated fae / spirit sight for dual look layers.
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 /** Gameline sight flags managed by approve / template sync. */
 export const SIGHT_FLAGS = ["fae", "forsaken"] as const;

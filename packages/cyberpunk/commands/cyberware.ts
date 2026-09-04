@@ -1,8 +1,8 @@
 /**
  * +cyber -- Cyberware Installation, Viewing, and Removal
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, ICyberware } from "../db/schemas.ts";
 import {
   getCyberware,
@@ -12,7 +12,7 @@ import {
   installCost,
   slugCyberName,
 } from "../data/cyberware.ts";
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 import type { IExtractedChrome } from "../db/schemas.ts";
 
 const chromeDB = new DBO<IExtractedChrome>("cpr.extracted_chrome");

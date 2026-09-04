@@ -1,6 +1,6 @@
 /** +drone — deploy and use personal drones. */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   ARR,
   ERR,

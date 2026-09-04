@@ -2,7 +2,7 @@
 // is defeated during scene resolution. Tables map archetype-key ->
 // list of { key, count } where key is an equipment catalog entry.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { createItem, itemData } from "../equipment/objects.ts";
 
 import lootData from "../../resources/loot.json" with { type: "json" };

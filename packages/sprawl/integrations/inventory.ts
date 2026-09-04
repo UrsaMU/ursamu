@@ -2,8 +2,8 @@
  * Soft hook: inventory:show
  * Stock inventory/inv/i — Sprawl chrome when enactor has a sheet.
  */
-import { gameHooks } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { getChar } from "../engine/sheet-io.ts";
 import { renderLoadoutView } from "../commands/gear.ts";
 

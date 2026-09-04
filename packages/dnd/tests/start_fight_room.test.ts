@@ -8,7 +8,7 @@ import {
   startRoomFight,
 } from "../src/combat/start-fight.ts";
 import { roomIdOf } from "../src/combat/session.ts";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   initDndCombat,
   removeDndCombat,
@@ -139,6 +139,6 @@ Deno.test("cleanup dnd encounters dbo", OPTS, async () => {
 });
 
 async function DBOClose() {
-  const { DBO } = await import("@ursamu/ursamu");
+  const { DBO } = await import("@ursamu/mush");
   await DBO.close?.();
 }

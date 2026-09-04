@@ -12,7 +12,7 @@
 //                               coming round. Postures: ambush | overwatch |
 //                               guard | first-fire-on-adjacent.
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   advanceTurn,
   getEncounterForRoom,

@@ -1,8 +1,8 @@
 /**
  * +gig -- Jobs Board and Mission System
  */
-import { addCmd, DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, IJob } from "../db/schemas.ts";
 import { JOB_TEMPLATES } from "../data/jobs-templates.ts";
 import { priceToEB } from "../engine/dice.ts";

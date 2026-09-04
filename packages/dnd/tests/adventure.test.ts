@@ -23,7 +23,7 @@ import {
   getInstance,
   countLivingMobs,
 } from "../src/adventure/site.ts";
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

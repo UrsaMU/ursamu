@@ -15,7 +15,7 @@ import {
 } from "../src/combat/ports.ts";
 import { advanceTurnSmart } from "../src/combat/walker.ts";
 import { buildNewCharacter } from "../engine/character.ts";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

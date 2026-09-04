@@ -2,8 +2,8 @@
  * +brawl -- Unarmed Combat Special Moves (FNFF)
  * CPR Core Chapter 13 -- grappling and brawling special actions.
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import { applyDamageToChar } from "../engine/character.ts";
 import {

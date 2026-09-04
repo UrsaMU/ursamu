@@ -1,8 +1,8 @@
 /**
  * +chopshop -- Cyberware Harvesting and Black Market Installation
  */
-import { addCmd, DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { bar, div, hdr, lbl, val, acc, bad, dim, ARR, ERR, OK, row, wrap, tbl } from "./chargen.ts";
 import type { ICPRCharacter, IChopshopQueue, ICyberware } from "../db/schemas.ts";
 import { getCyberware } from "../data/cyberware.ts";

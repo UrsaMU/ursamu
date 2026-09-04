@@ -11,8 +11,8 @@
  * NOTE: "In area" currently == "everyone in the same room". Distance-based
  * scatter and partial-radius targeting are a follow-up.
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import type { ICPRCharacter, IGearItem } from "../db/schemas.ts";
 import { getWeapon, type IWeaponDef } from "../data/weapons.ts";
 import { rollD10Critical } from "../engine/dice.ts";

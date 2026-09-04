@@ -1,5 +1,5 @@
 import "./commands.ts";
-import type { IPlugin } from "@ursamu/ursamu";
+import type { IPlugin } from "@ursamu/mush";
 
 export const plugin: IPlugin = {
   name: "vendor",

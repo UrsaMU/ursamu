@@ -1,7 +1,7 @@
 // Merits section: 2-column dotted-leader listing. Instanced merits render
 // with their qualifier: "Language (Spanish):......1".
 
-import { divider } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import { formatMeritLabel, splitMeritStorageKey } from "../../dictionary/index.ts";
 import { formatDottedStatLine } from "../../support/format.ts";
 import type { SheetSection, SheetContext } from "./types.ts";

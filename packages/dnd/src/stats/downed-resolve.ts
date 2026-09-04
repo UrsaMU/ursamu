@@ -2,7 +2,7 @@
  * After combat (or on a dying PC's skipped turn): resolve death saves
  * until stable, conscious, or dead → underworld.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { migrateSheet, type DndSheet } from "./dnd_sheet.ts";
 import {
   isDead,

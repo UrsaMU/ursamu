@@ -3,7 +3,7 @@
 // Resolution awards the catalog-specified Beats; removal is correctional and
 // awards none. Cross-player edits require canEdit (builder+).
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   addCondition,
   CONDITIONS,

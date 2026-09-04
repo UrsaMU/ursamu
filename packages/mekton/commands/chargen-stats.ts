@@ -1,5 +1,5 @@
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { chars } from "../schema.ts";
 import type { IMektonChar, IMektonStats } from "../schema.ts";
 import { derivedStats, maxWounds, skillPointsSpent } from "../derived.ts";

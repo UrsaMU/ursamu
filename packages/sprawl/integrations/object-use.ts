@@ -1,8 +1,8 @@
 /**
  * Soft hook: object:use — consume Sprawl Thing charges.
  */
-import { gameHooks } from "@ursamu/ursamu";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { isSprawlItem } from "../engine/items.ts";
 import { applyUseEffect } from "../engine/use-effect.ts";
 

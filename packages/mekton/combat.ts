@@ -1,4 +1,4 @@
-import { gameHooks } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
 import type { IMektonChar, IMektonWounds, WoundLocation } from "./schema.ts";
 import { derivedStats } from "./derived.ts";
 import { rollInterlock, rollDamage } from "./roll.ts";

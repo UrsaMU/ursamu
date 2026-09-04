@@ -3,7 +3,7 @@
  * No banner-style >> lines.
  */
 import { gameHooks, type IDBObj, type IUrsamuSDK } from
-  "@ursamu/ursamu";
+  "@ursamu/mush";
 import { isHostileMob } from "../combat/start-fight.ts";
 import { migrateSheet } from "../stats/dnd_sheet.ts";
 import { roomEncounter, roomIdOf } from "../combat/session.ts";

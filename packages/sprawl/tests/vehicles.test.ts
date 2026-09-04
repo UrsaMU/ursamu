@@ -1,5 +1,5 @@
 import { assertEquals, assert } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   buildItemData,
   createItem,

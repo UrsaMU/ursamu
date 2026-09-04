@@ -9,7 +9,7 @@ import {
   isDying,
 } from "../src/stats/vitality.ts";
 import { resolveDyingPc } from "../src/stats/downed-resolve.ts";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

@@ -1,6 +1,6 @@
 /** +sheet — Sprawl Goons character sheet (engine layout chrome). */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import {
   footer,
   ARR,

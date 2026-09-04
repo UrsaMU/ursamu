@@ -1,4 +1,4 @@
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 
 /**
  * @dig[/teleport] <room>[=<to exit>[,<from exit>]]

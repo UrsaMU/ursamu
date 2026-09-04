@@ -46,7 +46,6 @@
   },
   "imports": {
     "ursamu": "../mush/mod.ts",
-    "@ursamu/ursamu": "../mush/mod.ts",
     "@ursamu/mush": "../mush/mod.ts",
     "@ursamu/combat": "../combat/mod.ts",
     "@ursamu/jobs": "../jobs/mod.ts",

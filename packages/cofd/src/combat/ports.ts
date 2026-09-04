@@ -18,7 +18,7 @@ import {
   sessions,
   type IDBObj,
   type IUrsamuSDK,
-} from "@ursamu/ursamu";
+} from "@ursamu/mush";
 import {
   cofdEncounterStore,
   getEncounterForRoom,

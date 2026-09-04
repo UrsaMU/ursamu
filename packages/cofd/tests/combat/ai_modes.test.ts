@@ -10,7 +10,7 @@ import {
   assertExists,
   assertMatch,
 } from "@std/assert";
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 import {
   AI_STRATEGY_ERRORS,
   aiStrategyKeys,

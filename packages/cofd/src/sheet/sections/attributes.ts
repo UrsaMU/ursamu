@@ -1,6 +1,6 @@
 // Attributes section: divider + 3 rows x 3 columns (Mental/Physical/Social).
 
-import { divider } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import { formatDottedStatLine } from "../../support/format.ts";
 import type { SheetSection, SheetContext } from "./types.ts";
 

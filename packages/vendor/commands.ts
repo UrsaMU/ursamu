@@ -5,7 +5,7 @@ import {
   divider,
   footer,
   gameHooks
-} from "@ursamu/ursamu";
+} from "@ursamu/mush";
 
 export interface VendorItem {
   name: string;

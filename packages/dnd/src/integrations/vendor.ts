@@ -1,7 +1,7 @@
 /**
  * Vendor gameHooks — D&D gold + gear adapters.
  */
-import { gameHooks } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
 import { migrateSheet } from "../stats/dnd_sheet.ts";
 import {
   addCoins,

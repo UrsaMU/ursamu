@@ -17,7 +17,7 @@ import {
 } from "../engine/pronouns.ts";
 import { LOOK_OPENERS } from "../engine/catalog.ts";
 import { defaultChar } from "../db/schemas.ts";
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

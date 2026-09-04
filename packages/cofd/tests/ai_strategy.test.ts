@@ -4,7 +4,7 @@ import {
   assertStringIncludes,
 } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 import {
   AI_STRATEGY_ERRORS,
   aiStrategyKeys,

@@ -1,5 +1,5 @@
 /** Shared roll/attack helpers. */
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 import {
   bad,
   dim,

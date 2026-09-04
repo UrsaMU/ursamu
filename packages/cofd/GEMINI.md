@@ -75,8 +75,8 @@ ursamu-cofd-plugin/
 ## Import paths
 
 ```typescript
-import { addCmd, DBO, gameHooks, registerPluginRoute } from "@ursamu/ursamu";
-import type { IPlugin, IUrsamuSDK, IDBObj, SessionEvent } from "@ursamu/ursamu";
+import { addCmd, DBO, gameHooks, registerPluginRoute } from "@ursamu/mush";
+import type { IPlugin, IUrsamuSDK, IDBObj, SessionEvent } from "@ursamu/mush";
 import { registerHelpDir } from "@ursamu/help-plugin";
 ```
 
@@ -175,7 +175,7 @@ lifecycle (combat encounters, NPC directory, scene logs, etc.).
 
 ## Code conventions
 
-- **Imports.** Use the `@ursamu/ursamu` alias from `deno.json` (not raw
+- **Imports.** Use the `@ursamu/mush` alias from `deno.json` (not raw
   `jsr:` URLs). Workers / system scripts use the injected `u` SDK object —
   never import the package directly.
 - **Permissions.** Guard every cross-player edit with

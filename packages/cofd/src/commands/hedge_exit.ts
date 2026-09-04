@@ -1,6 +1,6 @@
 // Player +hedge/exit and /claim.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { isChangelingSheet } from "../form/index.ts";
 import {
   checkPortalEnter,

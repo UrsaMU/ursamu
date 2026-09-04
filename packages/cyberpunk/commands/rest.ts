@@ -2,8 +2,8 @@
  * +rest -- Time-Gated Wound Recovery
  * CPR Core p.224 -- Natural and medically assisted recovery.
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { bar, div, hdr, lbl, val, acc, dim, ARR, ERR, OK, row, wrap, grid } from "./chargen.ts";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import {

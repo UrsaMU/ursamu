@@ -2,7 +2,7 @@
  * +attack — resolve via CombatPorts, sticky focus, auto-kill.
  * Starts room combat automatically if none is active.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   currentActor,
   runCombatAction,

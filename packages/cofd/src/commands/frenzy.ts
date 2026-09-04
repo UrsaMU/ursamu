@@ -1,6 +1,6 @@
 // +frenzy — resist, ride, enter, or end the Beast's frenzy.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   rollFrenzyResist,
   enterFrenzy,

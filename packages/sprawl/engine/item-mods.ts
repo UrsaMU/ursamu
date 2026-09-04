@@ -2,7 +2,7 @@
  * Attach / detach mods on host Things (weapons + vehicles).
  * Host holds mods[] — loose mod Things are consumed on attach.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type {
   SprawlItemData,
   SprawlModInstall,

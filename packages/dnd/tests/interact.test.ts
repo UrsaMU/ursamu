@@ -6,7 +6,7 @@ import {
   isNoGet,
   useAction,
 } from "../src/world/interact.ts";
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

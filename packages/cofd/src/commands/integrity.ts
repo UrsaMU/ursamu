@@ -13,7 +13,7 @@
 // Cross-player /break and /set require canEdit (builder+). Granted
 // Conditions feed straight into the existing +condition catalog.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   refreshAdvantages,
   type CofdSheet,

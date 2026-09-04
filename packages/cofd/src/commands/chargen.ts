@@ -5,7 +5,7 @@ import {
   footer,
   type IUrsamuSDK,
   type IDBObj,
-} from "@ursamu/ursamu";
+} from "@ursamu/mush";
 import {
   initCgState,
   getStageInstructions,

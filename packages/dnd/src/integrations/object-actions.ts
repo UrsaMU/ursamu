@@ -2,7 +2,7 @@
  * object:open / object:use / object:close — D&D chests & altars.
  */
 import { gameHooks, type IDBObj, type IUrsamuSDK } from
-  "@ursamu/ursamu";
+  "@ursamu/mush";
 import { openDndChest } from "../commands/chest-open.ts";
 import { useDndProp } from "../commands/prop-use.ts";
 

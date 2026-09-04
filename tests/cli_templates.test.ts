@@ -83,7 +83,7 @@ Deno.test("M2 — inTreePluginIndexTs: remove() is not async", OPTS, () => {
 
 // ─── C1-fix: standaloneShowcaseTs must not reference invalid sub-path export ──
 
-Deno.test("C1-fix — standaloneShowcaseTs: does not import jsr:@ursamu/ursamu/cmdParser", OPTS, () => {
+Deno.test("C1-fix — standaloneShowcaseTs: does not import jsr:@ursamu/mush", OPTS, () => {
   const out = standaloneShowcaseTs();
   assertNotMatch(
     out,

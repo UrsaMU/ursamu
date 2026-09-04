@@ -2,7 +2,7 @@
  * Hackable room systems on gig sites (cams, cars, locks…).
  * Optional loot on any gig; required primary on hack-node finals.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type { IActiveGig, ISprawlChar } from "../db/schemas.ts";
 import {
   GIG_SYSTEMS,

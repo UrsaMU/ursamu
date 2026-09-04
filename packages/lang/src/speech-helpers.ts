@@ -1,4 +1,4 @@
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { garble } from "./garble.ts";
 import { emitLang } from "./hooks.ts";
 import { getLang } from "./langStore.ts";

@@ -1,6 +1,6 @@
 // +debt — list / pay Goblin Debts.
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   findDebt,
   openDebts,

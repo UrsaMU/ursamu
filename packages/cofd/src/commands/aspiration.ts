@@ -4,7 +4,7 @@
 // of three (3) active Aspirations is enforced in `addAspiration`. Compound
 // switches `/add/long` set the long-term flag; default is short-term.
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   addAspiration,
   AspirationCapacityError,

@@ -43,7 +43,6 @@
   },
   "imports": {
     "ursamu": "jsr:@ursamu/mush@^1.0.0",
-    "@ursamu/ursamu": "jsr:@ursamu/mush@^1.0.0",
     "@ursamu/mush": "jsr:@ursamu/mush@^1.0.0",
     "@ursamu/combat": "jsr:@ursamu/combat@^0.8.0",
     "@ursamu/core": "jsr:@ursamu/core@^1.0.0",

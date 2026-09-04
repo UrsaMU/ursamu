@@ -1,7 +1,7 @@
 /**
  * Realspace heat → delayed NPC spawns (seekers, tac, cops).
  */
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { INetState, ISprawlChar } from "../db/schemas.ts";
 import { spawnNpc } from "./npcs.ts";
 import { netOf, nowMs, withNet } from "./net-state.ts";

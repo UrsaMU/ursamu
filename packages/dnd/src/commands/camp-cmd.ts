@@ -1,7 +1,7 @@
 /**
  * +camp — claim / upgrade player camps into settlements.
  */
-import { addCmd, DBO, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO, type IUrsamuSDK } from "@ursamu/mush";
 import { roomIdOf } from "../combat/session.ts";
 import { spendCoins, formatPurse } from "../stats/currency.ts";
 import { migrateSheet, defaultSheet } from

@@ -10,7 +10,7 @@ core verbs (look, say, pose, get/drop/give, home, who, page, ooc,
 
 Import from `@ursamu/mush` only for game plugins (core is re-exported).
 
-> `@ursamu/ursamu` is a compatibility shim that re-exports this package.
+> `@ursamu/mush` is a compatibility shim that re-exports this package.
 > New projects should import `@ursamu/mush`.
 
 See `CHANGELOG.md`, `docs/STABLE.md`, `docs/DUAL_PACKAGE.md`,

@@ -1,6 +1,6 @@
 // +harvest / +reap — Glamour economy (CtL pp.103–104).
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { applyHarvest, applyReap } from "../glamour/index.ts";
 import { isChangelingSheet } from "../form/mask.ts";
 import {

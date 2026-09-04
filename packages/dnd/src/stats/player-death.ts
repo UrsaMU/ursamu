@@ -2,7 +2,7 @@
  * Player death: corpse with gear + spirit to underworld.
  * Resurrection restores body, gear, and clears death.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { migrateSheet, type DndSheet } from "./dnd_sheet.ts";
 import {
   deathOf,

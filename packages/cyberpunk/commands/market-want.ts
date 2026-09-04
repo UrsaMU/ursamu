@@ -1,8 +1,8 @@
 /**
  * +market/want, +market/wants, +market/cancelwant — Buy Order / Wanted List
  */
-import { addCmd, DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, IWantAd, IListing } from "../db/schemas.ts";
 import { bar, hdr, val, acc, dim, ARR, ERR, OK, tbl } from "./chargen.ts";
 

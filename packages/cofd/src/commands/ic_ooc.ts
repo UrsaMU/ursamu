@@ -17,7 +17,7 @@ import {
   getConfig,
   type IDBObj,
   type IUrsamuSDK,
-} from "@ursamu/ursamu";
+} from "@ursamu/mush";
 
 const DEFAULT_OOC = "1";
 const DEFAULT_HUB = "14";

@@ -1,7 +1,7 @@
 // deno-lint-ignore-file require-await
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 
-// IDBObj mirrors the internal shape from @ursamu/ursamu -- not yet in public exports.
+// IDBObj mirrors the internal shape from @ursamu/mush -- not yet in public exports.
 type IDBObj = {
   id: string;
   name?: string;

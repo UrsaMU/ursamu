@@ -1,8 +1,8 @@
 /**
  * +improve -- Improvement Point (IP) spending for skill and role advancement
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import { SKILLS, skillDisplayName, getSkill } from "../data/skills.ts";
 import { bar, div, hdr, lbl, val, acc, dim, ARR, ERR, OK, row, tbl } from "./chargen.ts";

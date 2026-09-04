@@ -4,8 +4,8 @@
  * Allows Fixers to privately source items not on any active market.
  * Rolls COOL + Streetwise + black_market_contacts + 1d10 vs tier DV.
  */
-import { addCmd, DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, PriceCategory, ISourcingListing } from "../db/schemas.ts";
 import { skillCheck } from "../engine/dice.ts";
 import {

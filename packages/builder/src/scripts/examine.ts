@@ -1,4 +1,4 @@
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { canSeeAttr, attrFlagsOf } from "@ursamu/mush/permissions";
 
 export const aliases = ["ex"];

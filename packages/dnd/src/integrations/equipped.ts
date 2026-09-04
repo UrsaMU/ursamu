@@ -2,7 +2,7 @@
  * Block drop/give of equipped D&D gear.
  * Wraps core cmds in init; restores originals in remove.
  */
-import { cmds, type IUrsamuSDK } from "@ursamu/ursamu";
+import { cmds, type IUrsamuSDK } from "@ursamu/mush";
 
 type CmdExec = (u: IUrsamuSDK) => void | Promise<void>;
 type CmdRef = { name: string; exec: CmdExec };

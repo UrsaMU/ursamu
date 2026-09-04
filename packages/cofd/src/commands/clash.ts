@@ -1,6 +1,6 @@
 // +clash — Clash of Wills helper (CtL p.126).
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   buildClashPools,
   resolveClashOutcome,

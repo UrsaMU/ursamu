@@ -4,7 +4,7 @@
 // cofd.npcs DBO collection tracks the archetype, tier, and powers for
 // cross-room directory and reuse.
 
-import { divider, type IDBObj, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IDBObj, type IUrsamuSDK } from "@ursamu/mush";
 import {
   archetypeHealthMax,
   archetypeKeys,

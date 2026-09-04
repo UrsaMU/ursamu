@@ -14,7 +14,7 @@
 // "failed", or "abandoned". A best-effort gameHooks.emit("cofd:extended:resolve")
 // is also broadcast for cross-plugin observers.
 
-import { DBO, gameHooks } from "@ursamu/ursamu";
+import { DBO, gameHooks } from "@ursamu/mush";
 
 // ---------------------------------------------------------------------------
 // Types

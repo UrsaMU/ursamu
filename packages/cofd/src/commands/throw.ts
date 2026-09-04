@@ -18,7 +18,7 @@
 //      blinded (smoke). Burning is announced.
 //   8. Destroy the thrown grenade from inventory (consumed).
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { type CofdSheet, defaultSheet } from "../stats/index.ts";
 import { applyAttackDamage } from "../combat/damage.ts";
 import { computeDefense } from "../combat/pools.ts";

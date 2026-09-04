@@ -2,7 +2,7 @@
  * CPR attack resolution helpers for @ursamu/combat ports.
  * Wraps engine math; does not own encounter lifecycle.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, ICPRNpc, WoundState } from
   "../../db/schemas.ts";
 import {

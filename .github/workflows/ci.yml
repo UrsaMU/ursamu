@@ -19,7 +19,7 @@ jobs:
           deno-version: v2.x
 
       - name: Type check
-        run: deno check --unstable-kv mod.ts
+        run: deno check --unstable-kv packages/mush/mod.ts packages/core/mod.ts
 
       - name: Lint
         run: deno lint

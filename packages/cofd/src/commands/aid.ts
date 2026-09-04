@@ -13,7 +13,7 @@
 // Sheets are read from `target.state.cofd` and written to `data.cofd`, the
 // same convention used by +health / +condition / +vitae.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { executeRoll, type RollResult } from "../roller/index.ts";
 import {
   refreshAdvantages,

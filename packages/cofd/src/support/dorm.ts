@@ -7,7 +7,7 @@
 //
 // When unset, no automatic home is applied.
 
-import { getConfig, type IUrsamuSDK } from "@ursamu/ursamu";
+import { getConfig, type IUrsamuSDK } from "@ursamu/mush";
 
 /** Resolve dorm room id for a sheet template, or null. */
 export function dormRoomIdForTemplate(

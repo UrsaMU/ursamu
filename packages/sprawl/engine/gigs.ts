@@ -2,7 +2,7 @@
  * Auto-gigs — roll, rewards, tokens, card (d66 tables).
  * Site run logic: engine/gig-run.ts
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type {
   GigObjective,
   GigTier,

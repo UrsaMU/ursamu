@@ -63,8 +63,8 @@ import { addCmd } from "../../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 
 // External plugins (outside the repo, consuming the package)
-import { addCmd, DBO, gameHooks, registerPluginRoute } from "jsr:@ursamu/ursamu";
-import type { ICmd, IPlugin, IDBObj, IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { addCmd, DBO, gameHooks, registerPluginRoute } from "jsr:@ursamu/mush";
+import type { ICmd, IPlugin, IDBObj, IUrsamuSDK } from "jsr:@ursamu/mush";
 ```
 
 ---
@@ -159,7 +159,7 @@ Lock strings support callable functions: `funcname(arg1, arg2)` combined with
 **Registering a custom lockfunc (plugins)**
 
 ```typescript
-import { registerLockFunc } from "jsr:@ursamu/ursamu";
+import { registerLockFunc } from "jsr:@ursamu/mush";
 
 registerLockFunc("tribe", (enactor, _target, args) =>
   String(enactor.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()
@@ -405,8 +405,8 @@ Phase 3 — remove()      gameHooks.off() for every .on() using the SAME named f
 ```typescript
 // index.ts
 import "./commands.ts";                          // Phase 1
-import { gameHooks } from "jsr:@ursamu/ursamu";
-import type { IPlugin, SessionEvent } from "jsr:@ursamu/ursamu";
+import { gameHooks } from "jsr:@ursamu/mush";
+import type { IPlugin, SessionEvent } from "jsr:@ursamu/mush";
 
 const onLogin = (e: SessionEvent) => { /* ... */ };  // named ref — required for remove()
 
@@ -486,7 +486,7 @@ for any plugin that declares a dependency on yours:
 
 ```typescript
 // src/game-hooks-augment.ts
-declare module "jsr:@ursamu/ursamu" {
+declare module "jsr:@ursamu/mush" {
   interface GameHookMap {
     "myplugin:action": (e: { actorId: string; at: number }) => void | Promise<void>;
     "myplugin:result": (e: { actorId: string; success: boolean; at: number }) => void | Promise<void>;
@@ -703,7 +703,7 @@ Consequences for script authors:
 |-------------|----------------|
 | `import type { IUrsamuSDK }` | ✅ Safe — type-only, elided at TS→JS compile |
 | `import { helper } from "../../helpers.ts"` | ❌ Deleted — `helper` is `undefined` at runtime |
-| `import { addCmd } from "jsr:@ursamu/ursamu"` | ❌ Deleted — same |
+| `import { addCmd } from "jsr:@ursamu/mush"` | ❌ Deleted — same |
 
 **All runtime capabilities come through the injected `u` SDK.** If a helper the
 script needs is not on the SDK, add it to the engine SDK first, then consume it as
@@ -727,7 +727,7 @@ Every plugin package under `packages/` should support in-process interactive sho
 - **`showcases/` folder**: Contains one or more JSON flow descriptions (e.g. `chargen-flow.json`).
 - **`tools/showcase.ts`**: The showcase execution driver script. Copy the standard runner from `packages/dnd/tools/showcase.ts` or `packages/cofd/tools/showcase.ts`. It intercepts `addCmd` and `send` so the commands run in-process against a mock/shim SDK.
 - **`tools/ursamu-shim.ts`**: Re-exports core modules and shims `addCmd` and `send` for local runner execution.
-- **`showcase.importmap.json`**: An import map that intercepts `"ursamu"` and `"@ursamu/ursamu"`, mapping them to `./tools/ursamu-shim.ts`.
+- **`showcase.importmap.json`**: An import map that intercepts `"ursamu"` and `"@ursamu/mush"`, mapping them to `./tools/ursamu-shim.ts`.
 - **`deno.json` showcase task**: Register the showcase task:
   ```json
   "showcase": "deno run -A --unstable-kv --import-map=showcase.importmap.json tools/showcase.ts"

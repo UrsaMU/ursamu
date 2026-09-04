@@ -2,7 +2,7 @@
 
 import type { CofdSheet } from "../stats/sheet.ts";
 import { createFruitObject } from "../hedge/fruit_objects.ts";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { findMarketGood } from "./catalog.ts";
 import { addDebt } from "./debt.ts";
 import {

@@ -1,6 +1,6 @@
 // +health command: view, apply, and heal damage on a character's Health track.
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   applyDamage,
   healDamage,

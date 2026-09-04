@@ -11,7 +11,7 @@ import {
 } from "../engine/worn-gear.ts";
 import { gatherBonuses } from "../engine/action.ts";
 import { defaultChar } from "../db/schemas.ts";
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

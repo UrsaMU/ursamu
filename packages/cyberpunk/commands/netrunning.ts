@@ -1,8 +1,8 @@
 /**
  * +netrun -- Netrunning and NET Architecture Commands
  */
-import { addCmd, DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, INetrun, INetArchitecture } from "../db/schemas.ts";
 import { bar, div, hdr, lbl, val, acc, dim, ARR, ERR, OK, row } from "./chargen.ts";
 import {

@@ -1,7 +1,7 @@
 /**
  * +approve / +deny / +unapprove — staff CGEN review.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   approvePlayer,
   unapprovePlayer,

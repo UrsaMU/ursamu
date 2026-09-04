@@ -3,7 +3,7 @@
 // way to surface specific traits. Output uses the PROVE>> system prefix
 // drawn from live sheet data; players cannot fake it via @emit/pose.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { resolveTrait } from "../roller/index.ts";
 import {
   equippedArmorEntry,
@@ -53,7 +53,7 @@ function signed(n: number): string {
 async function renderGearToken(
   token: string,
   sheet: CofdSheet,
-  u: import("@ursamu/ursamu").IUrsamuSDK,
+  u: import("@ursamu/mush").IUrsamuSDK,
 ): Promise<string | null> {
   const t = token.toLowerCase().trim();
   if (t === "weapon") {
@@ -78,7 +78,7 @@ async function renderGearToken(
 async function renderTrait(
   token: string,
   sheet: CofdSheet,
-  u: import("@ursamu/ursamu").IUrsamuSDK,
+  u: import("@ursamu/mush").IUrsamuSDK,
 ): Promise<string | null> {
   const gearLine = await renderGearToken(token, sheet, u);
   if (gearLine) return gearLine;

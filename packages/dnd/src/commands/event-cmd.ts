@@ -1,7 +1,7 @@
 /**
  * +event — roll local color / boons / ambushes.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   EVENT_TABLES,
   listEventTables,

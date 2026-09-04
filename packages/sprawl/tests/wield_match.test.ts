@@ -5,7 +5,7 @@ const OPTS = { sanitizeResources: false, sanitizeOps: false };
 Deno.test("wield pattern matches bare and args", OPTS, async () => {
   // Import through plugin command tree
   await import("../commands/gear-slots.ts");
-  const { cmds } = await import("@ursamu/ursamu");
+  const { cmds } = await import("@ursamu/mush");
   const wield = cmds.filter((c) => c.name === "wield" || c.name === "+wield");
   console.log("wield cmds", wield.map((c) => c.name + " " + c.pattern));
   assert(wield.length >= 1, "wield registered");
@@ -30,7 +30,7 @@ Deno.test("wield pattern matches bare and args", OPTS, async () => {
 
 Deno.test("first matching cmd for wield input", OPTS, async () => {
   await import("../commands.ts");
-  const { cmds } = await import("@ursamu/ursamu");
+  const { cmds } = await import("@ursamu/mush");
   const input = "wield pkd-45";
   const hits = cmds.filter((c) => c.pattern.test(input));
   console.log(

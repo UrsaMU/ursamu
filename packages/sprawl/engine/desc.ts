@@ -2,7 +2,7 @@
  * Look generator: paragraph base from d66 + optional gear clause.
  * Pronouns from SEX attr (%s/%o/%p family). Custom desc wins.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type { ISprawlChar, SprawlItemData } from "../db/schemas.ts";
 import {
   ACCESSORIES,

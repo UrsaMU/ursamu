@@ -1,7 +1,7 @@
 /**
  * +chargen -- Step Handlers
  */
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, Role, StatKey } from "../db/schemas.ts";
 import { ROLES, getRole } from "../data/roles.ts";
 import { SKILLS } from "../data/skills.ts";

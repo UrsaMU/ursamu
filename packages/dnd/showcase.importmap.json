@@ -1,6 +1,6 @@
 {
   "imports": {
-    "@ursamu/ursamu": "./tools/ursamu-shim.ts",
+    "@ursamu/mush": "./tools/ursamu-shim.ts",
     "@ursamu/globals": "https://raw.githubusercontent.com/UrsaMU/ursamu-sgp-plugin/master/mod.ts",
     "@nicia-ai/typegraph": "npm:@nicia-ai/typegraph@^0.31.0",
     "@nicia-ai/typegraph/postgres/pglite": "npm:@nicia-ai/typegraph@^0.31.0/postgres/pglite",
@@ -11,9 +11,9 @@
     "@ursamu/vendor-plugin": "../vendor/mod.ts",
     "@ursamu/mail": "jsr:@ursamu/mail@^2.4.0",
     "@ursamu/mail-plugin": "jsr:@ursamu/mail@^2.4.0",
-    "@ursamu/ursamu/app": "../mush/src/app.ts",
-    "@ursamu/ursamu/channels": "../channels/src/channel-events.ts",
-    "@ursamu/ursamu/jobs": "../jobs/mod.ts",
+    "@ursamu/mush/app": "../mush/src/app.ts",
+    "@ursamu/mush/channels": "../channels/src/channel-events.ts",
+    "@ursamu/mush/jobs": "../jobs/mod.ts",
     "ursamu": "../mush/mod.ts",
     "ursamu/": "../../",
     "@std/flags": "jsr:@std/flags@^0.224.0",

@@ -1,6 +1,6 @@
 // +shift -- form / Mask / Chrysalis for CoFD templates.
 
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import {
   applyAnimalShift,
   applyMaskShift,

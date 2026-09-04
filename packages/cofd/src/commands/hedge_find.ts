@@ -1,6 +1,6 @@
 // +hedge/find — locate Hidden Entry Hollow gates (−2).
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   getSeason,
   hiddenEntryPenalty,

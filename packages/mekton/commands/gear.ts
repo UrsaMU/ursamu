@@ -1,5 +1,5 @@
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { chars } from "../schema.ts";
 import type { IEquipmentItem } from "../schema.ts";
 import { findGearByName, gearByCategory, GEAR_CATALOG } from "../catalog.ts";

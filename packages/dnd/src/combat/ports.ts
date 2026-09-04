@@ -12,7 +12,7 @@ import {
   registerEncounterStore,
   unregisterEncounterStore,
 } from "@ursamu/combat";
-import { DBO, type IDBObj, type IUrsamuSDK } from "@ursamu/ursamu";
+import { DBO, type IDBObj, type IUrsamuSDK } from "@ursamu/mush";
 import {
   executeDndAttack,
   healthFrac,

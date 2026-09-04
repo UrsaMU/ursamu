@@ -46,8 +46,7 @@ Engine-dev mode (link imports to a local monorepo checkout):
 deno run -A --minimum-dependency-age=0 jsr:@ursamu/cli@0.1.5/create my-game --local
 ```
 
-> **Imports:** game code uses `jsr:@ursamu/mush`. The legacy package
-> `jsr:@ursamu/ursamu` re-exports the same surface.
+> **Imports:** game code uses `jsr:@ursamu/mush`.
 
 ## Method 2: From the monorepo
 

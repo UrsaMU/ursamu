@@ -2,7 +2,7 @@
  * Minimal D&D 5e attack/damage for combat ports.
  * Uses applyDamage so death saves / massive death fire.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   getAbilityMod,
   getProficiencyBonus,

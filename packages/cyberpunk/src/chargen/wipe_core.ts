@@ -2,7 +2,7 @@
  * Staff wipe of CPR character data (draft or approved).
  * Clears data.cpr + any orphan state.cpr fork.
  */
-import { dbojs, rewriteStatePaths } from "@ursamu/ursamu";
+import { dbojs, rewriteStatePaths } from "@ursamu/mush";
 import type { ICPRCharacter } from "../../db/schemas.ts";
 
 export type WipeOpts = {

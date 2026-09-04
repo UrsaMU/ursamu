@@ -1,7 +1,7 @@
 /**
  * Use altar / campfire (shared by `use` and +altar).
  */
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import { migrateSheet } from "../stats/dnd_sheet.ts";
 import { applyHeal as healSheet } from "../stats/vitality.ts";
 

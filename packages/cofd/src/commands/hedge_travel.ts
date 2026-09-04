@@ -1,6 +1,6 @@
 // Player +hedge travel: open / enter / exit.
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   isChangelingSheet,
   isMienActive,

@@ -1,8 +1,8 @@
 /**
  * Night Market — browse logic (multi-stall + single-stall views)
  */
-import { DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { IMarket, IListing, IConsignRequest } from "../db/schemas.ts";
 import { bar, div, hdr, val, acc, dim, ylw, ARR, ERR, row, wrap, tbl } from "./chargen.ts";
 

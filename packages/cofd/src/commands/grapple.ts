@@ -14,7 +14,7 @@
 //   /restrain       -- fully restrain; opponent may not move or attack
 //   /take-cover     -- use opponent as cover
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   type CofdSheet,
   defaultSheet,

@@ -7,7 +7,7 @@
 // Label text + spaces-after-colon always total 9 on each side so values
 // share a common start column under Name / Concept.
 
-import { header } from "@ursamu/ursamu";
+import { header } from "@ursamu/mush";
 import { fit } from "../../support/format.ts";
 import type { SheetSection, SheetContext } from "./types.ts";
 

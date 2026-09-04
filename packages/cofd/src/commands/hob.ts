@@ -1,6 +1,6 @@
 // +hob — create and manage hobgoblins (CtL p.252 light).
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   buildHobgoblinSheet,
   isHobgoblinSheet,

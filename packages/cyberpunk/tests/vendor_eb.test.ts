@@ -7,7 +7,7 @@ import {
   removeVendorHooks,
 } from "../src/integrations/vendor.ts";
 import { buildNewCharacter } from "../engine/character.ts";
-import { gameHooks } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

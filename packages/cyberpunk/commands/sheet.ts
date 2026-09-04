@@ -2,8 +2,8 @@
  * +sheet -- Character Sheet Display
  * +score -- Compact stat summary
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import type { ICPRCharacter, WoundState } from "../db/schemas.ts";
 import { skillDisplayName } from "../data/skills.ts";
 import { getRole } from "../data/roles.ts";

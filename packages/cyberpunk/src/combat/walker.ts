@@ -5,7 +5,7 @@ import {
   advanceTurnSmart as coreAdvance,
   type Encounter,
 } from "@ursamu/combat";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   cprEncounterStore,
   initCprCombat,

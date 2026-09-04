@@ -11,7 +11,7 @@ import {
   removeCprCombat,
 } from "../src/combat/ports.ts";
 import { buildNewCharacter } from "../engine/character.ts";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRNpc } from "../db/schemas.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

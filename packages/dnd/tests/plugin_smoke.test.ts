@@ -3,8 +3,8 @@
  * One file that touches every major D&D subsystem.
  */
 import { assertEquals, assert } from "@std/assert";
-import { cmds } from "@ursamu/ursamu";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { cmds } from "@ursamu/mush";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { plugin } from "../index.ts";
 import {
   dndEncounterStore,

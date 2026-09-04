@@ -6,7 +6,7 @@
 
 import { assertEquals } from "@std/assert";
 import { nextHopToward } from "../src/combat/pathfind.ts";
-import { dbojs } from "@ursamu/ursamu";
+import { dbojs } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

@@ -1,8 +1,8 @@
 /**
  * +chargen -- Character Generation Wizard
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, ChargenStage, ILifepath } from "../db/schemas.ts";
 import {
   CULTURAL_TABLE, PERSONALITY_TABLE, LIFE_GOAL_TABLE, VALUES_TABLE,

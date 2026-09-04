@@ -1,7 +1,7 @@
 /**
  * +travel — wilderness encounter check on path/woods rooms.
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import { defaultSheet, migrateSheet } from
   "../stats/dnd_sheet.ts";
 import { NPC_TEMPLATES } from "../combat/npc-templates.ts";

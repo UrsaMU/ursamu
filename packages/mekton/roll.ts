@@ -1,4 +1,4 @@
-import { gameHooks } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
 
 export interface IInterlockRoll {
   statValue: number;

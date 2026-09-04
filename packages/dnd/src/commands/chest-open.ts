@@ -1,7 +1,7 @@
 /**
  * Open a D&D treasure chest (shared by `open` and +chest).
  */
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import { migrateSheet } from "../stats/dnd_sheet.ts";
 import { addCoins } from "../stats/currency.ts";
 import { rollTreasureSlug } from "../adventure/treasure.ts";

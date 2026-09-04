@@ -1,7 +1,7 @@
 /**
  * Shared street purchase — +gear/buy and +market/buy.
  */
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { ARR, ERR, OK, dim, val } from "./chrome.ts";
 import type { IAugItem, ISprawlChar } from "../db/schemas.ts";
 import { saveChar } from "../engine/sheet-io.ts";

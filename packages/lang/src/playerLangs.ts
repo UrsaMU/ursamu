@@ -1,4 +1,4 @@
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { emitLang } from "./hooks.ts";
 
 export interface PlayerLangs {

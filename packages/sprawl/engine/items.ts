@@ -2,7 +2,7 @@
  * Sprawl carried gear as real UrsaMU Things (state.sprawl_item).
  * Native get/drop/give/use + inventory:show / object:use hooks.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import type {
   ILoadItem,
   ISprawlChar,

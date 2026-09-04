@@ -1,6 +1,6 @@
 // Builder +market create/stock/open/destroy.
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   createMarket,
   destroyMarket,

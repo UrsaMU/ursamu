@@ -2,7 +2,7 @@
 // stat block can be looked up by name across rooms and reused. The DBO
 // collection is "cofd.npcs".
 
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 import type { NpcTier } from "./archetypes.ts";
 
 export interface NpcRecord {

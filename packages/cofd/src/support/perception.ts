@@ -1,6 +1,6 @@
 // Resolve material vs fae names/descs for look (soft dual layer).
 
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 import {
   displayName,
   itemData,

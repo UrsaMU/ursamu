@@ -1,6 +1,6 @@
 // +hedge/forage, /fruit, /eat — goblin fruit as real objects.
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import { executeRoll } from "../roller/index.ts";
 import {
   applyFruitEffects,

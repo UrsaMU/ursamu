@@ -1,7 +1,7 @@
 /**
  * Adventure party: PCs in the room + hired NPC companions.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 export type PartyMember = {
   id: string;

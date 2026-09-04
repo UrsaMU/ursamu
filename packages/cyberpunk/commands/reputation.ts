@@ -1,8 +1,8 @@
 /**
  * +rep, +facedown -- Reputation and Social Combat Commands
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import { rollD10Critical } from "../engine/dice.ts";
 import { facedownTotal, resolveFacedown, FACEDOWN_SCENE_MS } from "../engine/combat.ts";

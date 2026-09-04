@@ -4,7 +4,7 @@ The plugin emits typed cpr:* events on the UrsaMU gameHooks bus.
 Consume them in any plugin to build AI-GM integrations.
 
 QUICK START
-  import { gameHooks } from "@ursamu/ursamu";
+  import { gameHooks } from "@ursamu/mush";
   import type {} from "jsr:@ursamu/cpr/hooks/augment.ts";
 
   gameHooks.on("cpr:combat:start", ({ roomId, participants }) => {

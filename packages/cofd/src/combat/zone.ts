@@ -18,7 +18,7 @@ import {
   type IDBObj,
   type IUrsamuSDK,
   dbojs,
-} from "@ursamu/ursamu";
+} from "@ursamu/mush";
 import { exitsFromRoom, queryByLocation } from "./dbo_normalize.ts";
 import { cofdEncounterStore } from "./encounter.ts";
 
@@ -308,7 +308,7 @@ export async function mobsInRoomForZone(
  */
 // deno-lint-ignore no-explicit-any
 export async function makeHookSdk(playerActor: IDBObj, roomId: string): Promise<any> {
-  const { send, sessions } = await import("@ursamu/ursamu");
+  const { send, sessions } = await import("@ursamu/mush");
   const doBroadcast = async (msg: string): Promise<void> => {
     const inRoom = await queryByLocation(roomId);
     const ids = inRoom
@@ -521,7 +521,7 @@ export async function tickZone(zoneId: string): Promise<void> {
         }
         const room = pickRandom(candidateRooms);
         if (room) {
-          const { send, sessions } = await import("@ursamu/ursamu");
+          const { send, sessions } = await import("@ursamu/mush");
           const inRoom = await queryByLocation(room);
           const ids = inRoom
             .filter((o) => o.flags?.has?.("player"))

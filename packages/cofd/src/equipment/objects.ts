@@ -12,7 +12,7 @@
 // Sheet still carries equippedWeapon/equippedArmor as IDBObj id pointers
 // for O(1) lookup without querying the whole contents list.
 
-import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import {
   isArmorType,
   isWeaponType,

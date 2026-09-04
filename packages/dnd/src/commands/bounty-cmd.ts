@@ -1,7 +1,7 @@
 /**
  * +bounty — notice-board jobs (kills / delve clear).
  */
-import { addCmd, type IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, type IUrsamuSDK } from "@ursamu/mush";
 import {
   bountyBySlug,
   listBounties,

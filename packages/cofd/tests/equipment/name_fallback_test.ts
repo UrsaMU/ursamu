@@ -3,7 +3,7 @@
 import { assert, assertEquals } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
 import { mockPlayer, mockU, MockObjectStore } from "../helpers/mockU.ts";
-import type { IDBObj } from "@ursamu/ursamu";
+import type { IDBObj } from "@ursamu/mush";
 import {
   createItem,
   isAmbiguousMatch,

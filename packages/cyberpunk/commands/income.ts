@@ -1,8 +1,8 @@
 /**
  * +income -- Role-based passive income collection and status
  */
-import { addCmd, DBO } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd, DBO } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import type { IIncomeRecord } from "../db/schemas.ts";
 import {

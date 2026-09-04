@@ -3,8 +3,8 @@
  * Implements the non-vehicle mechanics of the Moto role ability.
  * CPR Core -- Nomad role, Moto ability (family support aspects).
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { bar, div, hdr, lbl, val, acc, dim, ARR, ERR, OK, row, wrap, grid } from "./chargen.ts";
 import type { ICPRCharacter } from "../db/schemas.ts";
 import { d6 } from "../engine/dice.ts";

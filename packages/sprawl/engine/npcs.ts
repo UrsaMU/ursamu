@@ -3,7 +3,7 @@
  * Book p.26: DS is also Resilience; DS 0 = dead.
  * Room listings use &short-desc with live DS.
  */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { ANTAGONISTS, find, findByName, type Row } from "./catalog.ts";
 
 export type NpcDot = {

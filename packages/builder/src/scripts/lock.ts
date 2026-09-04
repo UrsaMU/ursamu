@@ -1,4 +1,4 @@
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 
 export const aliases = ["lock", "unlock"];
 

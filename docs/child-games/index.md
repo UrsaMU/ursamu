@@ -5,7 +5,7 @@ description: Scaffold and run a derived game project on top of UrsaMU
 
 # Child Games
 
-A "child game" is a standalone project that uses `@ursamu/ursamu` as a
+A "child game" is a standalone project that uses `@ursamu/mush` as a
 library — your own config, plugins, system-script overrides, and (usually)
 your own deployment.
 

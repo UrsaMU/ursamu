@@ -1,6 +1,6 @@
 // +hedge — CtL 2e Hedge travel, gates, Hollows (v1).
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   getSeason,
   isInHedge,

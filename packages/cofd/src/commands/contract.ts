@@ -1,7 +1,7 @@
 // +contract -- invoke a known CtL Contract (Glamour + optional roll).
 // While Mask is down, successes promote to exceptional (Wyrd floor).
 
-import { divider, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IUrsamuSDK } from "@ursamu/mush";
 import {
   findContract,
   type CtlContract,

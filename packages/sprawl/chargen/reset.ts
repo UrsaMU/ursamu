@@ -2,8 +2,8 @@
  * Full chargen wipe → fresh draft.
  * Clears sheet, look base, approved flag; destroys personal gear.
  */
-import { dbojs } from "@ursamu/ursamu";
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { dbojs } from "@ursamu/mush";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   defaultChar,
   type ISprawlChar,

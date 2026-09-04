@@ -13,7 +13,7 @@ import {
   unregisterEncounterStore,
 } from "@ursamu/combat";
 import { DBO, type IDBObj, type IUrsamuSDK } from
-  "@ursamu/ursamu";
+  "@ursamu/mush";
 import {
   cprOf,
   executeCprAttack,

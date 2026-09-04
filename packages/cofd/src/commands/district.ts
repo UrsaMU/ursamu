@@ -1,7 +1,7 @@
 // +district command suite implementation.
 // Allows setting and querying district traits on rooms and parent objects.
 
-import { divider, type IDBObj, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IDBObj, type IUrsamuSDK } from "@ursamu/mush";
 import {
   DEFAULT_ARCHETYPES,
   type DistrictTraits,

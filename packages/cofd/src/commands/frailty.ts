@@ -1,13 +1,13 @@
 // +frailty — list / cold iron note (CtL p.102).
 
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   coldIronNote,
   frailtyActPenalty,
   listFrailties,
   parseFrailty,
 } from "../form/frailty.ts";
-import { divider } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import { getSheet, isStaff } from "./hedge_helpers.ts";
 
 export async function frailtyExec(u: IUrsamuSDK): Promise<void> {

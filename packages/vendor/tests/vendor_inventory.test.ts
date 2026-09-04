@@ -1,6 +1,6 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
-import { cmds, gameHooks } from "@ursamu/ursamu";
+import { cmds, gameHooks } from "@ursamu/mush";
 import "../commands.ts";
 
 interface IDBObj {

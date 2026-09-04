@@ -1,6 +1,6 @@
 // Item row formatting for CoFD CONFORMAT.
 
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { dbrefWithFlags } from "@ursamu/mush";
 import { itemData } from "../equipment/objects.ts";
 import { lookupItem } from "../equipment/catalog.ts";

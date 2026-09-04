@@ -1,5 +1,5 @@
 /** Read/write state.sprawl on a player object. */
-import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import {
   defaultChar,
   type ISprawlChar,

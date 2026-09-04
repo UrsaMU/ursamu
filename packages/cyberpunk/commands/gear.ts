@@ -1,8 +1,8 @@
 /**
  * +gear -- Inventory / Gear Management
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, IGearItem, GearSlot } from "../db/schemas.ts";
 import { bar, div, hdr, val, acc, dim, bad, ARR, ERR, OK, tbl, row } from "./chargen.ts";
 

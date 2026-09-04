@@ -1,8 +1,8 @@
 /**
  * +cpr -- Admin Tools for CPR Plugin
  */
-import { addCmd } from "@ursamu/ursamu";
-import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { addCmd } from "@ursamu/mush";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import type { ICPRCharacter, StatKey, Role } from "../db/schemas.ts";
 import { ROLES } from "../data/roles.ts";
 import { recalcDerived, STAT_MIN, STAT_MAX } from "../engine/character.ts";

@@ -1,6 +1,6 @@
 // +pledge command executor — Seals, Oaths, and Bargains.
 
-import { divider, type IDBObj, type IUrsamuSDK } from "@ursamu/ursamu";
+import { divider, type IDBObj, type IUrsamuSDK } from "@ursamu/mush";
 import {
   createPledge,
   getPledge,

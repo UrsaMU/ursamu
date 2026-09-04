@@ -5,7 +5,7 @@
 // Pure functions take the maneuver and return the mutated copy; callers
 // persist via the DBO.
 
-import { DBO } from "@ursamu/ursamu";
+import { DBO } from "@ursamu/mush";
 import { executeRoll, type RollResult } from "../roller/execute.ts";
 import {
   IMPRESSION_ORDER,
