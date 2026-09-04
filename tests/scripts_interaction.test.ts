@@ -339,10 +339,16 @@ Deno.test("give — give money with insufficient funds fails", OPTS, async () =>
 
 Deno.test("home — sends 'home' message and calls teleport", OPTS, async () => {
   const teleportCalls: string[][] = [];
-  const u = makeU({ cmdName: "home", args: [], actorState: { home: ROOM_ID }, teleportCalls });
-  execHome(u);
+  const u = makeU({
+    cmdName: "home",
+    args: [],
+    actorState: { home: ROOM_ID },
+    teleportCalls,
+  });
+  await execHome(u);
   assertStringIncludes(u.msgs[0]?.msg ?? "", "home");
   assertEquals(teleportCalls.length, 1);
+  assertEquals(teleportCalls[0], [ACTOR_ID, ROOM_ID]);
 });
 
 // ===========================================================================
