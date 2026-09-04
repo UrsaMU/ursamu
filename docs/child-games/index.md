@@ -16,7 +16,7 @@ project, including daemon scripts, telnet sidecar, and a `.env` with a
 fresh JWT secret (v2.4.0):
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.4/create my-game
+deno run -A jsr:@ursamu/cli@0.1.5/create my-game
 cd my-game
 ```
 
@@ -91,9 +91,9 @@ remain legacy-compatible.
 Install or update from the CLI:
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.4/plugin install <url> [--ref <ref>]
-deno run -A jsr:@ursamu/cli@0.1.4/plugin update
-deno run -A jsr:@ursamu/cli@0.1.4/plugin list
+deno run -A jsr:@ursamu/cli@0.1.5/plugin install <url> [--ref <ref>]
+deno run -A jsr:@ursamu/cli@0.1.5/plugin update
+deno run -A jsr:@ursamu/cli@0.1.5/plugin list
 ```
 
 ## Local script overrides
@@ -122,8 +122,8 @@ project-specific mechanics as their own.
 ## Updating the engine
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.4/update         # latest stable
-deno run -A jsr:@ursamu/cli@0.1.4/update main    # specific branch
+deno run -A jsr:@ursamu/cli@0.1.5/update         # latest stable
+deno run -A jsr:@ursamu/cli@0.1.5/update main    # specific branch
 ```
 
 The updater rewrites the import map and re-runs `ensurePlugins`. Restart

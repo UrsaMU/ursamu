@@ -11,7 +11,7 @@ mkdir -p run logs
 ursamu_free_ports
 sleep 1
 
-DENO_FLAGS="--allow-all --unstable-detect-cjs --unstable-kv --unstable-net"
+DENO_FLAGS="--allow-all --minimum-dependency-age=0 --unstable-detect-cjs --unstable-kv --unstable-net"
 ursamu_find_supervisor
 
 ursamu_print_access
