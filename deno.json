@@ -13,6 +13,7 @@
     "packages/bbs",
     "packages/wiki",
     "packages/cofd",
+    "packages/wod20th",
     "packages/mekton",
     "packages/ai-gm",
     "packages/map",
@@ -575,7 +576,10 @@
       "src/services/Softcode/parser.cjs",
       "legends",
       "packages/theme-studio/public",
-      "games"
+      "games",
+      "packages/wod20th/tests",
+      "packages/wod20th/tools",
+      "packages/wod20th/showcases"
     ]
   },
   "allowScripts": {
