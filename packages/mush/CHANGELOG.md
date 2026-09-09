@@ -1,3 +1,8 @@
+## 1.0.39
+
+- look CONFORMAT: tighter name column (25), short-desc one line.
+- Depend on `@ursamu/core@^1.0.6` (send wrap-before-%r fix).
+
 ## 1.0.38
 
 - Depend on `@ursamu/core@^1.0.5` (NAWS APIs actually on JSR).

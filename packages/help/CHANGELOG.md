@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1] - 2026-09-09
+
+### Fixed
+
+- FileProvider resolves topics via frontmatter `aliases` / tags so
+  plugin help (e.g. `+help chargen`) is not shadowed by command help.
+
 ## [1.3.0] - 2026-08-09
 
 ### Added

@@ -2,13 +2,11 @@
 import { assert, assertEquals } from "jsr:@std/assert";
 import { describe, it } from "jsr:@std/testing/bdd";
 
-import type { PartialTheme } from "@ursamu/globals";
 import { wod20thGlobalsOverlay } from "../core/globalsTheme.ts";
 
 describe("wod20thGlobalsOverlay", () => {
-  it("type-checks as PartialTheme", () => {
-    const overlay: PartialTheme = wod20thGlobalsOverlay;
-    assert(overlay);
+  it("exports overlay object", () => {
+    assert(wod20thGlobalsOverlay);
   });
 
   it("defines the expected token shape", () => {

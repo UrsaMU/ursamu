@@ -1,0 +1,227 @@
+// WtA tribes (13) -- source: resources/wta20th.txt pp.113-114
+import type { ITribeDef } from "../../../core/types.ts";
+
+export const WTA_TRIBES: ITribeDef[] = [
+  {
+    id: "black-furies",
+    name: "black-furies",
+    displayName: "Black Furies",
+    initialWillpower: 3,
+    beginningGifts: [
+      "Breath of the Wyld",
+      "Man's Skin",
+      "Heightened Senses",
+      "Sense Wyrm",
+      "Wyld Resurgence",
+    ],
+    backgroundRestrictions: {
+      restricted: [],
+      discouraged: [],
+    },
+  },
+  {
+    id: "bone-gnawers",
+    name: "bone-gnawers",
+    displayName: "Bone Gnawers",
+    initialWillpower: 4,
+    beginningGifts: [
+      "Cooking",
+      "Desperate Strength",
+      "Resist Toxin",
+      "Scent of Sweet Honey",
+    ],
+    backgroundRestrictions: {
+      restricted: ["Ancestors", "Pure Breed"],
+      discouraged: ["Resources"],
+    },
+  },
+  {
+    id: "children-of-gaia",
+    name: "children-of-gaia",
+    displayName: "Children of Gaia",
+    initialWillpower: 4,
+    beginningGifts: [
+      "Brother's Scent",
+      "Jam Weapon",
+      "Mercy",
+      "Mother's Touch",
+      "Resist Pain",
+    ],
+    backgroundRestrictions: {
+      restricted: [],
+      discouraged: [],
+    },
+  },
+  {
+    id: "fianna",
+    name: "fianna",
+    displayName: "Fianna",
+    initialWillpower: 3,
+    beginningGifts: [
+      "Faerie Light",
+      "Hare's Leap",
+      "Persuasion",
+      "Resist Toxin",
+      "Two Tongues",
+    ],
+    backgroundRestrictions: {
+      restricted: [],
+      discouraged: [],
+    },
+  },
+  {
+    id: "get-of-fenris",
+    name: "get-of-fenris",
+    displayName: "Get of Fenris",
+    initialWillpower: 3,
+    beginningGifts: [
+      "Lightning Reflexes",
+      "Master of Fire",
+      "Razor Claws",
+      "Resist Pain",
+      "Visage of Fenris",
+    ],
+    backgroundRestrictions: {
+      restricted: [],
+      discouraged: ["Contacts"],
+    },
+  },
+  {
+    id: "glass-walkers",
+    name: "glass-walkers",
+    displayName: "Glass Walkers",
+    initialWillpower: 3,
+    beginningGifts: [
+      "Control Simple Machine",
+      "Diagnostics",
+      "Persuasion",
+      "Plug and Play",
+      "Trick Shot",
+    ],
+    backgroundRestrictions: {
+      restricted: ["Ancestors", "Pure Breed"],
+      discouraged: ["Mentor"],
+    },
+  },
+  {
+    id: "red-talons",
+    name: "red-talons",
+    displayName: "Red Talons",
+    initialWillpower: 3,
+    beginningGifts: [
+      "Beast Speech",
+      "Eye of the Hunter",
+      "Hidden Killer",
+      "Scent of Running Water",
+      "Wolf at the Door",
+    ],
+    backgroundRestrictions: {
+      restricted: ["Resources"],
+      discouraged: ["Allies", "Contacts"],
+    },
+    breedRestriction: ["metis", "lupus"],
+  },
+  {
+    id: "shadow-lords",
+    name: "shadow-lords",
+    displayName: "Shadow Lords",
+    initialWillpower: 3,
+    beginningGifts: [
+      "Aura of Confidence",
+      "Fatal Flaw",
+      "Seizing the Edge",
+      "Shadow Weaving",
+      "Whisper Catching",
+    ],
+    backgroundRestrictions: {
+      restricted: [],
+      discouraged: ["Allies", "Mentor"],
+    },
+  },
+  {
+    id: "silent-striders",
+    name: "silent-striders",
+    displayName: "Silent Striders",
+    initialWillpower: 3,
+    beginningGifts: [
+      "Heaven's Guidance",
+      "Sense Wyrm",
+      "Silence",
+      "Speed of Thought",
+      "Visions of Duat",
+    ],
+    backgroundRestrictions: {
+      restricted: ["Ancestors"],
+      discouraged: ["Resources"],
+    },
+  },
+  {
+    id: "silver-fangs",
+    name: "silver-fangs",
+    displayName: "Silver Fangs",
+    initialWillpower: 3,
+    beginningGifts: [
+      "Eye of the Falcon",
+      "Falcon's Grasp",
+      "Inspiration",
+      "Lambent Flame",
+      "Sense Wyrm",
+    ],
+    backgroundRestrictions: {
+      restricted: [],
+      discouraged: [],
+      required: [{ name: "Pure Breed", minDots: 3 }],
+    },
+  },
+  {
+    id: "stargazers",
+    name: "stargazers",
+    displayName: "Stargazers",
+    initialWillpower: 4,
+    beginningGifts: [
+      "Balance",
+      "Channeling",
+      "Falling Touch",
+      "Iron Resolve",
+      "Sense Wyrm",
+    ],
+    backgroundRestrictions: {
+      restricted: [],
+      discouraged: ["Allies", "Fetish", "Resources"],
+    },
+  },
+  {
+    id: "uktena",
+    name: "uktena",
+    displayName: "Uktena",
+    initialWillpower: 3,
+    beginningGifts: [
+      "Sense Magic",
+      "Sense Wyrm",
+      "Shroud",
+      "Spirit of the Lizard",
+      "Spirit Speech",
+    ],
+    backgroundRestrictions: {
+      restricted: [],
+      discouraged: [],
+    },
+  },
+  {
+    id: "wendigo",
+    name: "wendigo",
+    displayName: "Wendigo",
+    initialWillpower: 4,
+    beginningGifts: [
+      "Beat of the Heart-Drum",
+      "Call the Breeze",
+      "Camouflage",
+      "Ice Echo",
+      "Resist Pain",
+    ],
+    backgroundRestrictions: {
+      restricted: [],
+      discouraged: ["Contacts", "Resources"],
+    },
+  },
+];

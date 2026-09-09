@@ -3,6 +3,13 @@
 All notable changes to `@ursamu/core` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.6] - 2026-09-09
+
+### Fixed
+
+- `send()` expands `%r` / `%t` before word-wrap so MUSH newlines
+  are not shredded by wrap (chargen multi-line output).
+
 ## [1.0.5] - 2026-09-04
 
 Re-cut of NAWS/term-size APIs (1.0.3 was already on JSR).
