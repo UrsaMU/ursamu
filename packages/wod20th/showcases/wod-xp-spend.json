@@ -1,0 +1,65 @@
+{
+  "key": "wod-xp-spend",
+  "label": "WoD20th -- XP Spending (+xp/spend, /gift, /rite)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Sept Caern",
+      "desc": "A moss-circled stone where the spirits gather to listen."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Cliath Ahroun",
+        "fullName": "Maya Whitehorse",
+        "breed": "homid", "auspice": "ahroun", "tribe": "fianna",
+        "attributePriority": ["physical", "social", "mental"],
+        "attributes": {
+          "Strength": 2, "Dexterity": 2, "Stamina": 2,
+          "Charisma": 1, "Manipulation": 1, "Appearance": 1,
+          "Perception": 1, "Intelligence": 1, "Wits": 1
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Brawl": 3, "Athletics": 2, "Melee": 1 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Totem": 2 },
+        "gifts": ["Apecraft's Blessings", "Inspiration"],
+        "rites": [],
+        "willpower": 4,
+        "rage": 5, "rageCurrent": 5,
+        "gnosis": 1, "gnosisCurrent": 1,
+        "rank": 1,
+        "renown": { "glory": 2, "honor": 1, "wisdom": 0 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 30, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Balance" },
+    { "cmd": "+xp", "label": "starting balance", "as": "player" },
+
+    { "sub": "Preview" },
+    { "cmd": "+xp/preview Strength", "label": "attribute cost", "as": "player" },
+    { "cmd": "+xp/preview Razor Claws", "label": "gift cost (affinity)", "as": "player" },
+
+    { "sub": "Spend" },
+    { "cmd": "+xp/spend Strength", "label": "raise Strength (cost 12)", "as": "player" },
+    { "cmd": "+xp/spend Brawl", "label": "raise Brawl 3->4 (cost 6)", "as": "player" },
+    { "cmd": "+xp/gift Razor Claws", "label": "learn L1 affinity gift (cost 3)", "as": "player" },
+    { "cmd": "+xp/rite rite-of-cleansing", "label": "learn L1 rite (cost 2)", "as": "player" },
+
+    { "sub": "Depleted" },
+    { "cmd": "+xp", "label": "remaining balance", "as": "player" },
+    { "cmd": "+xp/spend Strength", "label": "rejection: insufficient XP", "as": "player" },
+    { "reset": true }
+  ]
+}

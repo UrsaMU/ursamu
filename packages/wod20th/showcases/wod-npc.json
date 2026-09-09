@@ -1,0 +1,69 @@
+{
+  "key": "wod-npc",
+  "label": "WoD20th -- Wyrm Bestiary + AI (+npc)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Blighted Lot",
+      "desc": "A vacant lot reeking of oil and old blood. Weeds twitch."
+    },
+    "character": {
+      "_flags": ["admin"],
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Ahroun",
+        "fullName": "Storm-of-Voices",
+        "breed": "homid", "auspice": "ahroun", "tribe": "Get of Fenris",
+        "attributePriority": ["physical", "social", "mental"],
+        "attributes": {
+          "Strength": 4, "Dexterity": 3, "Stamina": 4,
+          "Perception": 3, "Intelligence": 2, "Wits": 3,
+          "Charisma": 2, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["physical", "mental", "social"],
+        "abilities": { "Brawl": 3, "Athletics": 2, "Dodge": 2 },
+        "abilitySpecialties": {},
+        "backgrounds": {},
+        "willpower": 6,
+        "rage": 5, "rageCurrent": 5,
+        "gnosis": 3, "gnosisCurrent": 3,
+        "rank": 2,
+        "renown": { "glory": 2, "honor": 1, "wisdom": 0 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Browse the bestiary" },
+    { "cmd": "+npc",                       "label": "all kinds, grouped",   "as": "staff" },
+    { "cmd": "+npc/list bane",             "label": "banes only",           "as": "staff" },
+    { "cmd": "+npc/info bsd-ahroun",       "label": "BSD stats",            "as": "staff" },
+
+    { "sub": "Spawn two NPCs" },
+    { "cmd": "+npc/spawn bane-roach",                   "label": "spawn a bane",    "as": "staff" },
+    { "cmd": "+npc/spawn fomor-thug Krunzh the Spent",  "label": "spawn a fomor",   "as": "staff" },
+    { "cmd": "+npc/here",                               "label": "list spawned",    "as": "staff" },
+
+    { "sub": "Initiative + auto-AI turns" },
+    { "cmd": "+init",                                    "label": "PC rolls init",   "as": "staff" },
+    { "cmd": "+init/addnpc Bane-Roach",                  "label": "NPC1 in order",   "as": "staff" },
+    { "cmd": "+init/addnpc Krunzh the Spent",            "label": "NPC2 in order",   "as": "staff" },
+    { "cmd": "+init/show",                               "label": "order so far",    "as": "staff" },
+    { "cmd": "+init/next",                               "label": "advance; NPC turns auto-fire", "as": "staff" },
+
+    { "sub": "Manual single-NPC drive" },
+    { "cmd": "+npc/act Krunzh the Spent",                "label": "force one AI turn", "as": "staff" },
+
+    { "sub": "Despawn" },
+    { "cmd": "+npc/despawn Bane-Roach",                  "label": "remove from world", "as": "staff" },
+    { "cmd": "+npc/here",                                "label": "one left",          "as": "staff" }
+  ]
+}

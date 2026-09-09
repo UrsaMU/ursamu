@@ -1,0 +1,111 @@
+{
+  "key": "wod-moot",
+  "label": "WoD20th -- Sept Moot (+moot)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Heart of the Glen",
+      "desc": "A still pool ringed with standing stones. Spirit-song hums under the moss."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Galliard Alpha",
+        "fullName": "Storm-of-Voices",
+        "breed": "homid", "auspice": "galliard", "tribe": "Silver Fangs",
+        "attributePriority": ["physical", "social", "mental"],
+        "attributes": {
+          "Strength": 3, "Dexterity": 3, "Stamina": 3,
+          "Perception": 3, "Intelligence": 3, "Wits": 3,
+          "Charisma": 4, "Manipulation": 3, "Appearance": 3
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Leadership": 3, "Performance": 3 },
+        "abilitySpecialties": {},
+        "backgrounds": {},
+        "willpower": 6,
+        "rage": 4, "rageCurrent": 4,
+        "gnosis": 3, "gnosisCurrent": 3,
+        "rank": 3,
+        "renown": { "glory": 5, "honor": 3, "wisdom": 2 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    },
+    "targets": {
+      "Cassidy": {
+        "_char": {
+          "playerId": "mock-cassidy",
+          "splat": "wta",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Theurge",
+          "fullName": "Cassidy Cloudwalker",
+          "breed": "homid", "auspice": "theurge", "tribe": "Children of Gaia",
+          "attributePriority": ["mental", "social", "physical"],
+          "attributes": {
+            "Strength": 2, "Dexterity": 3, "Stamina": 3,
+            "Perception": 4, "Intelligence": 3, "Wits": 3,
+            "Charisma": 3, "Manipulation": 3, "Appearance": 2
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": ["talents", "skills", "knowledges"],
+          "abilities": { "Rituals": 3 },
+          "abilitySpecialties": {},
+          "backgrounds": {},
+          "willpower": 6,
+          "rage": 3, "rageCurrent": 3,
+          "gnosis": 5, "gnosisCurrent": 5,
+          "rank": 2,
+          "renown": { "glory": 0, "honor": 2, "wisdom": 4 },
+          "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+          "freebiesRemaining": 0, "freebiesLog": [],
+          "xpTotal": 0, "xpSpent": 0,
+          "staffNotes": "", "statLog": [], "notes": [],
+          "createdAt": 1700000000000, "updatedAt": 1700000000000
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Sept + caern groundwork" },
+    { "cmd": "+pack/create Iron Riders", "label": "alpha forms pack", "as": "player" },
+    { "cmd": "+pack/invite Cassidy", "label": "alpha invites Cassidy", "as": "player" },
+    { "cmd": "+pack/accept", "label": "Cassidy accepts", "as": "Cassidy" },
+    { "cmd": "+caern/create Heart-of-the-Glen=3=Wisdom", "label": "create caern", "as": "admin" },
+    { "cmd": "+caern/setroom Heart-of-the-Glen=mock-room", "label": "bind to room", "as": "admin" },
+    { "cmd": "+sept/create Sept of the Pines", "label": "create sept", "as": "admin" },
+    { "cmd": "+sept/bind Sept of the Pines/Heart-of-the-Glen", "label": "bind caern to sept", "as": "admin" },
+    { "cmd": "+sept/join Sept of the Pines", "label": "alpha brings pack in", "as": "player" },
+    { "cmd": "+sept/alpha Sept of the Pines=Storms", "label": "staff names Sept Alpha", "as": "admin" },
+    { "cmd": "+sept/position Sept of the Pines/Storms=Master of the Howl", "label": "Storms becomes Master of the Howl", "as": "admin" },
+
+    { "sub": "Schedule and open" },
+    { "cmd": "+moot/schedule Sept of the Pines=Saturday at moonrise", "label": "MotH schedules", "as": "player" },
+    { "cmd": "+moot/open", "label": "MotH opens the moot in the caern room", "as": "player" },
+    { "cmd": "+moot/info", "label": "show local moot status" },
+
+    { "sub": "Attendance" },
+    { "cmd": "+moot/attend", "label": "Storms attends", "as": "player" },
+    { "cmd": "+moot/attend", "label": "Cassidy attends", "as": "Cassidy" },
+    { "cmd": "+moot", "label": "list open moots" },
+
+    { "sub": "Phase walk + business" },
+    { "cmd": "+moot/phase next", "label": "advance to Inner Sky", "as": "player" },
+    { "cmd": "+moot/phase next", "label": "advance to Cracking the Bone", "as": "player" },
+    { "cmd": "+moot/award Cassidy=honor:2 spoke truth", "label": "staff awards Cassidy", "as": "admin" },
+    { "cmd": "+moot/phase next", "label": "advance to Revel", "as": "player" },
+
+    { "sub": "Close + closing honor" },
+    { "cmd": "+moot/close", "label": "Master of the Howl closes -- +0.5 Honor each", "as": "player" },
+    { "cmd": "+moot/info", "label": "final view -- closed, awards visible" }
+  ]
+}

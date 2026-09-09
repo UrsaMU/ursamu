@@ -1,0 +1,98 @@
+{
+  "key": "wod-pack",
+  "label": "WoD20th -- WtA Pack + Totem (+pack)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Glen Hollow",
+      "desc": "A clearing ringed in birches. Spirit-sign worn into the bark."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Galliard Alpha",
+        "fullName": "Storm-of-Voices",
+        "breed": "homid", "auspice": "galliard", "tribe": "Silver Fangs",
+        "attributePriority": ["physical", "social", "mental"],
+        "attributes": {
+          "Strength": 3, "Dexterity": 3, "Stamina": 3,
+          "Perception": 3, "Intelligence": 3, "Wits": 3,
+          "Charisma": 4, "Manipulation": 3, "Appearance": 3
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Leadership": 3, "Performance": 3 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Pure Breed": 3 },
+        "willpower": 6,
+        "rage": 4, "rageCurrent": 4,
+        "gnosis": 3, "gnosisCurrent": 3,
+        "rank": 2,
+        "renown": { "glory": 3, "honor": 0, "wisdom": 0 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    },
+    "targets": {
+      "Cassidy": {
+        "_char": {
+          "playerId": "mock-cassidy",
+          "splat": "wta",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Philodox",
+          "fullName": "Cassidy Cloudwalker",
+          "breed": "homid", "auspice": "philodox", "tribe": "Children of Gaia",
+          "attributePriority": ["mental", "social", "physical"],
+          "attributes": {
+            "Strength": 2, "Dexterity": 3, "Stamina": 3,
+            "Perception": 3, "Intelligence": 3, "Wits": 3,
+            "Charisma": 3, "Manipulation": 3, "Appearance": 2
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": ["talents", "skills", "knowledges"],
+          "abilities": { "Empathy": 3 },
+          "abilitySpecialties": {},
+          "backgrounds": {},
+          "willpower": 6,
+          "rage": 4, "rageCurrent": 4,
+          "gnosis": 3, "gnosisCurrent": 3,
+          "rank": 1,
+          "renown": { "glory": 0, "honor": 0, "wisdom": 0 },
+          "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+          "freebiesRemaining": 0, "freebiesLog": [],
+          "xpTotal": 0, "xpSpent": 0,
+          "staffNotes": "", "statLog": [], "notes": [],
+          "createdAt": 1700000000000, "updatedAt": 1700000000000
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Pack creation" },
+    { "cmd": "+pack", "label": "no pack yet", "as": "player" },
+    { "cmd": "+pack/create Iron Riders", "label": "form pack as alpha", "as": "player" },
+    { "cmd": "+pack", "label": "show roster", "as": "player" },
+
+    { "sub": "Invite + accept (single invite)" },
+    { "cmd": "+pack/invite Cassidy", "label": "alpha invites (mail sent)", "as": "player" },
+    { "cmd": "+pack", "label": "Cassidy sees pending invite", "as": "Cassidy" },
+    { "cmd": "+pack/accept", "label": "Cassidy accepts (single invite, no arg needed)", "as": "Cassidy" },
+    { "cmd": "+pack/list", "label": "all packs", "as": "player" },
+
+    { "sub": "Totem (staff)" },
+    { "cmd": "+pack/totem Iron Riders/Wolf=5", "label": "bind totem", "as": "admin" },
+    { "cmd": "+pack/who Iron Riders", "label": "show with totem", "as": "player" },
+
+    { "sub": "Leave + promotion" },
+    { "cmd": "+pack/leave", "label": "alpha leaves; oldest member promotes", "as": "player" },
+    { "cmd": "+pack/who Iron Riders", "label": "Cassidy is now alpha", "as": "Cassidy" }
+  ]
+}

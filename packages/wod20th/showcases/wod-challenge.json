@@ -1,0 +1,90 @@
+{
+  "key": "wod-challenge",
+  "label": "WoD20th -- Formal challenges (+challenge)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "The Bawn",
+      "desc": "Open ground beneath stars. Witnesses gather."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Galliard",
+        "fullName": "Storm-of-Voices",
+        "breed": "homid", "auspice": "galliard", "tribe": "Silver Fangs",
+        "attributePriority": ["social", "mental", "physical"],
+        "attributes": {
+          "Strength": 3, "Dexterity": 3, "Stamina": 3,
+          "Perception": 3, "Intelligence": 3, "Wits": 3,
+          "Charisma": 4, "Manipulation": 3, "Appearance": 3
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Performance": 3, "Intimidation": 2, "Expression": 2 },
+        "abilitySpecialties": {},
+        "backgrounds": {},
+        "willpower": 6,
+        "rage": 4, "rageCurrent": 4,
+        "gnosis": 3, "gnosisCurrent": 3,
+        "rank": 2,
+        "renown": { "glory": 3, "honor": 2, "wisdom": 1 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    },
+    "targets": {
+      "Bran": {
+        "_char": {
+          "playerId": "mock-bran",
+          "splat": "wta",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Ahroun",
+          "fullName": "Bran Ironclaw",
+          "breed": "homid", "auspice": "ahroun", "tribe": "Get of Fenris",
+          "attributePriority": ["physical", "social", "mental"],
+          "attributes": {
+            "Strength": 4, "Dexterity": 3, "Stamina": 4,
+            "Perception": 2, "Intelligence": 2, "Wits": 3,
+            "Charisma": 3, "Manipulation": 2, "Appearance": 2
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": ["talents", "skills", "knowledges"],
+          "abilities": { "Brawl": 3, "Intimidation": 3, "Performance": 1 },
+          "abilitySpecialties": {},
+          "backgrounds": {},
+          "willpower": 6,
+          "rage": 5, "rageCurrent": 5,
+          "gnosis": 2, "gnosisCurrent": 2,
+          "rank": 2,
+          "renown": { "glory": 4, "honor": 2, "wisdom": 0 },
+          "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+          "freebiesRemaining": 0, "freebiesLog": [],
+          "xpTotal": 0, "xpSpent": 0,
+          "staffNotes": "", "statLog": [], "notes": [],
+          "createdAt": 1700000000000, "updatedAt": 1700000000000
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Catalog" },
+    { "cmd": "+challenge", "label": "list types + open", "as": "player" },
+    { "cmd": "+challenge/info staredown", "label": "info on staredown", "as": "player" },
+
+    { "sub": "Non-combat: issue + accept + resolve" },
+    { "cmd": "+challenge/issue Bran=staredown/You spoke ill of my pack at the moot.", "label": "Storms challenges Bran", "as": "player" },
+    { "cmd": "+challenge/list", "label": "open list (Bran's view)", "as": "Bran" },
+
+    { "sub": "Issue + decline (combat type, declineCost)" },
+    { "cmd": "+challenge/issue Bran=single-combat/You owe me satisfaction for the insult.", "label": "Storms calls single-combat", "as": "player" }
+  ]
+}

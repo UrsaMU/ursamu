@@ -1,0 +1,58 @@
+{
+  "key": "wod-background",
+  "label": "WoD20th -- Backgrounds catalog (+background)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": { "name": "Sept Library", "desc": "Shelves of bound tribal lore." },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Theurge",
+        "fullName": "Storms",
+        "breed": "homid", "auspice": "theurge", "tribe": "Uktena",
+        "attributePriority": ["mental", "social", "physical"],
+        "attributes": {
+          "Strength": 2, "Dexterity": 3, "Stamina": 3,
+          "Perception": 4, "Intelligence": 3, "Wits": 3,
+          "Charisma": 3, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["mental", "social", "physical"],
+        "abilities": { "Occult": 3, "Cosmology": 2 },
+        "abilitySpecialties": {},
+        "backgrounds": {},
+        "willpower": 6,
+        "rage": 3, "rageCurrent": 3,
+        "gnosis": 5, "gnosisCurrent": 5,
+        "rank": 2,
+        "renown": { "glory": 0, "honor": 0, "wisdom": 3 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Browse: full catalog" },
+    { "cmd": "+background",                     "label": "all backgrounds", "as": "player" },
+
+    { "sub": "Drill into a universal background" },
+    { "cmd": "+background/info allies",         "label": "Allies",          "as": "player" },
+    { "cmd": "+background/info resources",      "label": "Resources",       "as": "player" },
+
+    { "sub": "Drill into a tribe-gated background" },
+    { "cmd": "+background/info pure-breed",     "label": "Pure Breed",      "as": "player" },
+    { "cmd": "+background/info ancestors",      "label": "Ancestors",       "as": "player" },
+
+    { "sub": "Pack-priced background" },
+    { "cmd": "+background/info totem",          "label": "Totem",           "as": "player" },
+
+    { "sub": "Bad slug rejects" },
+    { "cmd": "+background/info nonsense",       "label": "reject",          "as": "player" }
+  ]
+}

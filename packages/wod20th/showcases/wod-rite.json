@@ -1,0 +1,97 @@
+{
+  "key": "wod-rite",
+  "label": "WoD20th -- WtA Rites (+rite)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Sept Caern",
+      "desc": "A moss-circled stone where the spirits gather to listen."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Adren Theurge",
+        "fullName": "Maya Whitehorse",
+        "breed": "homid", "auspice": "theurge", "tribe": "Wendigo",
+        "attributePriority": ["physical", "mental", "social"],
+        "attributes": {
+          "Strength": 3, "Dexterity": 4, "Stamina": 3,
+          "Perception": 4, "Intelligence": 3, "Wits": 3,
+          "Charisma": 2, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Occult": 3, "Rituals": 4, "Enigmas": 2 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Mentor": 2, "Totem": 2 },
+        "willpower": 7,
+        "rage": 3, "rageCurrent": 3,
+        "gnosis": 6, "gnosisCurrent": 6,
+        "rank": 3,
+        "renown": { "glory": 2, "honor": 3, "wisdom": 6 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "rites": [],
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    },
+    "targets": {
+      "Cassidy": {
+        "_char": {
+          "playerId": "mock-cassidy",
+          "splat": "wta",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Cliath Philodox",
+          "fullName": "Cassidy Cloudwalker",
+          "breed": "homid", "auspice": "philodox", "tribe": "Children of Gaia",
+          "attributePriority": ["mental", "social", "physical"],
+          "attributes": {
+            "Strength": 2, "Dexterity": 3, "Stamina": 3,
+            "Perception": 3, "Intelligence": 3, "Wits": 3,
+            "Charisma": 3, "Manipulation": 3, "Appearance": 2
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": ["talents", "skills", "knowledges"],
+          "abilities": { "Empathy": 3, "Rituals": 2 },
+          "abilitySpecialties": {},
+          "backgrounds": { "Mentor": 1 },
+          "willpower": 6,
+          "rage": 4, "rageCurrent": 4,
+          "gnosis": 3, "gnosisCurrent": 3,
+          "rank": 1,
+          "renown": { "glory": 1, "honor": 2, "wisdom": 0 },
+          "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+          "rites": [],
+          "freebiesRemaining": 0, "freebiesLog": [],
+          "xpTotal": 0, "xpSpent": 0,
+          "staffNotes": "", "statLog": [], "notes": [],
+          "createdAt": 1700000000000, "updatedAt": 1700000000000
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Rites" },
+    { "cmd": "+rite", "label": "none known initially", "as": "player" },
+    { "cmd": "+rite/list", "label": "full rite catalog", "as": "player" },
+    { "cmd": "+rite/list passage", "label": "filter by passage category", "as": "player" },
+    { "cmd": "+rite/info rite-of-passage", "label": "detail on a rite", "as": "player" },
+
+    { "sub": "Learn & Cast" },
+    { "cmd": "+rite/learn rite-of-cleansing", "label": "learn Rite of Cleansing", "as": "player" },
+    { "cmd": "+rite/learn rite-of-passage", "label": "learn Rite of Passage", "as": "player" },
+    { "cmd": "+rite", "label": "now two known", "as": "player" },
+    { "cmd": "+rite/cast rite-of-cleansing", "label": "cast (Gnosis roll, RNG)", "as": "player" },
+
+    { "sub": "Staff Teach" },
+    { "cmd": "+rite/teach Cassidy=rite-of-cleansing", "label": "staff teaches Cassidy", "as": "admin" },
+    { "reset": true }
+  ]
+}

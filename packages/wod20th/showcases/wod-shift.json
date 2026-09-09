@@ -1,0 +1,72 @@
+{
+  "key": "wod-shift",
+  "label": "WoD20th -- WtA Form Shifting (+shift)",
+  "plugin": "wod20th",
+  "vars": { "player": "Fang" },
+  "setup": {
+    "room": {
+      "name": "Sept Commons",
+      "desc": "A clearing under broken stars, ringed by ancient pines."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-fang",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Cliath Ahroun",
+        "fullName": "Tyler Fang",
+        "age": "22",
+        "nature": "Defender",
+        "demeanor": "Bravo",
+        "breed": "homid",
+        "auspice": "ahroun",
+        "tribe": "Get of Fenris",
+        "attributePriority": ["physical", "mental", "social"],
+        "attributes": {
+          "Strength": 4, "Dexterity": 3, "Stamina": 4,
+          "Perception": 3, "Intelligence": 2, "Wits": 3,
+          "Charisma": 2, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": {
+          "Alertness": 3, "Brawl": 4, "Athletics": 3, "Primal-Urge": 2, "Intimidation": 2,
+          "Melee": 3, "Survival": 2, "Stealth": 2,
+          "Occult": 1, "Enigmas": 1
+        },
+        "abilitySpecialties": {},
+        "backgrounds": { "Pure Breed": 2, "Resources": 1, "Mentor": 2 },
+        "willpower": 5,
+        "rage": 5, "rageCurrent": 5,
+        "gnosis": 2, "gnosisCurrent": 2,
+        "rank": 1,
+        "renown": { "glory": 3, "honor": 0, "wisdom": 0 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "gifts": ["Razor Claws", "Inspiration", "Resist Pain"],
+        "currentForm": "homid",
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Form-Shifting" },
+    { "note": "Fang is a Cliath Ahroun (Get of Fenris). Five forms with stat modifiers." },
+    { "cmd": "+shift", "label": "show current form and modifier table", "as": "player" },
+    { "cmd": "+shift crinos", "label": "shift to war-form -- known by login name", "as": "player" },
+    { "sub": "Deed Name" },
+    { "note": "Set a deed name; it shows in place of the login name in non-homid forms." },
+    { "cmd": "+deedname Bloodclaw", "label": "claim deed name", "as": "player" },
+    { "cmd": "+shift homid", "label": "back to human (deed name suppressed)", "as": "player" },
+    { "cmd": "+shift crinos", "label": "shift again -- room now sees Bloodclaw", "as": "player" },
+    { "cmd": "+sheet", "label": "sheet shows Form + Deed", "as": "player" },
+    { "cmd": "+deedname/clear", "label": "remove the deed name", "as": "player" },
+    { "cmd": "+shift glabro", "label": "shift to glabro (no deed -> login name)", "as": "player" },
+    { "cmd": "+shift homid", "label": "return to human form", "as": "player" },
+    { "cmd": "+shift bogus", "label": "error -- invalid form", "as": "player" },
+    { "reset": true }
+  ]
+}

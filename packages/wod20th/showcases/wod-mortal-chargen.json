@@ -1,0 +1,93 @@
+{
+  "key": "wod-mortal-chargen",
+  "label": "WoD20th -- Mortal Character Generation",
+  "plugin": "wod20th",
+  "vars": { "player": "Cassidy" },
+  "steps": [
+    { "sub": "Starting Chargen" },
+    { "note": "First +chargen with no character shows the template picker." },
+    { "cmd": "+chargen", "label": "show template picker", "as": "player" },
+
+    { "sub": "Choosing a Template (Step 1)" },
+    { "note": "Mortal is a direct splat. Step 1 (Sub-template) auto-completes -- no breed/auspice/tribe." },
+    { "cmd": "+chargen/template mortal", "label": "start chargen as Mortal", "as": "player" },
+    { "cmd": "+chargen", "label": "view dashboard / current step", "as": "player" },
+
+    { "sub": "Step 2 -- Concept" },
+    { "note": "Required: fullName, age, nature, demeanor, and concept. Auto-advances when complete." },
+    { "cmd": "+chargen/set fullName=Cassidy Vale", "label": "set full name", "as": "player" },
+    { "cmd": "+chargen/set age=29", "label": "set age", "as": "player" },
+    { "cmd": "+chargen/set concept=Investigative Reporter", "label": "set concept", "as": "player" },
+    { "cmd": "+chargen/set nature=Survivor", "label": "Nature archetype", "as": "player" },
+    { "cmd": "+chargen/set demeanor=Director", "label": "Demeanor archetype", "as": "player" },
+
+    { "sub": "Step 3 -- Attribute Priority" },
+    { "note": "Pick primary/secondary/tertiary across physical/social/mental." },
+    { "cmd": "+chargen/priority attrs=mental/social/physical", "label": "Mental primary, Social secondary, Physical tertiary", "as": "player" },
+
+    { "sub": "Step 3 -- Spending Attribute Dots" },
+    { "note": "One trait per command. Mental primary gets 7 extra dots; Social 5; Physical 3." },
+    { "cmd": "+chargen/set Perception=3", "label": "Perception 1+3=4", "as": "player" },
+    { "cmd": "+chargen/set Intelligence=2", "label": "Intelligence 1+2=3", "as": "player" },
+    { "cmd": "+chargen/set Wits=2", "label": "Wits 1+2=3 (mental: 7 spent)", "as": "player" },
+    { "cmd": "+chargen/set Charisma=2", "label": "Charisma 1+2=3", "as": "player" },
+    { "cmd": "+chargen/set Manipulation=2", "label": "Manipulation 1+2=3", "as": "player" },
+    { "cmd": "+chargen/set Appearance=1", "label": "Appearance 1+1=2 (social: 5 spent)", "as": "player" },
+    { "cmd": "+chargen/set Strength=1", "label": "Strength 1+1=2", "as": "player" },
+    { "cmd": "+chargen/set Dexterity=1", "label": "Dexterity 1+1=2", "as": "player" },
+    { "cmd": "+chargen/set Stamina=1", "label": "Stamina 1+1=2 (physical: 3 spent)", "as": "player" },
+
+    { "sub": "Step 4 -- Ability Priority" },
+    { "cmd": "+chargen/priority abilities=knowledges/talents/skills", "label": "Knowledges primary", "as": "player" },
+
+    { "sub": "Step 4 -- Spending Ability Dots" },
+    { "note": "Cap is 3 per ability during Step 4. Knowledges 13, Talents 9, Skills 5." },
+    { "cmd": "+chargen/set Investigation=3", "label": "Investigation 3", "as": "player" },
+    { "cmd": "+chargen/set Academics=3", "label": "Academics 3", "as": "player" },
+    { "cmd": "+chargen/set Computer=2", "label": "Computer 2", "as": "player" },
+    { "cmd": "+chargen/set Law=2", "label": "Law 2", "as": "player" },
+    { "cmd": "+chargen/set Occult=2", "label": "Occult 2", "as": "player" },
+    { "cmd": "+chargen/set Medicine=1", "label": "Medicine 1 (knowledges: 13)", "as": "player" },
+    { "cmd": "+chargen/set Alertness=2", "label": "Alertness 2", "as": "player" },
+    { "cmd": "+chargen/set Expression=2", "label": "Expression 2", "as": "player" },
+    { "cmd": "+chargen/set Streetwise=2", "label": "Streetwise 2", "as": "player" },
+    { "cmd": "+chargen/set Subterfuge=2", "label": "Subterfuge 2", "as": "player" },
+    { "cmd": "+chargen/set Empathy=1", "label": "Empathy 1 (talents: 9)", "as": "player" },
+    { "cmd": "+chargen/set Drive=2", "label": "Drive 2", "as": "player" },
+    { "cmd": "+chargen/set Stealth=2", "label": "Stealth 2", "as": "player" },
+    { "cmd": "+chargen/set Etiquette=1", "label": "Etiquette 1 (skills: 5)", "as": "player" },
+
+    { "sub": "Step 5 -- Advantages (Backgrounds, Merits, Flaws)" },
+    { "note": "Mortals get 5 background dots. Merits cost freebies; flaws give them back (cap 7)." },
+    { "cmd": "+chargen/set Contacts=3", "label": "3 dots in Contacts", "as": "player" },
+    { "cmd": "+chargen/set Resources=2", "label": "2 dots in Resources (5 total)", "as": "player" },
+
+    { "sub": "Step 6 -- Freebies" },
+    { "note": "Mortals get 15 freebies. Costs: attr 5, ability 2, background 1, willpower 1." },
+    { "cmd": "+chargen/freebies", "label": "show ledger", "as": "player" },
+    { "cmd": "+chargen/spend Willpower=3", "label": "+3 Willpower (3 pts)", "as": "player" },
+    { "cmd": "+chargen/spend Willpower=2", "label": "+2 Willpower (2 pts)", "as": "player" },
+    { "cmd": "+chargen/freebies", "label": "ledger after spends", "as": "player" },
+    { "cmd": "+chargen/unspend Willpower", "label": "back out last Willpower spend", "as": "player" },
+    { "cmd": "+chargen/spend Willpower=2", "label": "spend it again (2 pts)", "as": "player" },
+
+    { "sub": "Notes" },
+    { "note": "Notes are private by default. Mark public to share with staff/viewers." },
+    { "cmd": "+chargen/notes set bg=Cassidy chases conspiracies the police won't touch.", "label": "private background note", "as": "player" },
+    { "cmd": "+chargen/notes public bg", "label": "make note staff-visible", "as": "player" },
+    { "cmd": "+chargen/notes list", "label": "list notes", "as": "player" },
+
+    { "sub": "Submission" },
+    { "cmd": "+chargen", "label": "review dashboard", "as": "player" },
+    { "cmd": "+chargen/submit", "label": "submit for staff approval", "as": "player" },
+
+    { "sub": "Staff Review" },
+    { "cmd": "+chargen/queue", "label": "list submitted characters", "as": "admin" },
+    { "cmd": "+chargen/note Cassidy=Concept fits the chronicle theme.", "label": "add staff note", "as": "admin" },
+    { "cmd": "+chargen/approve Cassidy", "label": "approve the character", "as": "admin" },
+
+    { "sub": "Reset (Admin)" },
+    { "note": "Showcase complete -- state cleared." },
+    { "reset": true }
+  ]
+}

@@ -22,6 +22,42 @@ Deno.test("wordWrap - preserves line length with hex colors", OPTS, () => {
   assertEquals(result, line);
 });
 
+Deno.test(
+  "wordWrap - %r is a line break (pre-formatted multi-line)",
+  OPTS,
+  () => {
+    // Chargen/sheets join with %r. send() wraps BEFORE the telnet
+    // formatter expands %r → \n. Without treating %r as a break, the
+    // whole block is one line and gets shredded on spaces.
+    const step =
+      "  [~] Step 2 - Concept           +chargen/set fullName=<name>";
+    const block =
+      "Breed:   Homid            Auspice: Ahroun           Tribe:   -" +
+      "%r" +
+      step +
+      "%r" +
+      "  [ ] Step 3 - Attributes        (locked)";
+    const result = wordWrap(block, 78);
+    const lines = result.split("\n");
+    assertEquals(lines.length, 3);
+    assertEquals(lines[1], step);
+    assertEquals(
+      lines[0],
+      "Breed:   Homid            Auspice: Ahroun           Tribe:   -",
+    );
+  },
+);
+
+Deno.test(
+  "wordWrap - does not reflow a 78-col step row at width 78",
+  OPTS,
+  () => {
+    const step =
+      "  [~] Step 1 - Sub-template      +chargen/set tribe=<tribe>";
+    assertEquals(wordWrap(step, 78), step);
+  },
+);
+
 Deno.test("shouldWordWrap: web skips, telnet wraps", OPTS, () => {
   sessions.open("sock-web", "s1");
   sessions.open("sock-tn", "s2");

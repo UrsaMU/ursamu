@@ -1,0 +1,523 @@
+{
+  "key": "wod-vampire-night",
+  "label": "WoD20th -- Kindred night (blood, feed, humanity, powers)",
+  "plugin": "wod20th",
+  "vars": {
+    "player": "Cass"
+  },
+  "setup": {
+    "room": {
+      "name": "Back Alley",
+      "desc": "Wet brick and neon bleed into puddles."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-cass",
+        "splat": "vtm",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Anarch",
+        "fullName": "Cassidy Rook",
+        "clan": "brujah",
+        "generation": 13,
+        "sect": "anarch",
+        "attributePriority": [
+          "physical",
+          "social",
+          "mental"
+        ],
+        "attributes": {
+          "Strength": 3,
+          "Dexterity": 3,
+          "Stamina": 2,
+          "Charisma": 2,
+          "Manipulation": 2,
+          "Appearance": 2,
+          "Perception": 2,
+          "Intelligence": 2,
+          "Wits": 3
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": [
+          "talents",
+          "skills",
+          "knowledges"
+        ],
+        "abilities": {
+          "Brawl": 3,
+          "Intimidation": 2,
+          "Streetwise": 2,
+          "Empathy": 2,
+          "Occult": 2,
+          "Subterfuge": 2
+        },
+        "abilitySpecialties": {},
+        "backgrounds": {
+          "Contacts": 2,
+          "Herd": 3
+        },
+        "disciplines": {
+          "Potence": 2,
+          "Presence": 3,
+          "Dominate": 3,
+          "Celerity": 1,
+          "Fortitude": 1,
+          "Protean": 3,
+          "Animalism": 3
+        },
+        "virtues": {
+          "Conscience": 3,
+          "Self-Control": 3,
+          "Courage": 4
+        },
+        "humanity": 6,
+        "path": "Humanity",
+        "willpower": 4,
+        "bloodMax": 10,
+        "bloodPool": 10,
+        "bloodPerTurn": 2,
+        "healthTrack": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "merits": {
+          "Unbondable": 0
+        },
+        "freebiesRemaining": 0,
+        "freebiesLog": [],
+        "xpTotal": 0,
+        "xpSpent": 0,
+        "staffNotes": "",
+        "statLog": [],
+        "notes": [],
+        "createdAt": 1700000000000,
+        "updatedAt": 1700000000000
+      }
+    },
+    "targets": {
+      "Rook": {
+        "_char": {
+          "playerId": "mock-rook",
+          "splat": "vtm",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Neonates",
+          "fullName": "Rook Vale",
+          "clan": "malkavian",
+          "generation": 13,
+          "sect": "anarch",
+          "attributePriority": [
+            "mental",
+            "social",
+            "physical"
+          ],
+          "attributes": {
+            "Strength": 2,
+            "Dexterity": 2,
+            "Stamina": 2,
+            "Charisma": 2,
+            "Manipulation": 3,
+            "Appearance": 2,
+            "Perception": 3,
+            "Intelligence": 3,
+            "Wits": 3
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": [
+            "talents",
+            "skills",
+            "knowledges"
+          ],
+          "abilities": {
+            "Empathy": 2,
+            "Occult": 2
+          },
+          "abilitySpecialties": {},
+          "backgrounds": {},
+          "disciplines": {
+            "Auspex": 2,
+            "Obfuscate": 2,
+            "Dementation": 2
+          },
+          "virtues": {
+            "Conscience": 2,
+            "Self-Control": 2,
+            "Courage": 3
+          },
+          "humanity": 5,
+          "path": "Humanity",
+          "derangements": [
+            "paranoia"
+          ],
+          "willpower": 4,
+          "bloodMax": 10,
+          "bloodPool": 8,
+          "bloodPerTurn": 1,
+          "healthTrack": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "freebiesRemaining": 0,
+          "freebiesLog": [],
+          "xpTotal": 0,
+          "xpSpent": 0,
+          "staffNotes": "",
+          "statLog": [],
+          "notes": [],
+          "createdAt": 1700000000000,
+          "updatedAt": 1700000000000
+        }
+      },
+      "Vessel": {
+        "_char": {
+          "playerId": "mock-vessel",
+          "splat": "mortal",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Night walker",
+          "fullName": "Sam Quill",
+          "attributePriority": [
+            "physical",
+            "mental",
+            "social"
+          ],
+          "attributes": {
+            "Strength": 2,
+            "Dexterity": 2,
+            "Stamina": 2,
+            "Charisma": 2,
+            "Manipulation": 2,
+            "Appearance": 2,
+            "Perception": 2,
+            "Intelligence": 2,
+            "Wits": 2
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": [
+            "talents",
+            "skills",
+            "knowledges"
+          ],
+          "abilities": {},
+          "abilitySpecialties": {},
+          "backgrounds": {},
+          "willpower": 3,
+          "healthTrack": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "freebiesRemaining": 0,
+          "freebiesLog": [],
+          "xpTotal": 0,
+          "xpSpent": 0,
+          "staffNotes": "",
+          "statLog": [],
+          "notes": [],
+          "createdAt": 1700000000000,
+          "updatedAt": 1700000000000
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Blood and buff"
+    },
+    {
+      "cmd": "+blood",
+      "as": "player"
+    },
+    {
+      "cmd": "+blood/buff strength",
+      "as": "player"
+    },
+    {
+      "cmd": "+blood",
+      "as": "player"
+    },
+    {
+      "sub": "Feed from Herd and vessel"
+    },
+    {
+      "cmd": "+feed",
+      "as": "player"
+    },
+    {
+      "cmd": "+feed/herd=2",
+      "as": "player"
+    },
+    {
+      "cmd": "+feed Vessel=1",
+      "as": "player"
+    },
+    {
+      "sub": "Heal with vitae"
+    },
+    {
+      "cmd": "+hurt me=2b",
+      "as": "player"
+    },
+    {
+      "cmd": "+blood/heal 1",
+      "as": "player"
+    },
+    {
+      "cmd": "+hurt me=1a",
+      "as": "player"
+    },
+    {
+      "cmd": "+blood/heal/agg",
+      "as": "player"
+    },
+    {
+      "sub": "Humanity and Paths"
+    },
+    {
+      "cmd": "+humanity",
+      "as": "player"
+    },
+    {
+      "cmd": "+humanity/paths",
+      "as": "player"
+    },
+    {
+      "cmd": "+humanity/sins",
+      "as": "player"
+    },
+    {
+      "cmd": "+humanity/check 5",
+      "as": "player"
+    },
+    {
+      "sub": "Disciplines L1-5 effects"
+    },
+    {
+      "cmd": "+discipline",
+      "as": "player"
+    },
+    {
+      "cmd": "+discipline/powers",
+      "as": "player"
+    },
+    {
+      "cmd": "+discipline/info Command",
+      "as": "player"
+    },
+    {
+      "cmd": "+discipline/use Awe",
+      "as": "player"
+    },
+    {
+      "cmd": "+discipline/use Command Rook",
+      "as": "player"
+    },
+    {
+      "cmd": "+discipline/use feral-claws",
+      "as": "player"
+    },
+    {
+      "cmd": "+discipline/use earth-meld",
+      "as": "player"
+    },
+    {
+      "cmd": "+discipline/use earth-meld",
+      "as": "player",
+      "label": "toggle earth-meld off"
+    },
+    {
+      "cmd": "+discipline/use Celerity",
+      "as": "player"
+    },
+    {
+      "cmd": "+discipline",
+      "as": "player"
+    },
+    {
+      "sub": "Hazard + Beast (Brujah frenzy)"
+    },
+    {
+      "cmd": "+hazard/fire me",
+      "as": "player"
+    },
+    {
+      "cmd": "+beast",
+      "as": "player"
+    },
+    {
+      "cmd": "+beast/list",
+      "as": "player"
+    },
+    {
+      "cmd": "+beast/frenzy hunger",
+      "as": "player"
+    },
+    {
+      "sub": "Derangements (Rook is Malk)"
+    },
+    {
+      "cmd": "+derange",
+      "as": "Rook"
+    },
+    {
+      "cmd": "+derange/list",
+      "as": "player"
+    },
+    {
+      "sub": "Coterie"
+    },
+    {
+      "cmd": "+coterie",
+      "as": "player"
+    },
+    {
+      "cmd": "+coterie/create Night Howlers",
+      "as": "player"
+    },
+    {
+      "cmd": "+coterie/invite Rook",
+      "as": "player"
+    },
+    {
+      "cmd": "+coterie/accept",
+      "as": "Rook"
+    },
+    {
+      "cmd": "+coterie",
+      "as": "player"
+    },
+    {
+      "cmd": "+coterie/list",
+      "as": "player"
+    },
+    {
+      "cmd": "+coterie/purpose Hunt the alley",
+      "as": "player"
+    },
+    {
+      "sub": "Domain (staff)"
+    },
+    {
+      "cmd": "+domain/create Neon District",
+      "as": "admin"
+    },
+    {
+      "cmd": "+domain/office Neon District/Cass=sheriff",
+      "as": "admin"
+    },
+    {
+      "cmd": "+domain/who Neon District",
+      "as": "player"
+    },
+    {
+      "cmd": "+domain",
+      "as": "player"
+    },
+    {
+      "sub": "Boons"
+    },
+    {
+      "cmd": "+boon/weights",
+      "as": "player"
+    },
+    {
+      "cmd": "+boon/owe Rook=minor saved my hide",
+      "as": "player"
+    },
+    {
+      "cmd": "+boon",
+      "as": "player"
+    },
+    {
+      "cmd": "+boon",
+      "as": "Rook"
+    },
+    {
+      "sub": "Bond / stake / torpor"
+    },
+    {
+      "cmd": "+bond",
+      "as": "player"
+    },
+    {
+      "cmd": "+stake",
+      "as": "player"
+    },
+    {
+      "cmd": "+torpor",
+      "as": "player"
+    },
+    {
+      "sub": "Sheet"
+    },
+    {
+      "cmd": "+sheet",
+      "as": "player"
+    },
+    {
+      "sub": "Blood magic: paths and rituals"
+    },
+    {
+      "cmd": "+stat Cass/thaumaturgy=3",
+      "as": "admin"
+    },
+    {
+      "cmd": "+discipline/primary",
+      "as": "player"
+    },
+    {
+      "cmd": "+discipline/primary The Lure of Flames",
+      "as": "player"
+    },
+    {
+      "cmd": "+discipline/powers",
+      "as": "player"
+    },
+    {
+      "cmd": "+discipline/use lure-candle",
+      "as": "player"
+    },
+    {
+      "cmd": "+ritual",
+      "as": "player"
+    },
+    {
+      "cmd": "+ritual/learn pavis of foul presence",
+      "as": "player"
+    },
+    {
+      "cmd": "+ritual/learn wake with evening's freshness",
+      "as": "player"
+    },
+    {
+      "cmd": "+ritual",
+      "as": "player"
+    },
+    {
+      "cmd": "+ritual/book pavis of foul presence",
+      "as": "player"
+    },
+    {
+      "cmd": "+ritual/cast wake with evening's freshness",
+      "as": "player"
+    },
+    {
+      "cmd": "+ritual/list thaumaturgy",
+      "as": "player"
+    }
+  ]
+}

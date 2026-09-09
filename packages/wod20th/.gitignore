@@ -1,0 +1,15 @@
+.claude/
+.vscode/
+.env
+
+.DS_Store
+
+.ursamu-stage
+
+# Runtime DB under data/; keep JSON tables tracked.
+data/*
+!data/*.json
+resources/
+
+node_modules/
+showcase.importmap.json

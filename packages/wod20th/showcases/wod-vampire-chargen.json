@@ -1,0 +1,291 @@
+{
+  "key": "wod-vampire-chargen",
+  "label": "WoD20th -- Vampire (V20) Character Generation",
+  "plugin": "wod20th",
+  "vars": {
+    "player": "CassidyRook"
+  },
+  "steps": [
+    {
+      "reset": true
+    },
+    {
+      "sub": "Starting Chargen"
+    },
+    {
+      "note": "Vampire is a top-level template on the multi-splat engine."
+    },
+    {
+      "cmd": "+chargen",
+      "label": "show template picker",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/template vampire",
+      "label": "start as Vampire",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen",
+      "label": "dashboard step 1",
+      "as": "player"
+    },
+    {
+      "sub": "Step 1 -- Clan"
+    },
+    {
+      "cmd": "+chargen/set clan=Brujah",
+      "label": "Clan Brujah",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen",
+      "label": "dashboard after clan",
+      "as": "player"
+    },
+    {
+      "sub": "Step 2 -- Concept"
+    },
+    {
+      "cmd": "+chargen/set fullName=Cassidy Rook",
+      "label": "full name",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set age=28",
+      "label": "age",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set concept=Anarch agitator",
+      "label": "concept",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set nature=Rebel",
+      "label": "Nature",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set demeanor=Bravo",
+      "label": "Demeanor",
+      "as": "player"
+    },
+    {
+      "sub": "Step 3 -- Attributes"
+    },
+    {
+      "cmd": "+chargen/priority attrs=social/physical/mental",
+      "label": "Social primary",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Charisma=3",
+      "label": "Charisma 4",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Manipulation=2",
+      "label": "Manipulation 3",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Appearance=2",
+      "label": "Appearance 3 (social 7)",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Strength=2",
+      "label": "Strength 3",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Dexterity=2",
+      "label": "Dexterity 3",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Stamina=1",
+      "label": "Stamina 2 (physical 5)",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Perception=1",
+      "label": "Perception 2",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Intelligence=1",
+      "label": "Intelligence 2",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Wits=1",
+      "label": "Wits 2 (mental 3)",
+      "as": "player"
+    },
+    {
+      "sub": "Step 4 -- Abilities"
+    },
+    {
+      "cmd": "+chargen/priority abilities=talents/skills/knowledges",
+      "label": "Talents primary",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Brawl=3",
+      "label": "Brawl 3",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Streetwise=3",
+      "label": "Streetwise 3",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Intimidation=3",
+      "label": "Intimidation 3",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Expression=2",
+      "label": "Expression 2",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Alertness=2",
+      "label": "Alertness 2 (talents 13)",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Melee=3",
+      "label": "Melee 3",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Drive=2",
+      "label": "Drive 2",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Stealth=2",
+      "label": "Stealth 2",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Firearms=2",
+      "label": "Firearms 2 (skills 9)",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Academics=2",
+      "label": "Academics 2",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Investigation=2",
+      "label": "Investigation 2",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Law=1",
+      "label": "Law 1 (knowledges 5)",
+      "as": "player"
+    },
+    {
+      "sub": "Step 5 -- Advantages"
+    },
+    {
+      "note": "3 in-clan Discipline dots, 5 Backgrounds, 7 Virtue extras."
+    },
+    {
+      "cmd": "+chargen/set Potence=2",
+      "label": "Potence 2",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Presence=1",
+      "label": "Presence 1 (3 disc)",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Contacts=2",
+      "label": "Contacts 2",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Resources=1",
+      "label": "Resources 1",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Generation=2",
+      "label": "Generation 2 (11th)",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Conscience=3",
+      "label": "Conscience 3",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Self-Control=3",
+      "label": "Self-Control 3",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/set Courage=4",
+      "label": "Courage 4 (virtue extras 7)",
+      "as": "player"
+    },
+    {
+      "sub": "Step 6 -- Freebies"
+    },
+    {
+      "cmd": "+chargen/freebies",
+      "label": "ledger",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/spend Celerity=1",
+      "label": "+1 Celerity (7 pts)",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/spend Willpower=3",
+      "label": "+3 Willpower (3 pts)",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/spend Brawl=1",
+      "label": "+1 Brawl freebie (2 pts)",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/freebies",
+      "label": "ledger after spends",
+      "as": "player"
+    },
+    {
+      "sub": "Sheet and Submit"
+    },
+    {
+      "cmd": "+sheet",
+      "label": "Kindred sheet",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/notes set bg=Cassidy burns for the streets.",
+      "label": "note",
+      "as": "player"
+    },
+    {
+      "cmd": "+chargen/submit",
+      "label": "submit for approval",
+      "as": "player"
+    },
+    {
+      "reset": true
+    }
+  ]
+}

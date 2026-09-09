@@ -1,0 +1,81 @@
+{
+  "key": "wod-spirit",
+  "label": "WoD20th -- WtA Spirit catalog (+spirit)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Spirit Glen",
+      "desc": "A still pool reflecting more sky than there is above it."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Theurge of the Wolf",
+        "fullName": "Storm-of-Voices",
+        "breed": "homid", "auspice": "theurge", "tribe": "Silver Fangs",
+        "attributePriority": ["mental", "social", "physical"],
+        "attributes": {
+          "Strength": 2, "Dexterity": 3, "Stamina": 3,
+          "Perception": 4, "Intelligence": 3, "Wits": 3,
+          "Charisma": 3, "Manipulation": 2, "Appearance": 3
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Occult": 3, "Rituals": 3 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Totem": 3 },
+        "willpower": 6,
+        "rage": 3, "rageCurrent": 3,
+        "gnosis": 10, "gnosisCurrent": 10,
+        "rank": 2,
+        "renown": { "glory": 1, "honor": 2, "wisdom": 4 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "rites": ["rite-of-binding"],
+        "_state": { "reality": "penumbra" },
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      },
+      "_carrying": [
+        { "name": "spirit-stone", "desc": "A river-worn stone carved with a single rune." },
+        { "name": "dried-feather", "desc": "A black feather, brittle, smelling faintly of ozone." }
+      ]
+    }
+  },
+  "steps": [
+    { "sub": "Browse the catalog" },
+    { "cmd": "+spirit", "label": "full catalog", "as": "player" },
+    { "cmd": "+spirit/list totem", "label": "totems only", "as": "player" },
+    { "cmd": "+spirit/totems", "label": "shortcut for totems", "as": "player" },
+    { "cmd": "+spirit/list gaffling", "label": "gafflings", "as": "player" },
+
+    { "sub": "Spirit detail" },
+    { "cmd": "+spirit/info wolf", "label": "Wolf sheet", "as": "player" },
+    { "cmd": "+spirit/info grandfather-thunder", "label": "Grandfather Thunder sheet", "as": "player" },
+    { "cmd": "+spirit/info not-a-spirit", "label": "unknown slug errors safely", "as": "player" },
+
+    { "sub": "Totem binding from catalog" },
+    { "cmd": "+pack/create Wolfs Run", "label": "form a pack", "as": "player" },
+    { "cmd": "+pack/totem Wolfs Run/wolf=5", "label": "bind canonical Wolf totem (boons auto-populate)", "as": "admin" },
+    { "cmd": "+pack/who Wolfs Run", "label": "show pack with boons", "as": "player" },
+    { "cmd": "+pack/totem Wolfs Run/mystery-spirit=3", "label": "custom totem slug -- warns but accepts", "as": "admin" },
+
+    { "sub": "Spirit interactions (Storms is in the Penumbra)" },
+    { "cmd": "+spirit/bargain wolf=I will plant 100 saplings on the bawn.", "label": "social roll, -1 Gnosis", "as": "player" },
+    { "cmd": "+spirit/chiminage wolf=a song of the autumn hunt",            "label": "formal offering, -1 Willpower", "as": "player" },
+    { "cmd": "@eq/kind spirit-stone=fetish",                                "label": "prep an empty fetish",          "as": "player" },
+    { "cmd": "+spirit/bind wolf=spirit-stone",                              "label": "Rite of the Fetish -> kind=fetish, fetishCost, fetishDesc, spiritSlug auto-set", "as": "player" },
+    { "cmd": "+spirit/bind wolf=spirit-stone",                              "label": "reject: already houses a spirit", "as": "player" },
+    { "cmd": "@eq/kind dried-feather=fetish",                               "label": "prep an empty fetish for the talen", "as": "player" },
+    { "cmd": "+spirit/bind/talen owl=dried-feather",                        "label": "one-shot talen: half cost, diff+1, state.talen=true", "as": "player" },
+    { "cmd": "+fetish/info dried-feather",                                  "label": "talen shows in fetish info", "as": "player" },
+    { "cmd": "+spirit/banish bane-spider",                                  "label": "drive a Wyrm spirit off (Willpower contest)", "as": "player" },
+
+    { "reset": true }
+  ]
+}

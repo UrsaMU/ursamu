@@ -1,0 +1,70 @@
+{
+  "key": "wod-fetish",
+  "label": "WoD20th -- WtA Fetishes (+fetish)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Spirit Glade",
+      "desc": "A clearing where Gaia's threads run thin."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Theurge",
+        "fullName": "Storms",
+        "breed": "homid", "auspice": "theurge", "tribe": "Uktena",
+        "attributePriority": ["mental", "social", "physical"],
+        "attributes": {
+          "Strength": 2, "Dexterity": 3, "Stamina": 3,
+          "Perception": 4, "Intelligence": 3, "Wits": 3,
+          "Charisma": 3, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["mental", "social", "physical"],
+        "abilities": { "Occult": 3, "Rituals": 3 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Fetish": 3 },
+        "willpower": 6,
+        "rage": 3, "rageCurrent": 3,
+        "gnosis": 5, "gnosisCurrent": 5,
+        "rank": 2,
+        "renown": { "glory": 0, "honor": 0, "wisdom": 3 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      },
+      "_carrying": [
+        { "name": "spirit-stone", "desc": "A river-worn stone carved with a single rune." },
+        { "name": "klaive",       "desc": "A blade of silvered iron humming with cold." },
+        { "name": "ordinary rock", "desc": "Just a rock." }
+      ]
+    }
+  },
+  "steps": [
+    { "sub": "Setup fetishes via @eq (one field per call)" },
+    { "cmd": "@eq/kind spirit-stone=fetish",                                       "label": "tag as fetish",        "as": "player" },
+    { "cmd": "@eq/fcost spirit-stone=1",                                           "label": "Gnosis cost = 1",      "as": "player" },
+    { "cmd": "@eq/fdesc spirit-stone=Whispers spirit names back when held.",       "label": "flavor description",   "as": "player" },
+    { "cmd": "@eq/kind klaive=fetish",                                             "label": "tag klaive as fetish", "as": "player" },
+    { "cmd": "@eq/fcost klaive=2",                                                 "label": "Gnosis cost = 2",      "as": "player" },
+    { "cmd": "@eq/fdesc klaive=A klaive of iron and silver.",                      "label": "flavor description",   "as": "player" },
+
+    { "sub": "List + info" },
+    { "cmd": "+fetish", "label": "list carried fetishes", "as": "player" },
+    { "cmd": "+fetish/info spirit-stone", "label": "show details", "as": "player" },
+    { "cmd": "+fetish/info ordinary rock", "label": "reject: not a fetish", "as": "player" },
+
+    { "sub": "Use + deactivate" },
+    { "cmd": "+fetish/use spirit-stone", "label": "activate (-1 Gnosis)", "as": "player" },
+    { "cmd": "+fetish", "label": "now shows ACTIVE", "as": "player" },
+    { "cmd": "+fetish/use spirit-stone", "label": "reject: already active", "as": "player" },
+    { "cmd": "+fetish/use klaive", "label": "activate second (-2 Gnosis)", "as": "player" },
+    { "cmd": "+fetish/deactivate spirit-stone", "label": "release", "as": "player" },
+    { "cmd": "+fetish", "label": "klaive still active", "as": "player" }
+  ]
+}

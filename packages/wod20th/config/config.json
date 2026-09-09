@@ -1,0 +1,35 @@
+{
+  "server": {
+    "telnet": 4201,
+    "ws": 4202,
+    "http": 4203,
+    "db": "db",
+    "chans": "channels",
+    "mail": "mail",
+    "wiki": "wiki",
+    "bboard": "bboard"
+  },
+  "game": {
+    "name": "UrsaMU",
+    "description": "A Modern MUSH-Like engine written in Typescript.",
+    "version": "0.0.1",
+    "playerStart": "1",
+    "text": {
+      "connect": "../text/default_connect.txt",
+      "welcome": "../text/welcome.md"
+    }
+  },
+  "theme": {
+    "primary": "#f97316",
+    "secondary": "#27272a",
+    "accent": "#fb923c",
+    "background": "#000000",
+    "surface": "#09090b",
+    "text": "#fafafa",
+    "muted": "#a1a1aa",
+    "glass": "rgba(9, 9, 11, 0.7)",
+    "glassBorder": "rgba(255, 255, 255, 0.05)",
+    "backgroundImage": "/images/default_bg.jpg"
+  },
+  "plugins": {}
+}

@@ -1,0 +1,95 @@
+{
+  "key": "wod-caern",
+  "label": "WoD20th -- Sept Caern (+caern)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Heart of the Glen",
+      "desc": "A still pool ringed with standing stones. Spirit-song hums under the moss."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Galliard Alpha",
+        "fullName": "Storm-of-Voices",
+        "breed": "homid", "auspice": "galliard", "tribe": "Silver Fangs",
+        "attributePriority": ["physical", "social", "mental"],
+        "attributes": {
+          "Strength": 3, "Dexterity": 3, "Stamina": 3,
+          "Perception": 3, "Intelligence": 3, "Wits": 3,
+          "Charisma": 4, "Manipulation": 3, "Appearance": 3
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Leadership": 3 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Pure Breed": 3 },
+        "willpower": 6,
+        "rage": 4, "rageCurrent": 4,
+        "gnosis": 5, "gnosisCurrent": 5,
+        "rank": 3,
+        "renown": { "glory": 3, "honor": 3, "wisdom": 3 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    },
+    "targets": {
+      "Cassidy": {
+        "_char": {
+          "playerId": "mock-cassidy",
+          "splat": "wta",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Philodox",
+          "fullName": "Cassidy Cloudwalker",
+          "breed": "homid", "auspice": "philodox", "tribe": "Children of Gaia",
+          "attributePriority": ["mental", "social", "physical"],
+          "attributes": {
+            "Strength": 2, "Dexterity": 3, "Stamina": 3,
+            "Perception": 3, "Intelligence": 3, "Wits": 3,
+            "Charisma": 3, "Manipulation": 3, "Appearance": 2
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": ["talents", "skills", "knowledges"],
+          "abilities": { "Empathy": 3 },
+          "abilitySpecialties": {},
+          "backgrounds": {},
+          "willpower": 6,
+          "rage": 4, "rageCurrent": 4,
+          "gnosis": 3, "gnosisCurrent": 3,
+          "rank": 1,
+          "renown": { "glory": 0, "honor": 0, "wisdom": 0 },
+          "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+          "freebiesRemaining": 0, "freebiesLog": [],
+          "xpTotal": 0, "xpSpent": 0,
+          "staffNotes": "", "statLog": [], "notes": [],
+          "createdAt": 1700000000000, "updatedAt": 1700000000000
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Pack setup -- alpha needs a pack to claim a caern" },
+    { "cmd": "+pack/create Iron Riders", "label": "alpha forms pack", "as": "player" },
+
+    { "sub": "Staff creates the caern and binds it to the room" },
+    { "cmd": "+caern/create Heart-of-the-Glen=3=Wisdom", "label": "create level 3 Wisdom caern", "as": "admin" },
+    { "cmd": "+caern/setroom Heart-of-the-Glen=mock-room", "label": "bind to current room", "as": "admin" },
+    { "cmd": "+caern/list", "label": "list caerns", "as": "player" },
+
+    { "sub": "Alpha claims for the pack" },
+    { "cmd": "+caern/claim Heart-of-the-Glen", "label": "claim", "as": "player" },
+    { "cmd": "+caern", "label": "default view -- shows the sept's caern", "as": "player" },
+
+    { "sub": "Alpha names a guardian" },
+    { "cmd": "+caern/guardian Heart-of-the-Glen=Cassidy", "label": "Cassidy becomes warder", "as": "player" },
+    { "cmd": "+caern/info Heart-of-the-Glen", "label": "info shows guardian + pack" }
+  ]
+}

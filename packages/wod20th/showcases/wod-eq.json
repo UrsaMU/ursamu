@@ -1,0 +1,86 @@
+{
+  "key": "wod-eq",
+  "label": "WoD20th -- Equipment (@eq, +wear, +wield)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Caern Armory",
+      "desc": "Racks of weapons and armor line the stone walls."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Cliath Ahroun",
+        "fullName": "Maya Storms",
+        "breed": "homid", "auspice": "ahroun", "tribe": "Wendigo",
+        "attributePriority": ["physical", "mental", "social"],
+        "attributes": {
+          "Strength": 4, "Dexterity": 3, "Stamina": 3,
+          "Perception": 3, "Intelligence": 2, "Wits": 3,
+          "Charisma": 2, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Brawl": 4, "Melee": 3, "Firearms": 2 },
+        "abilitySpecialties": {},
+        "backgrounds": {},
+        "willpower": 5,
+        "rage": 5, "rageCurrent": 5,
+        "gnosis": 2, "gnosisCurrent": 2,
+        "rank": 1,
+        "renown": { "glory": 3, "honor": 0, "wisdom": 0 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      },
+      "_carrying": [
+        { "name": "sword", "desc": "A plain steel longsword." },
+        { "name": "leather jacket", "desc": "A battered black leather jacket." },
+        { "name": "silver klaive", "desc": "A klaive forged of silver. It hums with cold." },
+        { "name": "boot knife", "desc": "A small concealed blade." }
+      ]
+    }
+  },
+  "steps": [
+    { "sub": "@eq builder -- one field per call" },
+    { "cmd": "@eq/kind sword=weapon",        "label": "sword is a weapon",          "as": "player" },
+    { "cmd": "@eq/wt sword=melee",           "label": "melee weaponType",           "as": "player" },
+    { "cmd": "@eq/damage sword=3",           "label": "3 damage dice",              "as": "player" },
+    { "cmd": "@eq/dt sword=L",               "label": "lethal damage type",         "as": "player" },
+    { "cmd": "@eq/kind leather jacket=armor","label": "jacket is armor",            "as": "player" },
+    { "cmd": "@eq/armor leather jacket=2",   "label": "armorRating 2",              "as": "player" },
+    { "cmd": "@eq/con leather jacket=J",     "label": "concealability Jacket",      "as": "player" },
+    { "cmd": "@eq/kind silver klaive=weapon","label": "silver klaive: weapon",      "as": "player" },
+    { "cmd": "@eq/wt silver klaive=melee",   "label": "melee",                      "as": "player" },
+    { "cmd": "@eq/damage silver klaive=4",   "label": "4 damage",                   "as": "player" },
+    { "cmd": "@eq/dt silver klaive=L",       "label": "lethal",                     "as": "player" },
+    { "cmd": "@eq/silver silver klaive=true","label": "silvered",                   "as": "player" },
+    { "cmd": "@eq/con silver klaive=T",      "label": "trenchcoat-concealable",     "as": "player" },
+    { "cmd": "@eq/kind boot knife=weapon",   "label": "knife: weapon",              "as": "player" },
+    { "cmd": "@eq/wt boot knife=melee",      "label": "melee",                      "as": "player" },
+    { "cmd": "@eq/damage boot knife=1",      "label": "1 damage",                   "as": "player" },
+    { "cmd": "@eq/dt boot knife=L",          "label": "lethal",                     "as": "player" },
+    { "cmd": "@eq/con boot knife=P",         "label": "pocketable",                 "as": "player" },
+    { "sub": "+wear / +wield" },
+    { "cmd": "+wear leather jacket", "label": "Don armor",         "as": "player" },
+    { "cmd": "+wield sword",         "label": "Wield first weapon", "as": "player" },
+    { "cmd": "+wield silver klaive", "label": "Wield second weapon","as": "player" },
+    { "cmd": "+wield boot knife",    "label": "Reject: over 2-weapon limit", "as": "player" },
+    { "cmd": "+sheathe sword",       "label": "Sheathe sword",     "as": "player" },
+    { "cmd": "+wield boot knife",    "label": "Now slot is free",  "as": "player" },
+    { "sub": "@eq display + verb attrs" },
+    { "cmd": "@eq/name silver klaive=Edge-Lord's Kiss",                            "label": "rename the klaive",       "as": "player" },
+    { "cmd": "@eq/desc silver klaive=A klaive of iron and silver that hums softly.","label": "set description",         "as": "player" },
+    { "cmd": "@eq/succ silver klaive=The blade sings its hunger back to you.",     "label": "user success verb",       "as": "player" },
+    { "cmd": "@eq/osucc silver klaive='s klaive hums with an answering note.",     "label": "room success verb",       "as": "player" },
+
+    { "sub": "@eq partial update + clear" },
+    { "cmd": "@eq/damage sword=4",   "label": "Bump sword damage", "as": "player" },
+    { "cmd": "@eq/clear boot knife", "label": "Clear eq fields",   "as": "player" }
+  ]
+}

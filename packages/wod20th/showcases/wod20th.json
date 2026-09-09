@@ -1,0 +1,148 @@
+{
+  "key": "wod20th-basic",
+  "label": "WoD20th -- Basic Smoke Test",
+  "plugin": "wod20th",
+  "vars": { "player": "TestPlayer" },
+  "setup": {
+    "room": {
+      "name": "Twilight Commons",
+      "desc": "A cracked plaza ringed with broken benches and a single sputtering lantern."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-testplayer",
+        "splat": "mortal",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Reluctant Journalist",
+        "fullName": "Sam Quill",
+        "age": "32",
+        "nature": "Survivor",
+        "demeanor": "Caregiver",
+        "attributePriority": ["mental", "social", "physical"],
+        "attributes": {
+          "Strength": 2, "Dexterity": 3, "Stamina": 2,
+          "Perception": 4, "Intelligence": 4, "Wits": 3,
+          "Charisma": 3, "Manipulation": 3, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["knowledges", "talents", "skills"],
+        "abilities": {
+          "Alertness": 3, "Investigation": 3, "Subterfuge": 2,
+          "Drive": 2, "Stealth": 2, "Etiquette": 1,
+          "Academics": 3, "Computer": 2, "Linguistics": 2, "Politics": 2, "Law": 1
+        },
+        "abilitySpecialties": {},
+        "backgrounds": { "Contacts": 3, "Resources": 2, "Mentor": 2 },
+        "willpower": 5,
+        "freebiesRemaining": 0,
+        "freebiesLog": [],
+        "xpTotal": 0,
+        "xpSpent": 0,
+        "staffNotes": "",
+        "statLog": [],
+        "notes": [],
+        "createdAt": 1700000000000,
+        "updatedAt": 1700000000000
+      }
+    },
+    "targets": {
+      "Storms": {
+        "_char": {
+          "playerId": "mock-storms",
+          "splat": "wta",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Wandering Theurge",
+          "fullName": "Maya Whitehorse",
+          "age": "24",
+          "nature": "Visionary",
+          "demeanor": "Loner",
+          "breed": "homid",
+          "auspice": "theurge",
+          "tribe": "Wendigo",
+          "attributePriority": ["physical", "mental", "social"],
+          "attributes": {
+            "Strength": 3, "Dexterity": 4, "Stamina": 3,
+            "Perception": 3, "Intelligence": 2, "Wits": 3,
+            "Charisma": 2, "Manipulation": 2, "Appearance": 2
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": ["talents", "skills", "knowledges"],
+          "abilities": {
+            "Alertness": 3, "Brawl": 3, "Athletics": 2, "Primal-Urge": 3, "Empathy": 2,
+            "Stealth": 3, "Survival": 3, "Melee": 2, "Animal-Ken": 1,
+            "Occult": 2, "Rituals": 2, "Enigmas": 1
+          },
+          "abilitySpecialties": {},
+          "backgrounds": { "Pure Breed": 2, "Totem": 2, "Mentor": 1 },
+          "willpower": 6,
+          "rage": 2,
+          "gnosis": 3,
+          "rank": 1,
+          "renown": { "glory": 0, "honor": 0, "wisdom": 3 },
+          "gifts": ["Persuasion", "Mother's Touch", "Call the Breeze"],
+          "freebiesRemaining": 0,
+          "freebiesLog": [],
+          "xpTotal": 0,
+          "xpSpent": 0,
+          "staffNotes": "",
+          "statLog": [],
+          "notes": [],
+          "createdAt": 1700000000000,
+          "updatedAt": 1700000000000
+        }
+      },
+      "Riley": {
+        "_char": {
+          "playerId": "mock-riley",
+          "splat": "kinfolk",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Tribal Quartermaster",
+          "fullName": "Riley Ashpaw",
+          "age": "28",
+          "nature": "Caregiver",
+          "demeanor": "Survivor",
+          "tribe": "Wendigo",
+          "attributePriority": ["social", "physical", "mental"],
+          "attributes": {
+            "Strength": 2, "Dexterity": 3, "Stamina": 3,
+            "Perception": 3, "Intelligence": 2, "Wits": 2,
+            "Charisma": 3, "Manipulation": 3, "Appearance": 3
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": ["skills", "talents", "knowledges"],
+          "abilities": {
+            "Drive": 3, "Firearms": 2, "Survival": 3, "Animal-Ken": 2, "Melee": 2,
+            "Alertness": 2, "Empathy": 3, "Streetwise": 2,
+            "Linguistics": 1, "Occult": 1, "Politics": 1
+          },
+          "abilitySpecialties": {},
+          "backgrounds": { "Kinfolk Breed": 3, "Resources": 2, "Contacts": 2 },
+          "merits": { "Acute Sense": 1 },
+          "willpower": 4,
+          "gnosis": 1,
+          "freebiesRemaining": 0,
+          "freebiesLog": [],
+          "xpTotal": 0,
+          "xpSpent": 0,
+          "staffNotes": "",
+          "statLog": [],
+          "notes": [],
+          "createdAt": 1700000000000,
+          "updatedAt": 1700000000000
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Character Sheet & Dice" },
+    { "note": "Smoke test. Actor is an approved mortal; Storms is WtA; Riley is Kinfolk." },
+    { "cmd": "+sheet", "label": "View own sheet (mortal)", "as": "player" },
+    { "cmd": "+sheet Storms", "label": "Staff views Storms (Werewolf)", "as": "admin" },
+    { "cmd": "+sheet Riley", "label": "Staff views Riley (Kinfolk)", "as": "admin" },
+    { "cmd": "+roll 5", "label": "Roll 5 dice vs diff 6", "as": "player" },
+    { "cmd": "+roll/spec 7 vs 7", "label": "Specialty roll (10s = 2 successes)", "as": "player" }
+  ]
+}

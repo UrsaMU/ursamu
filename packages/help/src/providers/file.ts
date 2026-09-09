@@ -563,7 +563,14 @@ export class FileProvider implements HelpProvider {
 
   async get(topic: string): Promise<HelpEntry | null> {
     const cache = await this.cache();
-    return cache.get(topic) ?? null;
+    const direct = cache.get(topic);
+    if (direct) return direct;
+    // Aliases/tags (frontmatter) so +help chargen finds
+    // wod20th/chargen before CommandProvider's addCmd help.
+    for (const entry of cache.values()) {
+      if (entry.tags.includes(topic)) return entry;
+    }
+    return null;
   }
 
   async all(): Promise<HelpEntry[]> {

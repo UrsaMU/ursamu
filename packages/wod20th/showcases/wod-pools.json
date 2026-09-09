@@ -1,0 +1,97 @@
+{
+  "key": "wod-pools",
+  "label": "WoD20th -- WtA Rage & Gnosis Pools (+rage, +gnosis)",
+  "plugin": "wod20th",
+  "vars": { "player": "Fang" },
+  "setup": {
+    "room": {
+      "name": "Sept Commons",
+      "desc": "A clearing under broken stars, ringed by ancient pines."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-fang",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Cliath Ahroun",
+        "fullName": "Tyler Fang",
+        "breed": "homid",
+        "auspice": "ahroun",
+        "tribe": "Get of Fenris",
+        "attributePriority": ["physical", "mental", "social"],
+        "attributes": {
+          "Strength": 4, "Dexterity": 3, "Stamina": 4,
+          "Perception": 3, "Intelligence": 2, "Wits": 3,
+          "Charisma": 2, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Alertness": 3, "Brawl": 4, "Athletics": 2 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Pure Breed": 2 },
+        "willpower": 5,
+        "rage": 6, "rageCurrent": 6,
+        "gnosis": 4, "gnosisCurrent": 4,
+        "rank": 1,
+        "renown": { "glory": 3, "honor": 0, "wisdom": 0 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    },
+    "targets": {
+      "Storms": {
+        "_char": {
+          "playerId": "mock-storms",
+          "splat": "wta",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Wandering Theurge",
+          "fullName": "Maya Whitehorse",
+          "breed": "homid", "auspice": "theurge", "tribe": "Wendigo",
+          "attributePriority": ["physical", "mental", "social"],
+          "attributes": {
+            "Strength": 3, "Dexterity": 4, "Stamina": 3,
+            "Perception": 3, "Intelligence": 2, "Wits": 3,
+            "Charisma": 2, "Manipulation": 2, "Appearance": 2
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": ["talents", "skills", "knowledges"],
+          "abilities": { "Alertness": 3, "Occult": 2 },
+          "abilitySpecialties": {},
+          "backgrounds": { "Mentor": 1 },
+          "willpower": 6,
+          "rage": 3, "rageCurrent": 3,
+          "gnosis": 5, "gnosisCurrent": 5,
+          "rank": 1,
+          "renown": { "glory": 0, "honor": 0, "wisdom": 3 },
+          "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+          "freebiesRemaining": 0, "freebiesLog": [],
+          "xpTotal": 0, "xpSpent": 0,
+          "staffNotes": "", "statLog": [], "notes": [],
+          "createdAt": 1700000000000, "updatedAt": 1700000000000
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Rage & Gnosis Pools" },
+    { "note": "Fang starts with Rage 6/6 and Gnosis 4/4." },
+    { "cmd": "+rage", "label": "show 6/6", "as": "player" },
+    { "cmd": "+rage/spend 2", "label": "spend 2 Rage", "as": "player" },
+    { "cmd": "+rage", "label": "now 4/6", "as": "player" },
+    { "cmd": "+rage/regain 1", "label": "regain 1 Rage", "as": "player" },
+    { "cmd": "+gnosis/spend 2", "label": "spend 2 Gnosis", "as": "player" },
+    { "cmd": "+gnosis/spend 10", "label": "error -- insufficient Gnosis", "as": "player" },
+
+    { "sub": "Staff Set (audit-logged)" },
+    { "cmd": "+rage/set 8 Storms", "label": "staff sets Storms permanent Rage = 8", "as": "admin" },
+
+    { "sub": "Validation" },
+    { "cmd": "+gnosis/spend 0", "label": "error -- positive integer required", "as": "player" },
+    { "reset": true }
+  ]
+}

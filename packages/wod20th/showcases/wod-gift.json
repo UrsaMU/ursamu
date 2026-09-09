@@ -1,0 +1,60 @@
+{
+  "key": "wod-gift",
+  "label": "WoD20th -- WtA Gifts (+gift)",
+  "plugin": "wod20th",
+  "vars": { "player": "Whisper" },
+  "setup": {
+    "room": {
+      "name": "Spirit Glade",
+      "desc": "A still glade where the Gauntlet runs thin."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-whisper",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Theurge Spirit-Talker",
+        "fullName": "Anya Whisper",
+        "breed": "homid", "auspice": "theurge", "tribe": "Uktena",
+        "attributePriority": ["mental", "social", "physical"],
+        "attributes": {
+          "Strength": 2, "Dexterity": 3, "Stamina": 3,
+          "Perception": 4, "Intelligence": 3, "Wits": 3,
+          "Charisma": 3, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["mental", "social", "physical"],
+        "abilities": { "Occult": 3, "Rituals": 3, "Empathy": 2 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Mentor": 2 },
+        "willpower": 6,
+        "rage": 3, "rageCurrent": 3,
+        "gnosis": 2, "gnosisCurrent": 2,
+        "rank": 1,
+        "renown": { "glory": 0, "honor": 1, "wisdom": 2 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "gifts": ["Mother's Touch", "Spirit Speech", "Razor Claws"],
+        "rites": [],
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Catalog & Known" },
+    { "cmd": "+gift", "label": "known gifts (2)", "as": "player" },
+    { "cmd": "+gift/list 1", "label": "level 1 catalog", "as": "player" },
+    { "cmd": "+gift/info mothers-touch", "label": "single-gift detail", "as": "player" },
+
+    { "sub": "Activation (action-data path)" },
+    { "cmd": "+gift/use mothers-touch", "label": "Int+Empathy roll, -1 Gnosis", "as": "player" },
+    { "cmd": "+gift/use razor-claws",   "label": "Dex+Primal-Urge roll, -1 Rage", "as": "player" },
+    { "cmd": "+gift/use mothers-touch", "label": "spend the last Gnosis", "as": "player" },
+    { "cmd": "+gift/use mothers-touch", "label": "fails -- out of Gnosis", "as": "player" },
+    { "cmd": "+gift/use unknown-slug", "label": "fails -- unknown slug", "as": "player" },
+    { "reset": true }
+  ]
+}

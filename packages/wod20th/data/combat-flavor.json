@@ -1,0 +1,130 @@
+{
+  "modes": {
+    "brawl": {
+      "verbs": [
+        { "v1": "drive a fist into", "v3": "drives a fist into" },
+        { "v1": "throw a crushing haymaker at", "v3": "throws a crushing haymaker at" },
+        { "v1": "slam shoulder-first into", "v3": "slams shoulder-first into" },
+        { "v1": "snap a kick toward", "v3": "snaps a kick toward" },
+        { "v1": "close and hammer", "v3": "closes and hammers" }
+      ]
+    },
+    "brawlWar": {
+      "verbs": [
+        { "v1": "slam fist and fang into", "v3": "slams fist and fang into" },
+        { "v1": "bowl into", "v3": "bowls into" },
+        { "v1": "crush down on", "v3": "crushes down on" },
+        { "v1": "savage", "v3": "savages" }
+      ]
+    },
+    "melee": {
+      "verbs": [
+        { "v1": "carve into", "v3": "carves into" },
+        { "v1": "slash toward", "v3": "slashes toward" },
+        { "v1": "thrust steel at", "v3": "thrusts steel at" },
+        { "v1": "bring the edge down on", "v3": "brings the edge down on" },
+        { "v1": "cut a line across", "v3": "cuts a line across" },
+        { "v1": "feint and drive into", "v3": "feints and drives into" }
+      ]
+    },
+    "firearms": {
+      "verbs": [
+        { "v1": "loose a burst at", "v3": "looses a burst at" },
+        { "v1": "snap a shot toward", "v3": "snaps a shot toward" },
+        { "v1": "draw a bead and fire on", "v3": "draws a bead and fires on" },
+        { "v1": "empty iron toward", "v3": "empties iron toward" },
+        { "v1": "crack rounds at", "v3": "cracks rounds at" }
+      ]
+    },
+    "clawsWar": {
+      "verbs": [
+        { "v1": "rake your talons across", "v3": "rakes %p talons across" },
+        { "v1": "tear into", "v3": "tears into" },
+        { "v1": "open a red path through", "v3": "opens a red path through" },
+        { "v1": "scythe claws through", "v3": "scythes claws through" }
+      ]
+    },
+    "clawsLupus": {
+      "verbs": [
+        {
+          "v1": "lunge, fangs and claws snapping at",
+          "v3": "lunges, fangs and claws snapping at"
+        },
+        { "v1": "spring and rake", "v3": "springs and rakes" },
+        { "v1": "snap jaws and claws at", "v3": "snaps jaws and claws at" }
+      ]
+    },
+    "clawsGlabro": {
+      "verbs": [
+        { "v1": "swipe your brutish claws at", "v3": "swipes %p brutish claws at" },
+        { "v1": "rake heavy claws across", "v3": "rakes heavy claws across" },
+        { "v1": "shove and claw at", "v3": "shoves and claws at" }
+      ]
+    },
+    "bite": {
+      "verbs": [
+        { "v1": "lunge and snap at", "v3": "lunges and snaps at" },
+        { "v1": "sink teeth toward", "v3": "sinks teeth toward" },
+        { "v1": "bite down on", "v3": "bites down on" },
+        { "v1": "tear a mouthful from", "v3": "tears a mouthful from" }
+      ]
+    },
+    "psychic": {
+      "verbs": [
+        { "v1": "claw at the mind of", "v3": "claws at the mind of" },
+        { "v1": "press nightmare into", "v3": "presses nightmare into" },
+        { "v1": "scrape thoughts from", "v3": "scrapes thoughts from" },
+        { "v1": "flood terror through", "v3": "floods terror through" }
+      ]
+    }
+  },
+  "hit": {
+    "heavy": [
+      "a brutal hit -- {fluid} sprays",
+      "the strike lands like a falling tree",
+      "bone and resolve both crack",
+      "a ruinous blow that staggers the world"
+    ],
+    "solid": [
+      "a solid blow draws {fluid}",
+      "the hit bites deep",
+      "meat and pride both take the mark",
+      "a clean, punishing connection"
+    ],
+    "glance": [
+      "a glancing strike",
+      "a shallow cut of force",
+      "contact, thin but real",
+      "a stinging graze"
+    ]
+  },
+  "miss": [
+    "but the strike fails to bite",
+    "but finds only air",
+    "but the timing slips",
+    "but the blow slides wide"
+  ],
+  "botch": [
+    "but the strike goes wild -- a botch",
+    "but overcommit wrecks the line -- botch",
+    "but footing betrays the attack -- botch"
+  ],
+  "impact": {
+    "heavy": [
+      "%crIt savages you -- you reel. (%ch{dmg} {dtype}%cn%cr taken)%cn",
+      "%crThe world narrows to pain. (%ch{dmg} {dtype}%cn%cr taken)%cn",
+      "%crYou are driven back, hard. (%ch{dmg} {dtype}%cn%cr taken)%cn"
+    ],
+    "solid": [
+      "%crIt lands hard. (%ch{dmg} {dtype}%cn%cr taken)%cn",
+      "%crBreath leaves you. (%ch{dmg} {dtype}%cn%cr taken)%cn",
+      "%crYou stagger. (%ch{dmg} {dtype}%cn%cr taken)%cn"
+    ],
+    "glance": [
+      "%cyA glancing hit. (%ch{dmg} {dtype}%cn%cy taken)%cn",
+      "%cyIt stings. (%ch{dmg} {dtype}%cn%cy taken)%cn",
+      "%cyYou catch the edge. (%ch{dmg} {dtype}%cn%cy taken)%cn"
+    ],
+    "none": ["The blow finds no purchase."]
+  }
+}

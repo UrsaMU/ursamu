@@ -1,0 +1,52 @@
+{
+  "key": "wod-realm",
+  "label": "WoD20th -- Umbral Realm catalog (+realm)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": { "name": "Spirit Lodge", "desc": "A place of stories." },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Theurge",
+        "fullName": "Storms",
+        "breed": "homid", "auspice": "theurge", "tribe": "Uktena",
+        "attributePriority": ["mental", "social", "physical"],
+        "attributes": {
+          "Strength": 2, "Dexterity": 3, "Stamina": 3,
+          "Perception": 4, "Intelligence": 3, "Wits": 3,
+          "Charisma": 3, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["mental", "social", "physical"],
+        "abilities": { "Occult": 3, "Cosmology": 2 },
+        "abilitySpecialties": {},
+        "backgrounds": {},
+        "willpower": 6,
+        "rage": 3, "rageCurrent": 3,
+        "gnosis": 5, "gnosisCurrent": 5,
+        "rank": 2,
+        "renown": { "glory": 0, "honor": 0, "wisdom": 3 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Browse: full catalog (grouped)" },
+    { "cmd": "+realm",                  "label": "all realms",  "as": "player" },
+
+    { "sub": "Just the Near Umbra" },
+    { "cmd": "+realm/near",             "label": "near only",   "as": "player" },
+
+    { "sub": "Drill into one Realm" },
+    { "cmd": "+realm/info pangaea",     "label": "Pangaea",     "as": "player" },
+    { "cmd": "+realm/info battleground","label": "Battleground","as": "player" },
+    { "cmd": "+realm/info nonsense",    "label": "reject",      "as": "player" }
+  ]
+}

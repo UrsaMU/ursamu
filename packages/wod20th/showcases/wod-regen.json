@@ -1,0 +1,53 @@
+{
+  "key": "wod-regen",
+  "label": "WoD20th -- Garou Regeneration (+regen)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Caern Clearing",
+      "desc": "A torch-lit ring of stones beneath a bruised twilight sky."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Cliath Ahroun",
+        "fullName": "Maya Storms",
+        "breed": "homid", "auspice": "ahroun", "tribe": "Wendigo",
+        "attributePriority": ["physical", "mental", "social"],
+        "attributes": {
+          "Strength": 4, "Dexterity": 3, "Stamina": 3,
+          "Perception": 3, "Intelligence": 2, "Wits": 3,
+          "Charisma": 2, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Brawl": 4, "Alertness": 2 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Pure Breed": 2 },
+        "willpower": 5,
+        "rage": 5, "rageCurrent": 5,
+        "gnosis": 2, "gnosisCurrent": 2,
+        "rank": 1,
+        "renown": { "glory": 3, "honor": 0, "wisdom": 0 },
+        "healthTrack": ["L", "B", "B", "B", "", "", ""],
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Garou Regeneration" },
+    { "note": "Storms enters with 3 Bashing + 1 Lethal." },
+    { "cmd": "+sheet",          "label": "Show current damage", "as": "player" },
+    { "cmd": "+regen",          "label": "Shake off 1 Bashing", "as": "player" },
+    { "cmd": "+regen 2",        "label": "Shake off 2 more Bashing", "as": "player" },
+    { "cmd": "+regen/lethal",   "label": "Knit the Lethal wound shut", "as": "player" },
+    { "cmd": "+sheet",          "label": "Track is now clean", "as": "player" }
+  ]
+}

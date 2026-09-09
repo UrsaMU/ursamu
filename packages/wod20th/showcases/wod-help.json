@@ -1,0 +1,26 @@
+{
+  "key": "wod-help",
+  "label": "WoD20th -- Liberation-Style +help Index",
+  "plugin": "wod20th",
+  "vars": { "player": "Cass" },
+  "setup": {},
+  "steps": [
+    { "sub": "+help  --  full index" },
+    { "note": "Bare +help renders the whole catalog in Liberation's two-column layout." },
+    { "cmd": "+help", "label": "full index", "as": "player" },
+
+    { "sub": "+help vtm  --  one topic" },
+    { "note": "+help <topic> frames a single help section." },
+    { "cmd": "+help vtm", "label": "Vampire overview", "as": "player" },
+
+    { "sub": "+help blood  --  another topic" },
+    { "cmd": "+help blood", "label": "Vitae / blood", "as": "player" },
+
+    { "sub": "+help/section Vampire  --  one category" },
+    { "note": "Only the requested category (two-column) is shown." },
+    { "cmd": "+help/section Vampire (VtM)", "label": "Vampire section only", "as": "player" },
+
+    { "sub": "unknown topic suggestion" },
+    { "cmd": "+help fangly", "label": "suggests close topics", "as": "player" }
+  ]
+}

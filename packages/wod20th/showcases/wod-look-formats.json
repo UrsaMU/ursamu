@@ -1,0 +1,59 @@
+{
+  "key": "wod-look-formats",
+  "label": "WoD20th -- Look Command (via @ursamu/globals)",
+  "plugin": "wod20th",
+  "vars": { "player": "Diablerie" },
+  "setup": {
+    "character": {
+      "_flags": ["admin"],
+      "_state": { "lastCommand": 0 }
+    },
+    "room": {
+      "name": "The Void",
+      "description": "A featureless void, stretching endlessly in all directions."
+    },
+    "targets": {
+      "Storms": {
+        "splat": "wta",
+        "status": "approved",
+        "_state": { "lastCommand": 0, "reality": "penumbra" }
+      }
+    },
+    "things": [
+      {
+        "name": "Strongbox",
+        "description": "A battered steel strongbox bolted to the floor. The dial is worn smooth from use."
+      }
+    ],
+    "exits": [
+      { "name": "north;n", "type": "direction" },
+      { "name": "south;s", "type": "direction" },
+      { "name": "east;e",  "type": "direction" },
+      { "name": "Secret Hatch;h", "type": "hidden",
+        "description": "A grated steel hatch flush with the floor, almost invisible under the dust." },
+      { "name": "Another Room", "type": "location" },
+      { "name": "Market;m", "type": "location",
+        "description": "A bustling open-air market -- vendors hawking everything from fresh fruit to questionable chrome." },
+      { "name": "Inn;i", "type": "location" },
+      { "name": "Garden;g", "type": "location" },
+      { "name": "Astral Plane;ap", "type": "portal" }
+    ]
+  },
+  "steps": [
+    { "sub": "Look At The Room (Material Plane)" },
+    { "note": "Diablerie is material; Storms is in the Penumbra. Storms is invisible." },
+    { "cmd": "look", "label": "Storms (penumbra) not in Players section", "as": "player" },
+
+    { "sub": "Look At A Player" },
+    { "cmd": "look Storms", "label": "player card", "as": "player" },
+
+    { "sub": "Look At An Exit" },
+    { "cmd": "look Market", "label": "exit by name", "as": "player" },
+    { "cmd": "look h",      "label": "exit by alias", "as": "player" },
+
+    { "sub": "Look At A Thing" },
+    { "cmd": "look Strongbox", "label": "thing card", "as": "player" },
+
+    { "reset": true }
+  ]
+}

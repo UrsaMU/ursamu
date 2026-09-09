@@ -123,27 +123,64 @@ function padVisual(s: string, width: number): string {
   return raw + " ".repeat(width - len);
 }
 
+/** Collapse short-desc to one line (no %r / newline wrap). */
+function oneLineDesc(desc: string): string {
+  return String(desc ?? "")
+    .replace(/%r/gi, " ")
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/ +/g, " ")
+    .trim();
+}
+
+/** Looker NAWS width, capped to WIDTH (78). */
+function rowWidth(me: IDBObj): number {
+  const bag = {
+    ...((me as { data?: Record<string, unknown> }).data ?? {}),
+    ...(me.state ?? {}),
+  } as Record<string, unknown>;
+  const raw = bag.termWidth;
+  let n = WIDTH;
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    n = Math.trunc(raw);
+  } else if (typeof raw === "string" && /^\d+$/.test(raw.trim())) {
+    n = parseInt(raw, 10);
+  }
+  // Never wider than 78; never so narrow rows collapse.
+  return Math.max(40, Math.min(WIDTH, n));
+}
+
 /**
  * One CONFORMAT row: name | role | idle | short-desc
- * Fixed cells so every line lines up (78-col).
+ * Fixed cells; whole row clipped to looker width (≤78, no wrap).
  */
 function conformatCells(
   name: string,
   role: string,
   idle: string,
   desc: string,
+  width: number = WIDTH,
 ): string {
-  // 1 + 39 + 1 + 10 + 1 + 5 + 1 + rest (name +30% vs 30)
-  const NAME_W = 39;
-  const ROLE_W = 10;
-  const IDLE_W = 5;
-  return (
+  // Name 25 + role/idle; short-desc fills the rest (clipped to width).
+  // 1 + 25 + 1 + 8 + 1 + 4 + 1 + short-desc
+  const NAME_W = 25;
+  const ROLE_W = 8;
+  const IDLE_W = 4;
+  const prefix =
     " " +
     padVisual(name, NAME_W) + " " +
     padVisual(role || "", ROLE_W) + " " +
-    padVisual(idle || "", IDLE_W) + " " +
-    desc
-  ).replace(/\s+$/, "");
+    padVisual(idle || "", IDLE_W) + " ";
+  const maxDesc = Math.max(0, width - visualLen(prefix));
+  let body = oneLineDesc(desc);
+  if (maxDesc <= 0) {
+    return truncateVisual(prefix.replace(/\s+$/, ""), width);
+  }
+  if (visualLen(body) > maxDesc) {
+    body = truncateVisual(body, Math.max(1, maxDesc - 1)) + "…";
+  }
+  const row = (prefix + body).replace(/\s+$/, "");
+  if (visualLen(row) <= width) return row;
+  return truncateVisual(row, Math.max(1, width - 1)) + "…";
 }
 
 /** Turn MUSH %r / %t into real whitespace before wrap. */
@@ -659,7 +696,8 @@ const ROLE_TAGS = [
   { flag: "staff",     display: "(Staff)"  },
 ];
 
-const SHORTDESC_PROMPT = "%ch%cxUse '&short-desc me=<desc>' to set.%cn";
+// Keep short — long prompt + name/role/idle overflows narrow terms.
+const SHORTDESC_PROMPT = "%ch%cx&short-desc me=<desc>%cn";
 
 function coloredName(obj: IDBObj): string {
   const moniker = (obj.state?.moniker as string) || "";
@@ -727,13 +765,14 @@ export const defaultConformatHandler = async (
     .filter((o): o is IDBObj => o != null);
 
   const actor = u.me;
+  const width = rowWidth(actor);
   const characters = visibleObjs.filter((o) => o.flags.has("player") && o.flags.has("connected"));
   const objects = visibleObjs.filter((o) => !o.flags.has("player") && !o.flags.has("exit") && !o.flags.has("room"));
 
   const lines: string[] = [];
 
   if (characters.length > 0) {
-    lines.push(divider("Players", "-", WIDTH));
+    lines.push(divider("Players", "-", width));
     for (const c of characters) {
       const cName = coloredName(c);
       const idle = formatIdle(c.state?.lastCommand as number);
@@ -745,12 +784,12 @@ export const defaultConformatHandler = async (
         c,
         showStaffDbref(actor, canEditChar),
       );
-      lines.push(conformatCells(nameWithRef, role, idle, desc));
+      lines.push(conformatCells(nameWithRef, role, idle, desc, width));
     }
   }
 
   if (objects.length > 0) {
-    lines.push(divider("Contents", "-", WIDTH));
+    lines.push(divider("Contents", "-", width));
     for (const s of stackThingsByName(u, actor, objects)) {
       const disp = s.count > 1
         ? `${s.label} ×${s.count}`
@@ -763,10 +802,11 @@ export const defaultConformatHandler = async (
       );
       const sd = getShortDesc(s.rep);
       // Same 4 cells as players so columns line up in the room
-      lines.push(conformatCells(name, "", "", sd));
+      lines.push(conformatCells(name, "", "", sd, width));
     }
   }
 
+  if (lines.length === 0) return null;
   return lines.join("\n");
 };
 

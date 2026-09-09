@@ -1,0 +1,78 @@
+{
+  "key": "wod-talen",
+  "label": "WoD20th -- WtA Talens (single-use fetishes)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Spirit Glade",
+      "desc": "A clearing where Gaia's threads run thin."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Theurge",
+        "fullName": "Storms",
+        "breed": "homid", "auspice": "theurge", "tribe": "Uktena",
+        "attributePriority": ["mental", "social", "physical"],
+        "attributes": {
+          "Strength": 2, "Dexterity": 3, "Stamina": 3,
+          "Perception": 4, "Intelligence": 3, "Wits": 3,
+          "Charisma": 3, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["mental", "social", "physical"],
+        "abilities": { "Occult": 3, "Rituals": 3 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Fetish": 3 },
+        "willpower": 6,
+        "rage": 3, "rageCurrent": 3,
+        "gnosis": 5, "gnosisCurrent": 5,
+        "rank": 2,
+        "renown": { "glory": 0, "honor": 0, "wisdom": 3 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      },
+      "_carrying": [
+        { "name": "moon-glow",     "desc": "A pale stone shedding cold light." },
+        { "name": "wind-snorkel",  "desc": "A reed carved with a single sigil." },
+        { "name": "klaive",        "desc": "A blade of silvered iron." }
+      ]
+    }
+  },
+  "steps": [
+    { "sub": "Build two talens and one normal fetish" },
+    { "cmd": "@eq/kind moon-glow=fetish",                   "as": "player" },
+    { "cmd": "@eq/talen moon-glow=true",                    "as": "player" },
+    { "cmd": "@eq/fcost moon-glow=1",                       "as": "player" },
+    { "cmd": "@eq/fdesc moon-glow=Sheds moonlight one scene.", "as": "player" },
+    { "cmd": "@eq/kind wind-snorkel=fetish",                "as": "player" },
+    { "cmd": "@eq/talen wind-snorkel=true",                 "as": "player" },
+    { "cmd": "@eq/fcost wind-snorkel=1",                    "as": "player" },
+    { "cmd": "@eq/kind klaive=fetish",                      "as": "player" },
+    { "cmd": "@eq/fcost klaive=2",                          "as": "player" },
+
+    { "sub": "List shows TALEN vs blank" },
+    { "cmd": "+fetish",                                     "as": "player" },
+
+    { "sub": "Info shows talen status" },
+    { "cmd": "+fetish/info moon-glow",                      "label": "talen -- single use", "as": "player" },
+
+    { "sub": "Use a talen (-1 Gnosis, marked spent)" },
+    { "cmd": "+fetish/use moon-glow",                       "label": "consumed",           "as": "player" },
+    { "cmd": "+fetish/use moon-glow",                       "label": "reject: spent",      "as": "player" },
+    { "cmd": "+fetish/info moon-glow",                      "label": "now shows spent",    "as": "player" },
+
+    { "sub": "Talens cannot be /deactivated" },
+    { "cmd": "+fetish/deactivate wind-snorkel",             "label": "reject",             "as": "player" },
+
+    { "sub": "Normal fetish still binds + releases" },
+    { "cmd": "+fetish/use klaive",                          "label": "-2 Gnosis, active",  "as": "player" },
+    { "cmd": "+fetish/deactivate klaive",                   "label": "release",            "as": "player" }
+  ]
+}

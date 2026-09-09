@@ -1,0 +1,71 @@
+{
+  "key": "wod-title",
+  "label": "WoD20th -- Garou titles (+title)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Hall of Heroes",
+      "desc": "Banners and bones. Galliards remember; the rest survive."
+    },
+    "character": {
+      "_flags": ["admin"],
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Ahroun of Fenris",
+        "fullName": "Storm-of-Voices",
+        "breed": "homid", "auspice": "ahroun", "tribe": "Get of Fenris",
+        "attributePriority": ["physical", "social", "mental"],
+        "attributes": {
+          "Strength": 4, "Dexterity": 3, "Stamina": 4,
+          "Perception": 3, "Intelligence": 2, "Wits": 3,
+          "Charisma": 2, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["physical", "mental", "social"],
+        "abilities": { "Brawl": 3 },
+        "abilitySpecialties": {},
+        "backgrounds": {},
+        "willpower": 6,
+        "rage": 5, "rageCurrent": 5,
+        "gnosis": 3, "gnosisCurrent": 3,
+        "rank": 2,
+        "renown": { "glory": 2, "honor": 1, "wisdom": 0 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "npcKills": { "bane": 5, "fomor": 1, "bsd": 1 },
+        "scars": [
+          { "slug": "deep-scar", "name": "Deep Scar", "glory": 1, "description": "Aches.", "acquiredAt": 1 },
+          { "slug": "broken-jaw", "name": "Broken Jaw", "glory": 1, "description": ".", "acquiredAt": 2 },
+          { "slug": "missing-fingers", "name": "Missing Fingers", "glory": 2, "description": ".", "acquiredAt": 3 }
+        ],
+        "titles": [],
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Browse the title catalog" },
+    { "cmd": "+title/list",                          "label": "all titles + rewards", "as": "player" },
+    { "cmd": "+title/info bane-killer",              "label": "drill-down",           "as": "player" },
+
+    { "sub": "Self-sheet (no titles earned yet -- start fresh)" },
+    { "cmd": "+title",                               "label": "empty",                "as": "player" },
+
+    { "sub": "Staff awards a title outside the kill engine" },
+    { "cmd": "+title/award Storm-of-Voices=spiral-breaker", "label": "staff grant",  "as": "staff" },
+    { "cmd": "+title",                               "label": "now earned",           "as": "player" },
+
+    { "sub": "Staff revokes (renown not refunded)" },
+    { "cmd": "+title/revoke Storm-of-Voices=spiral-breaker", "label": "staff strip", "as": "staff" },
+    { "cmd": "+title",                               "label": "empty again",          "as": "player" },
+
+    { "sub": "Unknown title is rejected" },
+    { "cmd": "+title/info not-real",                 "label": "reject",               "as": "player" }
+  ]
+}

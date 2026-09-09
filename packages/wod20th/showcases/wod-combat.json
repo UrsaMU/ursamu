@@ -1,0 +1,126 @@
+{
+  "key": "wod-combat",
+  "label": "WoD20th -- Basic Combat (+attack)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Caern Clearing",
+      "desc": "A torch-lit ring of stones beneath a bruised twilight sky."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Cliath Ahroun",
+        "fullName": "Maya Storms",
+        "breed": "homid", "auspice": "ahroun", "tribe": "Wendigo",
+        "attributePriority": ["physical", "mental", "social"],
+        "attributes": {
+          "Strength": 4, "Dexterity": 3, "Stamina": 3,
+          "Perception": 3, "Intelligence": 2, "Wits": 3,
+          "Charisma": 2, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Brawl": 4, "Melee": 3, "Firearms": 2, "Alertness": 2 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Pure Breed": 2 },
+        "willpower": 5,
+        "rage": 5, "rageCurrent": 5,
+        "gnosis": 2, "gnosisCurrent": 2,
+        "rank": 1,
+        "renown": { "glory": 3, "honor": 0, "wisdom": 0 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      },
+      "_carrying": [
+        {
+          "name": "silver sword",
+          "desc": "A finely-balanced longsword with silvered edge.",
+          "state": {
+            "kind": "weapon",
+            "weaponType": "melee",
+            "damage": 2,
+            "damageType": "L",
+            "silver": true,
+            "wielded": true
+          }
+        }
+      ]
+    },
+    "targets": {
+      "Bran": {
+        "_char": {
+          "playerId": "mock-bran",
+          "splat": "wta",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Cliath Galliard",
+          "fullName": "Bran Loresinger",
+          "breed": "homid", "auspice": "galliard", "tribe": "Fianna",
+          "attributePriority": ["physical", "social", "mental"],
+          "attributes": {
+            "Strength": 2, "Dexterity": 3, "Stamina": 3,
+            "Perception": 2, "Intelligence": 2, "Wits": 3,
+            "Charisma": 3, "Manipulation": 2, "Appearance": 3
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": ["talents", "skills", "knowledges"],
+          "abilities": { "Brawl": 2, "Performance": 4, "Alertness": 2, "Dodge": 2 },
+          "abilitySpecialties": {},
+          "backgrounds": { "Pure Breed": 1 },
+          "willpower": 4,
+          "rage": 3, "rageCurrent": 3,
+          "gnosis": 3, "gnosisCurrent": 3,
+          "rank": 1,
+          "renown": { "glory": 0, "honor": 1, "wisdom": 2 },
+          "freebiesRemaining": 0, "freebiesLog": [],
+          "xpTotal": 0, "xpSpent": 0,
+          "staffNotes": "", "statLog": [], "notes": [],
+          "createdAt": 1700000000000, "updatedAt": 1700000000000
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Declared defense (full pool, costs an action)" },
+    { "note": "Bran can pre-declare a defense via +defend. Declared defenses roll at FULL pool but consume the defender's next action when consumed by an attack." },
+    { "cmd": "+defend",                 "label": "no declared defense yet", "as": "Bran" },
+    { "cmd": "+defend/dodge",           "label": "Bran readies a full dodge", "as": "Bran" },
+    { "cmd": "+defend",                 "label": "now shows declared", "as": "Bran" },
+    { "cmd": "+attack Bran",            "label": "attack rolls vs full-pool dodge", "as": "player" },
+    { "cmd": "+defend",                 "label": "consumed -- no defense queued now", "as": "Bran" },
+
+    { "sub": "Pool-splitting: attack AND defend on the same turn" },
+    { "note": "Bran wants to dodge AND still strike back. +split 2 lets both happen at -1 die each. The Storms attack rolls against Bran's declared dodge; both fire under the split tax." },
+    { "cmd": "+split 2",                "label": "Bran declares 2 actions (-1 each)", "as": "Bran" },
+    { "cmd": "+defend/dodge",           "label": "ready a dodge (will pay -1 split tax)", "as": "Bran" },
+    { "cmd": "+attack Bran",            "label": "attack lands; defense rolls Dex+Dodge-1", "as": "player" },
+    { "cmd": "+split",                  "label": "Bran's slot was consumed by the defense", "as": "Bran" },
+    { "cmd": "+split/clear",            "label": "reset for the next scene", "as": "Bran" },
+
+    { "cmd": "+heal Bran=10all",        "label": "staff heals Bran for the next scenes", "as": "admin" },
+
+    { "sub": "Illegal declaration downgrades silently" },
+    { "cmd": "+defend/block",           "label": "Bran declares block", "as": "Bran" },
+    { "cmd": "+defend/parry",           "label": "switches to parry (no melee weapon -> still legal to declare, illegal to USE)", "as": "Bran" },
+    { "cmd": "+defend/clear",           "label": "cancel for the basic-combat run", "as": "Bran" },
+
+    { "cmd": "+heal Bran=10all",        "label": "fully heal Bran", "as": "admin" },
+
+    { "sub": "Basic Combat (no declared defense -> unopposed)" },
+    { "note": "Per W20 p.288, undeclared = unopposed. With no +defend queued Bran takes whatever Storms rolls -- no reactive roll fires." },
+    { "cmd": "+attack Bran",            "label": "Basic brawl strike, unopposed", "as": "player" },
+    { "cmd": "+attack/melee Bran",      "label": "Lethal melee, unopposed", "as": "player" },
+    { "cmd": "+attack/firearms Bran",   "label": "Rejected -- no firearm wielded", "as": "player" },
+    { "cmd": "+attack/claws Bran",      "label": "Claw strike, unopposed", "as": "player" },
+    { "cmd": "+attack me",              "label": "Self-attack rejected", "as": "player" },
+
+    { "cmd": "+sheet Bran",             "label": "Show damage taken by Bran", "as": "admin" }
+  ]
+}

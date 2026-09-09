@@ -1,0 +1,9 @@
+{
+  "name": "wod20th",
+  "version": "1.0.0",
+  "description": "WoD20th System for UrsaMU.",
+  "ursamu": ">=1.9.5",
+  "author": "UrsaMU",
+  "license": "MIT",
+  "main": "index.ts"
+}

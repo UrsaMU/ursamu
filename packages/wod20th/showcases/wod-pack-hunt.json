@@ -1,0 +1,148 @@
+{
+  "key": "wod-pack-hunt",
+  "label": "WoD20th -- Pack Hunt: Two Garou vs two banes",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "_note": [
+    "Demonstrates the full Wave-3 combat flow:",
+    "  pack tactics (two PCs, declared splits, init order)",
+    "  AI driver: target picking, split-decision on multiple targets",
+    "  rage spending (+rage/spend) for narrative cost outside combat",
+    "  title earned silently on the kill counter crossing 5 banes",
+    "BANE CANON NOTE: Per W20 Ch 7, banes are 4-stat spirits",
+    "(Rage / Gnosis / Willpower / Power). The bestiary in splats/wta/data/",
+    "wyrmNpcs.ts derives Garou-shaped Attributes/Abilities from those",
+    "four numbers so the existing +attack resolution works unchanged --",
+    "the AI driver treats Strength/Dex/Brawl as dice pools, not a sheet.",
+    "Threat 1-5 informs flavor + split-action decisions in runNpcTurn().",
+    "Showcase note: +init/next auto-fires NPC turns only when the new",
+    "current is an NPC. To demonstrate AI in isolation we use +npc/act,",
+    "which forces one AI turn (staff-only)."
+  ],
+  "setup": {
+    "room": {
+      "name": "Blighted Industrial Lot",
+      "desc": "A vacant lot reeking of oil and old blood. Spirit-pollution thrums."
+    },
+    "character": {
+      "_flags": ["admin"],
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Ahroun of Fenris",
+        "fullName": "Storms",
+        "breed": "homid", "auspice": "ahroun", "tribe": "Get of Fenris",
+        "attributePriority": ["physical", "social", "mental"],
+        "attributes": {
+          "Strength": 4, "Dexterity": 3, "Stamina": 4,
+          "Perception": 3, "Intelligence": 2, "Wits": 3,
+          "Charisma": 2, "Manipulation": 2, "Appearance": 2
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["physical", "social", "mental"],
+        "abilities": { "Brawl": 3, "Athletics": 2, "Dodge": 2 },
+        "abilitySpecialties": {},
+        "backgrounds": {},
+        "willpower": 6, "willpowerCurrent": 6,
+        "rage": 5, "rageCurrent": 5,
+        "gnosis": 3, "gnosisCurrent": 3,
+        "rank": 2,
+        "renown": { "glory": 3, "honor": 1, "wisdom": 0 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "npcKills": { "bane": 4 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "_state": { "reality": "material" },
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    },
+    "targets": {
+      "Bran": {
+        "_char": {
+          "playerId": "mock-bran",
+          "splat": "wta", "status": "approved", "chargenStep": 6,
+          "concept": "Cliath Galliard", "fullName": "Bran",
+          "breed": "homid", "auspice": "galliard", "tribe": "Fianna",
+          "attributePriority": ["physical", "social", "mental"],
+          "attributes": {
+            "Strength": 3, "Dexterity": 4, "Stamina": 3,
+            "Perception": 3, "Intelligence": 2, "Wits": 4,
+            "Charisma": 3, "Manipulation": 2, "Appearance": 3
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": ["physical", "social", "mental"],
+          "abilities": { "Brawl": 2, "Athletics": 3, "Dodge": 3 },
+          "abilitySpecialties": {},
+          "backgrounds": {},
+          "willpower": 5, "willpowerCurrent": 5,
+          "rage": 3, "rageCurrent": 3,
+          "gnosis": 4, "gnosisCurrent": 4,
+          "rank": 1,
+          "renown": { "glory": 1, "honor": 2, "wisdom": 1 },
+          "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+          "freebiesRemaining": 0, "freebiesLog": [],
+          "xpTotal": 0, "xpSpent": 0,
+          "staffNotes": "", "statLog": [], "notes": [],
+          "_state": { "reality": "material" },
+          "createdAt": 1700000000000, "updatedAt": 1700000000000
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Pack assembles in a Wyrm-tainted lot" },
+    { "cmd": "+npc/info bane-furmling",                "label": "preview the weaker bane (derived stats)", "as": "staff" },
+    { "cmd": "+npc/info bane-shade",                   "label": "preview the stronger bane",               "as": "staff" },
+
+    { "sub": "Both Garou shift to Crinos -- claws only manifest in war-form" },
+    { "cmd": "+shift crinos",                          "label": "Storms shifts",   "as": "player" },
+    { "cmd": "+shift crinos",                          "label": "Bran shifts",     "as": "Bran" },
+
+    { "sub": "ST spawns two banes" },
+    { "cmd": "+npc/spawn bane-furmling Twitchpelt",    "label": "weaker bane",      "as": "staff" },
+    { "cmd": "+npc/spawn bane-shade Mirror-Eater",     "label": "stronger bane",    "as": "staff" },
+
+    { "sub": "Initiative for everyone" },
+    { "cmd": "+init",                                  "label": "Storms rolls",     "as": "player" },
+    { "cmd": "+init",                                  "label": "Bran rolls",       "as": "Bran" },
+    { "cmd": "+init/addnpc Twitchpelt",                "label": "furmling rolls",   "as": "staff" },
+    { "cmd": "+init/addnpc Mirror-Eater",              "label": "shade rolls",      "as": "staff" },
+    { "cmd": "+init/show",                             "label": "combined order",   "as": "player" },
+
+    { "sub": "Storms declares 2 actions; pack tactics open" },
+    { "cmd": "+split 2",                               "label": "two actions, -1 die each",                  "as": "player" },
+    { "cmd": "+attack/claws Twitchpelt",               "label": "first action vs furmling",                  "as": "player" },
+    { "cmd": "+attack/claws Twitchpelt",               "label": "second action; B -> L overflow finishes it",  "as": "player" },
+
+    { "sub": "Bran joins in" },
+    { "cmd": "+attack/claws Mirror-Eater",             "label": "shade's hide soaks most of it",             "as": "Bran" },
+
+    { "sub": "Pack braces -- both Garou declare a reactive defense" },
+    { "cmd": "+defend/dodge",                          "label": "Storms dodges incoming",                    "as": "player" },
+    { "cmd": "+defend/dodge",                          "label": "Bran dodges incoming",                      "as": "Bran" },
+
+    { "sub": "Mirror-Eater retaliates via the AI driver (forced fire so it's visible)" },
+    { "cmd": "+npc/act Mirror-Eater",                  "label": "AI: bane rolls Rage vs target Willpower; dodges consume", "as": "staff" },
+
+    { "sub": "Pack inspects wounds" },
+    { "cmd": "+sheet",                                 "label": "Storms after the shade's strike",           "as": "player" },
+    { "cmd": "+sheet",                                 "label": "Bran after the shade's strike",             "as": "Bran" },
+
+    { "sub": "Storms burns Rage to fuel the next move" },
+    { "cmd": "+rage/spend 1",                          "label": "Rage 5 -> 4",                                "as": "player" },
+
+    { "sub": "Storms strikes Mirror-Eater" },
+    { "cmd": "+attack/claws Mirror-Eater",             "label": "press the kill",                            "as": "player" },
+
+    { "sub": "Round wraps via +init/next" },
+    { "cmd": "+init/next",                             "label": "advance the initiative",                    "as": "staff" },
+
+    { "sub": "Clean up the scene" },
+    { "cmd": "+npc/here",                              "label": "what's still standing",                     "as": "player" },
+    { "cmd": "+npc/despawn Mirror-Eater",              "label": "ST clears the lingering shade",             "as": "staff" },
+    { "cmd": "+init/clear",                            "label": "combat ends",                               "as": "staff" }
+  ]
+}

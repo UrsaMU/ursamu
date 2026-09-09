@@ -24,9 +24,14 @@
     "jsr:@std/testing@0.224": "0.224.0",
     "jsr:@std/testing@^1.0.17": "1.0.19",
     "jsr:@ursamu/core@1.0.0": "1.0.0",
+    "jsr:@ursamu/jobs@~0.1.1": "0.1.1",
+    "jsr:@ursamu/mush@1.0.9": "1.0.9",
+    "jsr:@ursamu/mushcode@*": "0.7.0",
     "jsr:@ursamu/mushcode@0.7": "0.7.0",
     "jsr:@ursamu/mushcode@0.7.0": "0.7.0",
+    "jsr:@ursamu/ursamu@^2.3.0": "2.7.0",
     "jsr:@zaubrik/djwt@^3.0.2": "3.0.2",
+    "npm:@deno/sandbox@0.10.0": "0.10.0",
     "npm:@digibear/tags@1.0.0": "1.0.0",
     "npm:@electric-sql/pglite@~0.5.2": "0.5.4",
     "npm:@langchain/anthropic@0.3": "0.3.34_@langchain+core@0.3.80_zod@4.4.3",
@@ -140,8 +145,49 @@
         "npm:zod@4.4.3"
       ]
     },
+    "@ursamu/jobs@0.1.1": {
+      "integrity": "2f2a78c3c09ada4b41762f73a48f0b4b6e0be4de5967baf4a00a1d30ea98dfb7",
+      "dependencies": [
+        "jsr:@ursamu/mush"
+      ]
+    },
+    "@ursamu/mush@1.0.9": {
+      "integrity": "4f1de7144b4b65461e3debc8e69885f8e9beb2c89c54cbf36a10112f9c13afba",
+      "dependencies": [
+        "jsr:@std/dotenv",
+        "jsr:@std/fs@0.224",
+        "jsr:@std/path@0.224",
+        "jsr:@ursamu/core",
+        "jsr:@ursamu/mushcode@0.7",
+        "npm:@digibear/tags",
+        "npm:@ursamu/parser",
+        "npm:bcryptjs",
+        "npm:quickjs-emscripten",
+        "npm:sucrase@3.35.0"
+      ]
+    },
     "@ursamu/mushcode@0.7.0": {
       "integrity": "bf68b211b4448f0dcb79f66b9ef5b032661af293f771a732e191e77353a028da"
+    },
+    "@ursamu/ursamu@2.7.0": {
+      "integrity": "80af2e54afd2ee14cc7214a74913675c0b82432da676df565aea4e2426ea82ac",
+      "dependencies": [
+        "jsr:@std/dotenv",
+        "jsr:@std/flags",
+        "jsr:@std/fs@0.224",
+        "jsr:@std/fs@0.224.0",
+        "jsr:@std/path@0.224",
+        "jsr:@std/path@0.224.0",
+        "jsr:@std/semver",
+        "jsr:@zaubrik/djwt",
+        "npm:@deno/sandbox",
+        "npm:@digibear/tags",
+        "npm:@ursamu/parser",
+        "npm:bcryptjs",
+        "npm:lodash@4.17.21",
+        "npm:quickjs-emscripten",
+        "npm:sucrase@3.35.0"
+      ]
     },
     "@zaubrik/djwt@3.0.2": {
       "integrity": "8070adaa49cd9e5d2b8ae82fd461132c966ef2f8ff8378db4a4da8df4f17c664",
@@ -167,6 +213,24 @@
     },
     "@cfworker/json-schema@4.1.1": {
       "integrity": "sha512-gAmrUZSGtKc3AiBL71iNWxDsyUC5uMaKKGdvzYsBoTW/xi42JQHl7eKV2OYzCUqvc+D2RCcf7EXY2iCyFIk6og=="
+    },
+    "@deno/sandbox@0.10.0": {
+      "integrity": "sha512-Fq41hNE4H3kKGHyYvbtkyi26SGKCawWt3dbJE2dmSsWqCf3VErfqXBMBe7hBOySBbNwPQLUS+sHsHHelAGwzjg==",
+      "dependencies": [
+        "@deno/shim-deno",
+        "ws",
+        "zod@4.4.3"
+      ]
+    },
+    "@deno/shim-deno-test@0.5.0": {
+      "integrity": "sha512-4nMhecpGlPi0cSzT67L+Tm+GOJqvuk8gqHBziqcUQOarnuIax1z96/gJHCSIz2Z0zhxE6Rzwb3IZXPtFh51j+w=="
+    },
+    "@deno/shim-deno@0.18.2": {
+      "integrity": "sha512-oQ0CVmOio63wlhwQF75zA4ioolPvOwAoK0yuzcS5bDC1JUvH3y1GS8xPh8EOpcoDQRU4FTG8OQfxhpR+c6DrzA==",
+      "dependencies": [
+        "@deno/shim-deno-test",
+        "which@4.0.0"
+      ]
     },
     "@digibear/tags@1.0.0": {
       "integrity": "sha512-WyNr8pR6B0NlN1mA6PD9JYSwvT5RoYKu1w3w6Q327qA9cqTZlhdBxlywXMTiHmDzVs4b90RmgCCwy+sxpobNSQ=="
@@ -481,7 +545,7 @@
       "dependencies": [
         "path-key",
         "shebang-command",
-        "which"
+        "which@2.0.2"
       ]
     },
     "debug@4.4.3": {
@@ -686,6 +750,9 @@
     },
     "isexe@2.0.0": {
       "integrity": "sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw=="
+    },
+    "isexe@3.1.5": {
+      "integrity": "sha512-6B3tLtFqtQS4ekarvLVMZ+X+VlvQekbe4taUkf/rhVO3d/h0M2rfARm/pXLcPEsjjMsFgrFgSrhQIxcSVrBz8w=="
     },
     "jackspeak@3.4.3": {
       "integrity": "sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==",
@@ -1155,7 +1222,14 @@
     "which@2.0.2": {
       "integrity": "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==",
       "dependencies": [
-        "isexe"
+        "isexe@2.0.0"
+      ],
+      "bin": true
+    },
+    "which@4.0.0": {
+      "integrity": "sha512-GlaYyEb07DPxYCKhKzplCWBJtvxZcZMrL+4UkrTSJHHPyZU4mYYTv3qaOe77H7EODLSSopAUFAc6W8U4yqvscg==",
+      "dependencies": [
+        "isexe@3.1.5"
       ],
       "bin": true
     },
@@ -1183,6 +1257,9 @@
     },
     "wrappy@1.0.2": {
       "integrity": "sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ=="
+    },
+    "ws@8.21.3": {
+      "integrity": "sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw=="
     },
     "yallist@4.0.0": {
       "integrity": "sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A=="
@@ -1369,7 +1446,10 @@
           "jsr:@std/fs@0.224",
           "jsr:@std/path@0.224",
           "jsr:@std/semver@1",
-          "jsr:@ursamu/mushcode@0.6",
+          "jsr:@ursamu/core@1.0.5",
+          "jsr:@ursamu/help@1.3.0",
+          "jsr:@ursamu/mush@1.0.38",
+          "jsr:@ursamu/mushcode@0.7.0",
           "jsr:@zaubrik/djwt@^3.0.2",
           "npm:@digibear/tags@1.0.0",
           "npm:@ursamu/parser@1.2.4",
@@ -1647,6 +1727,42 @@
           "jsr:@std/path@0.224",
           "jsr:@ursamu/mush@1",
           "npm:imagescript@1.3.0"
+        ]
+      }
+    },
+    "links": {
+      "jsr:@ursamu/globals@1.2.1": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@std/testing@0.224",
+          "jsr:@ursamu/mushcode@*",
+          "jsr:@ursamu/ursamu@^2.3.0"
+        ]
+      },
+      "jsr:@ursamu/web@0.2.73": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@ursamu/jobs@^1.1.2",
+          "jsr:@ursamu/mush@1",
+          "jsr:@ursamu/site@~0.1.5",
+          "jsr:@ursamu/wiki@~0.2.2"
+        ]
+      },
+      "jsr:@ursamu/wod20th@1.1.0": {
+        "dependencies": [
+          "jsr:@std/assert@1",
+          "jsr:@std/flags@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@std/testing@1",
+          "jsr:@ursamu/mushcode@0.7",
+          "jsr:@zaubrik/djwt@^3.0.2",
+          "npm:@electric-sql/pglite@~0.5.2",
+          "npm:@nicia-ai/typegraph@0.31",
+          "npm:zod@4.4.3"
         ]
       }
     }

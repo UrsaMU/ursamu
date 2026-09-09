@@ -1,0 +1,101 @@
+{
+  "key": "wod-sept",
+  "label": "WoD20th -- Sept membership and roster (+sept)",
+  "plugin": "wod20th",
+  "vars": { "player": "Storms" },
+  "setup": {
+    "room": {
+      "name": "Heart of the Glen",
+      "desc": "A still pool ringed with standing stones. The bawn breathes."
+    },
+    "character": {
+      "_char": {
+        "playerId": "mock-storms",
+        "splat": "wta",
+        "status": "approved",
+        "chargenStep": 6,
+        "concept": "Galliard Alpha",
+        "fullName": "Storm-of-Voices",
+        "breed": "homid", "auspice": "galliard", "tribe": "Silver Fangs",
+        "attributePriority": ["physical", "social", "mental"],
+        "attributes": {
+          "Strength": 3, "Dexterity": 3, "Stamina": 3,
+          "Perception": 3, "Intelligence": 3, "Wits": 3,
+          "Charisma": 4, "Manipulation": 3, "Appearance": 3
+        },
+        "attributeSpecialties": {},
+        "abilityPriority": ["talents", "skills", "knowledges"],
+        "abilities": { "Leadership": 3, "Performance": 3 },
+        "abilitySpecialties": {},
+        "backgrounds": { "Pure Breed": 3 },
+        "willpower": 6,
+        "rage": 4, "rageCurrent": 4,
+        "gnosis": 3, "gnosisCurrent": 3,
+        "rank": 3,
+        "renown": { "glory": 7, "honor": 3, "wisdom": 3 },
+        "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+        "freebiesRemaining": 0, "freebiesLog": [],
+        "xpTotal": 0, "xpSpent": 0,
+        "staffNotes": "", "statLog": [], "notes": [],
+        "createdAt": 1700000000000, "updatedAt": 1700000000000
+      }
+    },
+    "targets": {
+      "Cassidy": {
+        "_char": {
+          "playerId": "mock-cassidy",
+          "splat": "wta",
+          "status": "approved",
+          "chargenStep": 6,
+          "concept": "Theurge",
+          "fullName": "Cassidy Cloudwalker",
+          "breed": "homid", "auspice": "theurge", "tribe": "Children of Gaia",
+          "attributePriority": ["mental", "social", "physical"],
+          "attributes": {
+            "Strength": 2, "Dexterity": 3, "Stamina": 3,
+            "Perception": 4, "Intelligence": 3, "Wits": 3,
+            "Charisma": 3, "Manipulation": 3, "Appearance": 2
+          },
+          "attributeSpecialties": {},
+          "abilityPriority": ["talents", "skills", "knowledges"],
+          "abilities": { "Rituals": 3 },
+          "abilitySpecialties": {},
+          "backgrounds": {},
+          "willpower": 6,
+          "rage": 3, "rageCurrent": 3,
+          "gnosis": 5, "gnosisCurrent": 5,
+          "rank": 2,
+          "renown": { "glory": 0, "honor": 2, "wisdom": 4 },
+          "renownTemp": { "glory": 0, "honor": 0, "wisdom": 0 },
+          "freebiesRemaining": 0, "freebiesLog": [],
+          "xpTotal": 0, "xpSpent": 0,
+          "staffNotes": "", "statLog": [], "notes": [],
+          "createdAt": 1700000000000, "updatedAt": 1700000000000
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Pack + caern groundwork" },
+    { "cmd": "+pack/create Iron Riders", "label": "alpha forms pack", "as": "player" },
+    { "cmd": "+pack/invite Cassidy", "label": "alpha invites Cassidy", "as": "player" },
+    { "cmd": "+pack/accept", "label": "Cassidy accepts", "as": "Cassidy" },
+    { "cmd": "+caern/create Heart-of-the-Glen=3=Wisdom", "label": "staff makes the caern", "as": "admin" },
+    { "cmd": "+caern/setroom Heart-of-the-Glen=mock-room", "label": "bind caern to room", "as": "admin" },
+
+    { "sub": "Sept setup" },
+    { "cmd": "+sept/create Sept of the Pines", "label": "staff founds the sept", "as": "admin" },
+    { "cmd": "+sept/bind Sept of the Pines/Heart-of-the-Glen", "label": "bind caern to sept", "as": "admin" },
+    { "cmd": "+sept/join Sept of the Pines", "label": "alpha brings pack in", "as": "player" },
+    { "cmd": "+sept/alpha Sept of the Pines=Storms", "label": "staff names Sept Alpha", "as": "admin" },
+
+    { "sub": "Positions" },
+    { "cmd": "+sept/position Sept of the Pines/Cassidy=Master of the Rite", "label": "Cassidy is Master of the Rite", "as": "player" },
+
+    { "sub": "Info + roster" },
+    { "cmd": "+sept/info Sept of the Pines", "label": "sept overview", "as": "player" },
+    { "cmd": "+sept/roster Sept of the Pines", "label": "default roster (sort by rank)", "as": "player" },
+    { "cmd": "+sept/roster Sept of the Pines=sort:name", "label": "sorted by name", "as": "player" },
+    { "cmd": "+sept/roster Sept of the Pines=auspice:theurge", "label": "filtered to theurges", "as": "player" }
+  ]
+}

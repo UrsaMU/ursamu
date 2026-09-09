@@ -110,7 +110,16 @@ export function wordWrap(text: string, width = 78): string {
   if (/<\/?span\b/i.test(text) || /<br\s*\/?>/i.test(text)) {
     return text;
   }
-  return text
+  // MUSH %r is a line break. prepareOutbound wraps BEFORE the
+  // telnet formatter expands %r → \n, so treat %r as \n here or
+  // pre-formatted multi-line output (chargen, sheets, look) is
+  // shredded into one long line and reflowed on every space.
+  const normalized = String(text ?? "")
+    .replace(/%r/gi, "\n")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
+
+  return normalized
     .split("\n")
     .map((line) => {
       const cleanLine = line
