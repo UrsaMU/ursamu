@@ -1,3 +1,9 @@
+## 1.0.40
+
+- Room presence: same-room `X has connected.` on create/connect
+  via live DB location (not pre-login `u.broadcast`).
+- Disconnect notice shares the same room-socket helper.
+
 ## 1.0.39
 
 - look CONFORMAT: tighter name column (25), short-desc one line.

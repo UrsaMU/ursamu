@@ -1,6 +1,6 @@
 /**
- * Room announcement when a player fully goes offline.
- * Mirrors login's "has connected." from verbs/auth.ts.
+ * Room presence lines when a player connects or goes offline.
+ * Same-room only: "Alice has connected." / "Alice has disconnected."
  */
 import { send, sessions } from "@ursamu/core";
 import { dbojs } from "../world/dbobjs.ts";
@@ -15,24 +15,20 @@ function playerLabel(player: IDBOBJ): string {
 }
 
 /**
- * Notify other connected players in the leaver's room.
- * Call after the leaver's connected flag is cleared so they
- * are not matched by the connected query.
+ * Socket ids for connected players in `loc`, optionally skipping one id.
  */
-export async function notifyRoomDisconnect(
-  player: IDBOBJ,
-): Promise<void> {
-  const loc = player.location;
-  if (!loc) return;
-
+async function roomSocketIds(
+  loc: string,
+  excludeId?: string,
+): Promise<string[]> {
   const others = await dbojs.query({
     $and: [
       { location: loc },
       { flags: /connected/i },
-      { id: { $ne: player.id } },
+      ...(excludeId ? [{ id: { $ne: excludeId } }] : []),
     ],
   });
-  if (others.length === 0) return;
+  if (others.length === 0) return [];
 
   const allSessions = sessions.list();
   const socketIds: string[] = [];
@@ -42,6 +38,36 @@ export async function notifyRoomDisconnect(
       if (aid === o.id) socketIds.push(s.socketId);
     }
   }
+  return socketIds;
+}
+
+/**
+ * Tell others in the room that this player connected.
+ * Call after the player is flagged connected and location is set.
+ */
+export async function notifyRoomConnect(
+  player: IDBOBJ,
+): Promise<void> {
+  const loc = player.location;
+  if (!loc) return;
+
+  const socketIds = await roomSocketIds(loc, player.id);
+  if (socketIds.length === 0) return;
+  send(socketIds, `${playerLabel(player)} has connected.`);
+}
+
+/**
+ * Tell others in the room that this player disconnected.
+ * Call after the leaver's connected flag is cleared so they
+ * are not matched by the connected query.
+ */
+export async function notifyRoomDisconnect(
+  player: IDBOBJ,
+): Promise<void> {
+  const loc = player.location;
+  if (!loc) return;
+
+  const socketIds = await roomSocketIds(loc, player.id);
   if (socketIds.length === 0) return;
   send(socketIds, `${playerLabel(player)} has disconnected.`);
 }

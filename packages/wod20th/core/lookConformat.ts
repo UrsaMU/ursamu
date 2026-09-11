@@ -150,8 +150,8 @@ function formatPlayerRow(
 
   const prefix =
     ` ${padClip(nameWithRef, NAME_W)}` +
-    `${padClip(role, ROLE_W)}` +
-    `${padClip(idle, IDLE_W)}`;
+    ` ${padClip(role, ROLE_W)}` +
+    ` ${padClip(idle, IDLE_W)}`;
   const prefixLen = visualLen(prefix);
   if (prefixLen >= width) {
     return visualTruncate(prefix.replace(/\s+$/, ""), width);

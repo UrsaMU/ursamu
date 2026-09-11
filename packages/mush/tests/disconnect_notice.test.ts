@@ -1,5 +1,8 @@
 import { assertEquals } from "@std/assert";
-import { notifyRoomDisconnect } from "../src/events/disconnect-notice.ts";
+import {
+  notifyRoomConnect,
+  notifyRoomDisconnect,
+} from "../src/events/disconnect-notice.ts";
 import type { IDBOBJ } from "../src/world/types.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
@@ -13,8 +16,20 @@ Deno.test(
       flags: "player",
       data: { name: "Alice" },
     } as IDBOBJ;
-    // Must not throw
     await notifyRoomDisconnect(player);
+  },
+);
+
+Deno.test(
+  "notifyRoomConnect: no-op when player has no location",
+  OPTS,
+  async () => {
+    const player = {
+      id: "p1",
+      flags: "player connected",
+      data: { name: "Alice" },
+    } as IDBOBJ;
+    await notifyRoomConnect(player);
   },
 );
 
@@ -22,9 +37,6 @@ Deno.test(
   "notifyRoomDisconnect: playerLabel prefers moniker",
   OPTS,
   async () => {
-    // Exercise through no-location path — pure smoke that moniker
-    // field is accepted without throw. Full room delivery is covered
-    // by integration (needs live sessions + dbojs).
     const player = {
       id: "p2",
       flags: "player",
@@ -32,5 +44,19 @@ Deno.test(
     } as IDBOBJ;
     await notifyRoomDisconnect(player);
     assertEquals(player.data?.moniker, "Bobby");
+  },
+);
+
+Deno.test(
+  "notifyRoomConnect: playerLabel prefers moniker",
+  OPTS,
+  async () => {
+    const player = {
+      id: "p3",
+      flags: "player connected",
+      data: { name: "Carol", moniker: "Cee" },
+    } as IDBOBJ;
+    await notifyRoomConnect(player);
+    assertEquals(player.data?.moniker, "Cee");
   },
 );

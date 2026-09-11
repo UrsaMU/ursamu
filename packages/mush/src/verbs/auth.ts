@@ -72,6 +72,18 @@ export async function execCreate(u: IUrsamuSDK): Promise<void> {
   }
 
   u.send(`Welcome, ${name}! Your character has been created.`);
+
+  try {
+    const { notifyRoomConnect } = await import(
+      "../events/disconnect-notice.ts"
+    );
+    const { dbojs } = await import("../world/dbobjs.ts");
+    const live = await dbojs.queryOne({ id: player.id });
+    if (live) await notifyRoomConnect(live);
+  } catch (e: unknown) {
+    console.error("[auth] create room notice error:", e);
+  }
+
   u.execute("look");
 }
 
@@ -143,7 +155,17 @@ export async function execConnect(u: IUrsamuSDK): Promise<void> {
     "data.failedAttempts": 0,
   });
 
-  if (player.location) u.broadcast(`${u.util.displayName(player, player)} has connected.`);
+  // Same-room presence (not u.broadcast — pre-login SDK location is wrong).
+  try {
+    const { notifyRoomConnect } = await import(
+      "../events/disconnect-notice.ts"
+    );
+    const { dbojs } = await import("../world/dbobjs.ts");
+    const live = await dbojs.queryOne({ id: player.id });
+    if (live) await notifyRoomConnect(live);
+  } catch (e: unknown) {
+    console.error("[auth] connect room notice error:", e);
+  }
 
   const motd = await u.text.read("motd");
   if (motd) {
