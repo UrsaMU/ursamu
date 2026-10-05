@@ -39,7 +39,7 @@
 
   // ── Page mode ─────────────────────────────────────────────────────────────
 
-  // Support mount /site and serveRoot apex (court.ursamu.io/)
+  // Support mount /site and serveRoot apex (e.g. yourgame.example.com/)
   // Recomputed on SPA navigations via refreshPathname().
   var pathname = "/";
 
