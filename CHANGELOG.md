@@ -4,6 +4,35 @@ All notable changes to UrsaMU are documented here.
 
 ## [Unreleased]
 
+## [3.1.3] — 2026-10-05
+
+### Added
+
+- **`@ursamu/wod20th` 1.1.0** — World of Darkness 20th Anniversary
+  plugin with player-friendly character generation.
+
+### Changed
+
+- **Dropped `@ursamu/ursamu` meta-package** (#226) — games install
+  individual `@ursamu/*` packages instead.
+- **CLI 0.1.5** pins `@ursamu/mush@1.0.38` / `@ursamu/core@1.0.5`
+  on create (#225).
+- Bumped `@ursamu/core` to 1.0.6, `@ursamu/mush` to 1.0.40,
+  `@ursamu/help` to 1.3.1.
+
+### Fixed
+
+- **ANSI hex background** — uppercase `%X<#rrggbb>` / `%C<#rrggbb>`
+  now emit background colour (`48`) instead of foreground (`38`),
+  matching the single-letter convention and the telnet renderer (#228).
+- **Same-room connect notice** and look column spacing (`@ursamu/mush`).
+- **wod20th JSR publish** — drop `declare module` from published hooks.
+
+### Housekeeping
+
+- Removed references to the expired project domain from the site,
+  tests, and docs.
+
 ## [3.1.0] — 2026-08-24
 
 First tagged 3.x release. A game is a small project you
