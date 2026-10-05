@@ -253,15 +253,15 @@ Deno.test("injectSiteHtml: telnet under title", OPTS, () => {
 </header>`;
   const withBoth = injectSiteHtml(src, {
     title: "Court of Miracles",
-    telnet: "court.ursamu.io:4201",
+    telnet: "court.example.com:4201",
   });
-  assertEquals(withBoth.includes("court.ursamu.io:4201"), true);
-  assertEquals(withBoth.includes('href="telnet://court.ursamu.io:4201"'), true);
+  assertEquals(withBoth.includes("court.example.com:4201"), true);
+  assertEquals(withBoth.includes('href="telnet://court.example.com:4201"'), true);
   assertEquals(withBoth.includes("data-site-banner-connect hidden"), false);
 
   const noTitle = injectSiteHtml(src, {
     title: "",
-    telnet: "court.ursamu.io:4201",
+    telnet: "court.example.com:4201",
   });
   assertEquals(
     /data-site-banner-connect[^>]*\bhidden\b/i.test(noTitle),

@@ -9,7 +9,7 @@ _community_.
 
 - **Modern Web Client**: Play from anywhere with a beautiful glass-interface.
 - **Classic Telnet Support**: Connect with your favorite MUSH client at
-  `mush.ursamu.com:4201`.
+  `yourgame.example.com:4201`.
 - **Dynamic World**: Experience a living, breathing universe.
 
 > 'The universe is vast, but you are not alone.'

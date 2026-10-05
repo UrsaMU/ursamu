@@ -432,7 +432,7 @@
 ## 0.1.3
 
 - `serveRoot`: SPA at `/`, `/login`, `/profile`, `/wiki/*`
-  (for apex hosts like court.ursamu.io)
+  (for apex hosts like court.example.com)
 - Client links honor apex vs `/site` mount
 - Works with mush 1.0.7+ (`/` no longer always → /admin/)
 
