@@ -348,7 +348,9 @@ function resolveAnsi(code: string): string {
       const r = parseInt(hex[1].slice(0,2), 16);
       const g = parseInt(hex[1].slice(2,4), 16);
       const b = parseInt(hex[1].slice(4,6), 16);
-      return `\x1b[38;2;${r};${g};${b}m`;
+      // %X / %C = background, %x / %c = foreground (same as ANSI_MAP).
+      const layer = code[0] === "X" || code[0] === "C" ? 48 : 38;
+      return `\x1b[${layer};2;${r};${g};${b}m`;
     }
     return ANSI_RESET;
   }
