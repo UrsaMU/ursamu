@@ -12,23 +12,17 @@
     "packages/jobs",
     "packages/bbs",
     "packages/wiki",
-    "packages/cofd",
     "packages/wod20th",
-    "packages/mekton",
     "packages/ai-gm",
     "packages/map",
     "packages/lang",
     "packages/combat",
     "packages/dnd",
     "packages/cyberpunk",
-    "packages/sprawl",
     "packages/vendor",
     "games/roses",
-    "games/cor",
     "games/cpr",
-    "packages/site",
-    "packages/utopia",
-    "games/utopia-local"
+    "packages/site"
   ],
   "nodeModulesDir": "auto",
   "tasks": {
@@ -575,7 +569,7 @@
     "exclude": [
       "src/services/Softcode/parser.cjs",
       "legends",
-      "packages/theme-studio/public",
+      "unfinished/packages/theme-studio/public",
       "games",
       "packages/wod20th/tests",
       "packages/wod20th/tools",
