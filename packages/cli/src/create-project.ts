@@ -379,7 +379,7 @@ export async function scaffoldProject(
 
   function getLocalPath(pkgName: string, engineRelPath: string): string {
     if (pkgName === "@ursamu/globals") {
-      return `${engineRelPath}/packages/cofd/tests/helpers/globals-shim.ts`;
+      return `${engineRelPath}/unfinished/packages/cofd/tests/helpers/globals-shim.ts`;
     }
     const slug = pkgName.replace("@ursamu/", "");
     const base = slug

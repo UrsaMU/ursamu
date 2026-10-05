@@ -241,7 +241,7 @@ describe("Resting and Hit Dice", () => {
 });
 
 import { dndCgExec } from "../src/commands/cg.ts";
-import { mockPlayer, mockU } from "../../cofd/tests/helpers/mockU.ts";
+import { mockPlayer, mockU } from "./helpers/mockU.ts";
 import { assertStringIncludes } from "@std/assert";
 
 describe("D&D Guided Character Gen Reset Guard", () => {

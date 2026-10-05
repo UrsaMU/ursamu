@@ -740,7 +740,7 @@ shared code or generate it at install time.
 Every plugin package under `packages/` should support in-process interactive showcases to preview commands and flows. To make a showcase function correctly:
 
 - **`showcases/` folder**: Contains one or more JSON flow descriptions (e.g. `chargen-flow.json`).
-- **`tools/showcase.ts`**: The showcase execution driver script. Copy the standard runner from `packages/dnd/tools/showcase.ts` or `packages/cofd/tools/showcase.ts`. It intercepts `addCmd` and `send` so the commands run in-process against a mock/shim SDK.
+- **`tools/showcase.ts`**: The showcase execution driver script. Copy the standard runner from `packages/dnd/tools/showcase.ts` or `unfinished/packages/cofd/tools/showcase.ts`. It intercepts `addCmd` and `send` so the commands run in-process against a mock/shim SDK.
 - **`tools/ursamu-shim.ts`**: Re-exports core modules and shims `addCmd` and `send` for local runner execution.
 - **`showcase.importmap.json`**: An import map that intercepts `"ursamu"` and `"@ursamu/mush"`, mapping them to `./tools/ursamu-shim.ts`.
 - **`deno.json` showcase task**: Register the showcase task:
