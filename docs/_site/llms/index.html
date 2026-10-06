@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html><head><meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3001/llms/">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/llms/">
 <meta name="twitter:card" content="summary">
 </head><body><h1>UrsaMU — AI Reference</h1>
 <blockquote>
@@ -915,10 +915,10 @@ export const plugin: IPlugin = {
 <hr>
 <hr>
 <h2>Plugin Coupling Patterns</h2>
-<h3>Rule: never use <code>@ursamu/ursamu/*</code> sub-paths inside <code>src/plugins/</code></h3>
-<p>When running the engine directly, Deno resolves <code>@ursamu/ursamu</code> from the<br>
-local <code>deno.json</code> — not from JSR. A sub-path export that is absent from the<br>
-local <code>deno.json</code> will halt startup even if the published JSR version has it.</p>
+<h3>Rule: never hang other plugins off <code>@ursamu/mush/*</code> sub-paths</h3>
+<p>Engine imports use <code>@ursamu/mush</code> / <code>@ursamu/core</code>. Other plugins are their<br>
+own packages (<code>@ursamu/jobs</code>, <code>@ursamu/help</code>, …). Do not invent engine<br>
+sub-paths for plugin code — they will fail at startup.</p>
 <table>
 <thead>
 <tr>
@@ -932,8 +932,12 @@ local <code>deno.json</code> will halt startup even if the published JSR version
 <td>Relative: <code>../../jobs/mod.ts</code></td>
 </tr>
 <tr>
-<td>External plugin (separate repo) importing engine types</td>
-<td>Sub-path: <code>@ursamu/ursamu/jobs</code></td>
+<td>External plugin importing engine types</td>
+<td><code>jsr:@ursamu/mush</code></td>
+</tr>
+<tr>
+<td>External plugin importing jobs API</td>
+<td><code>jsr:@ursamu/jobs</code></td>
 </tr>
 </tbody>
 </table>
@@ -969,7 +973,7 @@ declare module "../../../services/Hooks/GameHooks.ts" {
 await gameHooks.emit("job:created", job);   // fires AFTER jobHooks subscribers
 
 // In plugin B (discord) — no jobs import needed:
-import { gameHooks } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/mush";
 gameHooks.on("job:created", async (job) =&gt; { /* post to webhook */ });
 </code></pre>
 <p>Loose coupling means:</p>
@@ -981,14 +985,13 @@ gameHooks.on("job:created", async (job) =&gt; { /* post to webhook */ });
 <h3>Case study: discord → jobs import error</h3>
 <p><strong>Symptom</strong> (<code>deno task start</code>):</p>
 <pre class="language-none" tabindex="0"><code class="language-none">Error loading plugin from .../discord/index.ts:
-  TypeError: Unknown export './jobs' for '@ursamu/ursamu'.
+  TypeError: Unknown export './jobs' for '@ursamu/mush'.
 </code></pre>
-<p><strong>Root cause</strong>: <code>discord/src/job-hooks.ts</code> imported <code>jobHooks</code> from<br>
-<code>@ursamu/ursamu/jobs</code>. When running the engine directly, <code>@ursamu/ursamu</code><br>
-resolves to the local <code>deno.json</code> whose exports did not include <code>./jobs</code>.</p>
-<p><strong>Wrong fix</strong>: Add <code>"./jobs": "..."</code> to <code>deno.json</code> exports and leave the<br>
-cross-plugin import as-is. This silences the error locally but doesn’t address<br>
-the architectural problem.</p>
+<p><strong>Root cause</strong>: <code>discord/src/job-hooks.ts</code> treated jobs as an engine<br>
+sub-path (<code>@ursamu/mush/jobs</code>) instead of its own package or hooks.<br>
+<code>@ursamu/mush</code> has no <code>./jobs</code> export.</p>
+<p><strong>Wrong fix</strong>: Add <code>"./jobs": "..."</code> to mush <code>deno.json</code> exports and leave<br>
+the cross-plugin import as-is. That couples plugins into the engine package.</p>
 <p><strong>Right fix (applied)</strong>:</p>
 <ol>
 <li><code>GameHookMap</code> changed from <code>type</code> to <code>interface</code> — enables declaration merging.</li>

@@ -1,12 +1,12 @@
 ---
 layout: layout.vto
 title: Writing Help Files
-description: How to create and organize in-game help files for UrsaMU players using the help-plugin.
+description: How to create and organize in-game help files for UrsaMU players using @ursamu/help.
 ---
 
 # Writing Help Files
 
-The `help` command is provided by the **[help-plugin](https://github.com/UrsaMU/help-plugin)**, which
+The `help` command is provided by the **[@ursamu/help](https://jsr.io/@ursamu/help)**, which
 is bundled in the default `plugins.manifest.json` and installed automatically on first run. It replaces
 the former built-in help command.
 
@@ -262,7 +262,7 @@ global index without copying files into the game's `help/` folder. Call
 `registerHelpDir()` inside your plugin's `init()`:
 
 ```ts
-import { registerHelpDir } from "jsr:@ursamu/help-plugin";
+import { registerHelpDir } from "jsr:@ursamu/help/register";
 import { fromFileUrl } from "@std/path";
 
 export default {

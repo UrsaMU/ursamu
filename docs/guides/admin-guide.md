@@ -324,27 +324,16 @@ inline so you can see which component (if any) didn't reload cleanly.
 > engine reads and compiles them on each invocation — so they never need a
 > reload.
 
-### Plugin Install Behavior
+### Plugin load behavior
 
-On startup the engine resolves and installs every plugin declared in
-`src/plugins/plugins.manifest.json` (plus their transitive `deps[]`). Two
-things to know when editing the manifest:
+Games pin packages in `deno.json` and register plugins at startup.
+The loader topologically sorts `IPlugin.dependencies` and fails fast
+if a declared dep is missing or out of range.
 
-- **Optional `deps[].version` semver range** — each dep entry may set
-  `"version": "^1.2.0"` (or `">=1.0.0 <2.0.0"`, etc.). The installer
-  reads the dep's own `ursamu.plugin.json` `version` and aborts the run
-  if it doesn't satisfy the range. Entries without `version` install
-  unconditionally — backwards compatible.
-- **Fail-fast, whole-manifest rollback** — if any plugin or transitive
-  dep fails to clone, has an unsafe name or URL, violates a `version`
-  range, or has incompatible ranges from multiple requesters, the entire
-  install run aborts. Disk and `src/plugins/.registry.json` are left
-  exactly as they were before the run — your previously installed
-  plugins are not touched. The error names which entry failed and why.
-
-In practice: after editing the manifest, restart the server. If the run
-aborts, fix the offending entry and restart again — there is no partial
-state to clean up.
+Community plugins installed with `ursamu plugin install <url>` still
+use `ursamu.plugin.json` and `src/plugins/.registry.json`. Official
+packages come from JSR — see
+[Official Plugins](../plugins/official-plugins.md).
 
 ### Updating packages without crashing (`@restart` / `@update`)
 
@@ -410,7 +399,7 @@ The deno child PID is written to `.ursamu-deno.pid`; the loop PID is in
 
 ## Help Administration
 
-The `help` command is provided by the **[help-plugin](https://github.com/UrsaMU/help-plugin)**,
+The `help` command is provided by the **[@ursamu/help](https://jsr.io/@ursamu/help)**,
 which aggregates entries from three sources in priority order:
 
 | Priority | Source | Description |

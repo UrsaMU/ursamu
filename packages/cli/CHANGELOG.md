@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.6
+
+- New games pin `@ursamu/mush@1.0.40` and
+  `@ursamu/core@1.0.6` (engine release).
+
 ## 0.1.5
 
 - New games pin `@ursamu/mush@1.0.38` and

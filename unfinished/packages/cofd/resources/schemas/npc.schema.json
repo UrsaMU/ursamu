@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ursamu.dev/schemas/cofd/npc.schema.json",
+  "$id": "https://ursamu.github.io/ursamu/schemas/cofd/npc.schema.json",
   "title": "CoFD NPC Template",
   "description": "Authorable NPC / antagonist template for Chronicles of Darkness 2e (mortal, Lost, Forsaken, Hosts, spirits, etc.). One file per template under resources/npcs/.",
   "type": "object",

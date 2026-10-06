@@ -341,8 +341,8 @@ export async function scaffoldProject(
   // Engine pins: keep in sync with published @ursamu/mush + core.
   // Dual-package override keys force plugin range rewrites onto one
   // mush/core instance (see packages/mush/docs/DUAL_PACKAGE.md).
-  const MUSH = "jsr:@ursamu/mush@1.0.38";
-  const CORE = "jsr:@ursamu/core@1.0.5";
+  const MUSH = "jsr:@ursamu/mush@1.0.40";
+  const CORE = "jsr:@ursamu/core@1.0.6";
   const jsrImports: Record<string, string> = {
     "ursamu": MUSH,
     "@ursamu/mush": MUSH,
@@ -408,7 +408,7 @@ export async function scaffoldProject(
       jsrImports[pkgName] = matchedOpt.jsrUrl;
       if (pkgName === "@ursamu/help") {
         jsrImports["@ursamu/help/register"] =
-          "jsr:@ursamu/help@^1.2.0/register";
+          "jsr:@ursamu/help@^1.3.1/register";
       }
     }
   }

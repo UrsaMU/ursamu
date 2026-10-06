@@ -7,14 +7,22 @@ Studios), covering the BtVS/AFMBE rules family.
 
 ## Install
 
-Add `packages/cinematic` to the workspace list in the root
-`deno.json`, then import the plugin wherever plugins load:
+```json
+// deno.json
+{
+  "imports": {
+    "@ursamu/cinematic-plugin": "jsr:@ursamu/cinematic-plugin@1.0.0"
+  }
+}
+```
 
 ```typescript
 import plugin from "@ursamu/cinematic-plugin";
+// register via your game's plugin loader
 ```
 
-Dependency: `help >= 1.0.0`.
+Dependency: `help >= 1.0.0`. Monorepo checkouts can import the
+workspace path `packages/cinematic` instead of JSR.
 
 ## Commands
 

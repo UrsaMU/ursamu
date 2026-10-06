@@ -22,21 +22,21 @@ src/plugins/
 ## The IPlugin Interface
 
 ```typescript
-// src/@types/IPlugin.ts
 export interface IPlugin {
   name: string;          // unique slug — used in logs and config namespacing
   version: string;       // semver, e.g. "1.0.0"
   description?: string;
-  config?: IConfig;      // optional default config values (deep-merged at startup)
+  dependencies?: { name: string; version: string }[]; // load-order deps
 
-  init?: () => boolean | Promise<boolean>;  // called once at startup
-  remove?: () => void   | Promise<void>;    // called when the plugin is unloaded
+  init(): boolean | Promise<boolean>;          // called once at startup
+  remove(): void | Promise<void>;              // called when the plugin is unloaded
 }
 ```
 
-That is the complete interface. There is no `author` field, no `dependencies`
-array, no `App` parameter, and no `onInit`/`onLoad`/`onUnload` lifecycle
-methods. The interface is intentionally minimal.
+The interface is intentionally minimal: no `author` field, no `App` parameter,
+and no `onInit`/`onLoad`/`onUnload` lifecycle methods. `dependencies` lists
+plugins this one needs, ordered first by the loader (see
+[dependencies](./dependencies.md)).
 ---
 
 ## Lifecycle
@@ -148,17 +148,15 @@ manifest at the plugin root:
   "author": "Your Name",
   "license": "MIT",
   "main": "index.ts",
-  "deps": [
-    { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" }
+  "dependencies": [
+    { "name": "jobs", "version": ">=1.0.0" }
   ]
 }
 ```
 
-Each `deps[]` entry may include an optional `version` semver range
-(`"^1.2.0"`, `">=1.0.0 <2.0.0"`). When present, the installer reads the
-dep's own manifest `version` and aborts the whole install if it does not
-satisfy the range. Omit `version` to install the dep without a check
-(backwards compatible). See the
-[Plugin Manager](./index.md#installing-community-plugins) and the
-[`deps[]` reference](./index.md#deps-entries) for the full install,
-update, remove, and atomic-rollback semantics.
+Each `dependencies[]` entry declares a plugin this one needs at runtime:
+a `name` and a `version` semver range (`">=1.0.0"`, `"^1.2.0"`). The loader
+orders dependencies first and fails fast if a declared dependency is missing
+or its version is out of range. See
+[Plugin Basics](./basics.md) and the
+[dependencies reference](./dependencies.md) for full semantics.

@@ -127,7 +127,7 @@ gameHooks.on("channel:message", ({ channelName, senderId, senderName, message })
 
 Fire when DBOs in the main `dbojs` collection are created, modified, or
 destroyed. Useful for cache invalidation, audit logs, or reacting to
-builder-plugin operations.
+`@ursamu/builder` operations.
 
 ```typescript
 gameHooks.on("object:created",   ({ id, obj }) => {});

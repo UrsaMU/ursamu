@@ -20,26 +20,32 @@ export const optionalPackages: PackageOption[] = [
   {
     name: "Public Site (FE shell)",
     pkgName: "@ursamu/site",
-    jsrUrl: "jsr:@ursamu/site@^0.1.77",
+    jsrUrl: "jsr:@ursamu/site@^0.1.96",
     description: "Public web portal shell, skins, /play UI",
   },
   {
     name: "Staff Web Console",
     pkgName: "@ursamu/web",
-    jsrUrl: "jsr:@ursamu/web@^0.2.72",
+    jsrUrl: "jsr:@ursamu/web@^0.2.82",
     description: "Staff admin SPA at /admin (wiki, DB, settings)",
   },
   {
     name: "BBS (Bulletin Board)",
     pkgName: "@ursamu/bbs",
-    jsrUrl: "jsr:@ursamu/bbs@^1.1.0",
+    jsrUrl: "jsr:@ursamu/bbs@^1.2.0",
     description: "In-game bulletin boards & forums",
   },
   {
     name: "Chronicles of Darkness",
     pkgName: "@ursamu/cofd-plugin",
-    jsrUrl: "jsr:@ursamu/cofd-plugin@^1.2.0",
+    jsrUrl: "jsr:@ursamu/cofd-plugin@^1.4.0",
     description: "CoFD 2e sheets, rolls, & chargen",
+  },
+  {
+    name: "Cinematic Unisystem",
+    pkgName: "@ursamu/cinematic-plugin",
+    jsrUrl: "jsr:@ursamu/cinematic-plugin@^1.0.0",
+    description: "Cinematic Unisystem chargen, rolls, Drama Points",
   },
   {
     name: "Combat System",
@@ -68,37 +74,37 @@ export const optionalPackages: PackageOption[] = [
   {
     name: "In-Game Help",
     pkgName: "@ursamu/help",
-    jsrUrl: "jsr:@ursamu/help@^1.2.0",
+    jsrUrl: "jsr:@ursamu/help@^1.3.1",
     description: "Help file compiler & interactive viewer",
   },
   {
     name: "In-Game Mail",
     pkgName: "@ursamu/mail",
-    jsrUrl: "jsr:@ursamu/mail@^2.7.0",
+    jsrUrl: "jsr:@ursamu/mail@^2.9.0",
     description: "Offline mail (post/inbox) messaging",
   },
   {
     name: "In-Game Wiki",
     pkgName: "@ursamu/wiki",
-    jsrUrl: "jsr:@ursamu/wiki@^0.2.7",
+    jsrUrl: "jsr:@ursamu/wiki@^0.2.9",
     description: "Wiki system, editing, & backlinks",
   },
   {
     name: "Jobs System",
     pkgName: "@ursamu/jobs",
-    jsrUrl: "jsr:@ursamu/jobs@^1.1.0",
+    jsrUrl: "jsr:@ursamu/jobs@^1.2.0",
     description: "Player-staff ticketing/jobs system",
   },
   {
     name: "Language Garbling",
     pkgName: "@ursamu/lang-plugin",
-    jsrUrl: "jsr:@ursamu/lang-plugin@^3.0.0",
+    jsrUrl: "jsr:@ursamu/lang-plugin@^3.1.0",
     description: "Phoneme-based fake speech garbling",
   },
   {
     name: "Map Plugin",
     pkgName: "@ursamu/map-plugin",
-    jsrUrl: "jsr:@ursamu/map-plugin@^3.1.0",
+    jsrUrl: "jsr:@ursamu/map-plugin@^3.2.0",
     description: "Interactive and graphical grid maps",
   },
   {
@@ -120,9 +126,15 @@ export const optionalPackages: PackageOption[] = [
     description: "Shop vendor NPC system",
   },
   {
+    name: "Sprawl Goons",
+    pkgName: "@ursamu/sprawl-plugin",
+    jsrUrl: "jsr:@ursamu/sprawl-plugin@^1.0.0",
+    description: "Sprawl Goons 2d6 chargen, combat, net, city",
+  },
+  {
     name: "Communication Channels",
     pkgName: "@ursamu/channels",
-    jsrUrl: "jsr:@ursamu/channels@^1.1.0",
+    jsrUrl: "jsr:@ursamu/channels@^1.2.0",
     description: "In-game player chat channel system",
   },
   {
@@ -134,8 +146,14 @@ export const optionalPackages: PackageOption[] = [
   {
     name: "Events & Hooks",
     pkgName: "@ursamu/events",
-    jsrUrl: "jsr:@ursamu/events@^0.1.0",
+    jsrUrl: "jsr:@ursamu/events@^0.2.0",
     description: "Custom game events & hooks system",
+  },
+  {
+    name: "World of Darkness 20th",
+    pkgName: "@ursamu/wod20th",
+    jsrUrl: "jsr:@ursamu/wod20th@^1.1.0",
+    description: "WoD20th VtM/WtA/Mortal/Kinfolk chargen",
   },
 ];
 

@@ -1,195 +1,199 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://localhost:3001/</loc>
-    <lastmod>2026-08-05T21:20:26.754Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/</loc>
+    <lastmod>2026-10-06T01:29:15.861Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/about/</loc>
-    <lastmod>2026-08-05T21:20:26.753Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/about/</loc>
+    <lastmod>2026-09-04T17:02:55.916Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/api/</loc>
+    <loc>https://ursamu.github.io/ursamu/api/</loc>
     <lastmod>2026-06-17T17:09:09.004Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/api/core/</loc>
+    <loc>https://ursamu.github.io/ursamu/api/core/</loc>
     <lastmod>2026-07-25T17:52:39.348Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/api/rest/</loc>
+    <loc>https://ursamu.github.io/ursamu/api/rest/</loc>
     <lastmod>2026-07-29T04:18:02.176Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/audit-holes/</loc>
+    <loc>https://ursamu.github.io/ursamu/audit-holes/</loc>
     <lastmod>2026-06-03T20:26:45.800Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/child-games/</loc>
-    <lastmod>2026-08-05T21:20:26.753Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/child-games/</loc>
+    <lastmod>2026-10-06T01:32:41.953Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/configuration/</loc>
+    <loc>https://ursamu.github.io/ursamu/configuration/</loc>
     <lastmod>2026-07-29T04:18:02.177Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/development/</loc>
-    <lastmod>2026-06-17T17:09:09.005Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/development/</loc>
+    <lastmod>2026-09-04T17:02:55.916Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/development/contributing/</loc>
+    <loc>https://ursamu.github.io/ursamu/development/contributing/</loc>
     <lastmod>2026-06-03T20:26:45.811Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/development/testing/</loc>
-    <lastmod>2026-06-03T20:26:45.808Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/development/testing/</loc>
+    <lastmod>2026-09-04T14:10:03.643Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/discord-webhook/</loc>
+    <loc>https://ursamu.github.io/ursamu/discord-webhook/</loc>
     <lastmod>2026-06-03T20:26:45.789Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/extending/</loc>
+    <loc>https://ursamu.github.io/ursamu/extending/</loc>
     <lastmod>2026-06-03T20:26:45.872Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/</loc>
-    <lastmod>2026-07-29T04:18:02.177Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/guides/</loc>
+    <lastmod>2026-08-05T22:25:07.971Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/admin-guide/</loc>
-    <lastmod>2026-08-05T21:20:18.725Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/guides/admin-guide/</loc>
+    <lastmod>2026-08-05T21:26:36.080Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/cli/</loc>
-    <lastmod>2026-08-05T21:20:26.754Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/guides/attribute-scripts/</loc>
+    <lastmod>2026-08-05T22:25:07.970Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/commands/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/cli/</loc>
+    <lastmod>2026-10-06T01:29:15.861Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ursamu.github.io/ursamu/guides/commands/</loc>
     <lastmod>2026-06-03T20:26:45.843Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/customization/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/customization/</loc>
     <lastmod>2026-06-03T20:26:45.842Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/debugging/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/debugging/</loc>
     <lastmod>2026-06-03T20:26:45.865Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/deployment/</loc>
-    <lastmod>2026-08-05T21:20:26.754Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/guides/deployment/</loc>
+    <lastmod>2026-10-06T01:32:41.953Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/docker/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/docker/</loc>
     <lastmod>2026-07-25T17:52:39.348Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/first-script/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/first-script/</loc>
     <lastmod>2026-06-03T20:26:45.862Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/gameclock/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/gameclock/</loc>
     <lastmod>2026-06-03T20:26:45.850Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/help-authoring/</loc>
-    <lastmod>2026-06-03T20:26:45.860Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/guides/help-authoring/</loc>
+    <lastmod>2026-08-08T16:35:07.816Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/installation/</loc>
-    <lastmod>2026-08-05T21:20:26.754Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/guides/installation/</loc>
+    <lastmod>2026-10-06T01:29:15.861Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/lock-expressions/</loc>
-    <lastmod>2026-06-03T20:26:45.840Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/guides/lock-expressions/</loc>
+    <lastmod>2026-09-04T14:10:03.644Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/password-reset/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/password-reset/</loc>
     <lastmod>2026-06-03T20:26:45.851Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/recipes/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/recipes/</loc>
     <lastmod>2026-06-03T20:26:45.836Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/scenes/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/scenes/</loc>
     <lastmod>2026-06-03T20:26:45.834Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/scripting/</loc>
-    <lastmod>2026-06-03T20:26:45.871Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/guides/scripting/</loc>
+    <lastmod>2026-09-04T14:10:03.644Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/sdk-cookbook/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/sdk-cookbook/</loc>
     <lastmod>2026-06-03T20:26:45.853Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/softcoding/</loc>
-    <lastmod>2026-07-29T04:18:02.177Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/guides/softcoding/</loc>
+    <lastmod>2026-08-05T22:25:07.971Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/user-guide/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/user-guide/</loc>
     <lastmod>2026-06-03T20:26:45.855Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/guides/wiki/</loc>
+    <loc>https://ursamu.github.io/ursamu/guides/wiki/</loc>
     <lastmod>2026-06-03T20:26:45.848Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/llms/</loc>
-    <lastmod>2026-06-03T20:26:45.791Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/llms/</loc>
+    <lastmod>2026-09-04T17:02:55.917Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/market-research-2026-04/</loc>
+    <loc>https://ursamu.github.io/ursamu/market-research-2026-04/</loc>
     <lastmod>2026-06-03T20:26:45.804Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/mush_compatibility/</loc>
-    <lastmod>2026-06-03T20:26:45.796Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/mush_compatibility/</loc>
+    <lastmod>2026-09-04T14:10:03.645Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/plugins/</loc>
+    <loc>https://ursamu.github.io/ursamu/plugins/</loc>
     <lastmod>2026-06-03T20:26:45.821Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/plugins/basics/</loc>
+    <loc>https://ursamu.github.io/ursamu/plugins/basics/</loc>
     <lastmod>2026-06-03T20:26:45.816Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/plugins/chargen/</loc>
+    <loc>https://ursamu.github.io/ursamu/plugins/chargen/</loc>
     <lastmod>2026-06-03T20:26:45.829Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/plugins/commands/</loc>
+    <loc>https://ursamu.github.io/ursamu/plugins/commands/</loc>
     <lastmod>2026-06-03T20:26:45.817Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/plugins/configuration/</loc>
+    <loc>https://ursamu.github.io/ursamu/plugins/configuration/</loc>
     <lastmod>2026-06-03T20:26:45.823Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/plugins/database/</loc>
+    <loc>https://ursamu.github.io/ursamu/plugins/database/</loc>
     <lastmod>2026-06-03T20:26:45.832Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/plugins/dependencies/</loc>
+    <loc>https://ursamu.github.io/ursamu/plugins/dependencies/</loc>
     <lastmod>2026-06-03T20:26:45.819Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/plugins/events/</loc>
+    <loc>https://ursamu.github.io/ursamu/plugins/events/</loc>
     <lastmod>2026-06-03T20:26:45.831Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/plugins/first-plugin/</loc>
+    <loc>https://ursamu.github.io/ursamu/plugins/first-plugin/</loc>
     <lastmod>2026-06-03T20:26:45.825Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/plugins/hooks/</loc>
+    <loc>https://ursamu.github.io/ursamu/plugins/hooks/</loc>
     <lastmod>2026-06-03T20:26:45.827Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3001/plugins/official-plugins/</loc>
-    <lastmod>2026-08-05T21:20:26.755Z</lastmod>
+    <loc>https://ursamu.github.io/ursamu/plugins/official-plugins/</loc>
+    <lastmod>2026-08-05T21:26:36.081Z</lastmod>
   </url>
 </urlset>

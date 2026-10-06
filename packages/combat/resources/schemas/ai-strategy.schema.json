@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ursamu.dev/schemas/combat/ai-strategy.schema.json",
+  "$id": "https://ursamu.github.io/ursamu/schemas/combat/ai-strategy.schema.json",
   "title": "UrsaMU Combat AI Strategy",
   "description": "Declarative combat AI for NPCs. One file per strategy under resources/ai/. Rules are evaluated each turn: matching rules are collected, highest priority wins; ties break by weight (weighted random).",
   "type": "object",

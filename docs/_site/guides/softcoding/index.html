@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Soft-Coding Guide | UrsaMU Documentation</title>
-  <meta name="description" content="How to store scripts and data in object attributes and trigger them with @trigger, u.trigger, and u.eval.">
-  <link rel="stylesheet" href="/styles.css">
+  <title>Softcode Guide | UrsaMU Documentation</title>
+  <meta name="description" content="Pure TinyMUX softcode on UrsaMU — expressions, substitutions, action commands, $-patterns, UDFs, and worked examples.">
+  <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3001/guides/softcoding/">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/softcoding/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -19,7 +19,7 @@
 <header class="site-header">
 
   <!-- Wordmark -->
-  <a href="/" class="site-logo">
+  <a href="/ursamu/" class="site-logo">
     <span class="site-logo-name">UrsaMU</span>
     <span class="site-logo-tag">docs</span>
   </a>
@@ -33,25 +33,25 @@
     
     
     
-    <a href="/guides/" class="header-nav-link active">
+    <a href="/ursamu/guides/" class="header-nav-link active">
       Guides
     </a>
     
     
     
-    <a href="/api/" class="header-nav-link">
+    <a href="/ursamu/api/" class="header-nav-link">
       API
     </a>
     
     
     
-    <a href="/plugins/" class="header-nav-link">
+    <a href="/ursamu/plugins/" class="header-nav-link">
       Plugins
     </a>
     
     
     
-    <a href="/development/" class="header-nav-link">
+    <a href="/ursamu/development/" class="header-nav-link">
       Development
     </a>
     
@@ -98,7 +98,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/about/" class="sidebar-link">
+      <a href="/ursamu/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -110,37 +110,49 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Getting Started</div>
 
-      <a href="/guides/installation/" class="sidebar-link">
+      <a href="/ursamu/guides/installation/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
         Installation
       </a>
-      <a href="/guides/user-guide/" class="sidebar-link">
+      <a href="/ursamu/guides/user-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Player Guide
       </a>
-      <a href="/guides/admin-guide/" class="sidebar-link">
+      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         Admin Guide
       </a>
-      <a href="/guides/customization/" class="sidebar-link">
+      <a href="/ursamu/guides/customization/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
         Customization
       </a>
-      <a href="/guides/scripting/" class="sidebar-link">
-        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
-        Scripting Guide
+      <a href="/ursamu/guides/softcoding/" class="sidebar-link active">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M8 7h8M8 11h6"></path></svg>
+        Softcode (TinyMUX)
       </a>
-      <a href="/guides/first-script/" class="sidebar-link">
+      <a href="/ursamu/guides/attribute-scripts/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        Attribute Scripts
+      </a>
+      <a href="/ursamu/guides/scripting/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        Scripting (TypeScript)
+      </a>
+      <a href="/ursamu/guides/first-script/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         Your First Script
       </a>
-      <a href="/guides/sdk-cookbook/" class="sidebar-link">
+      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link">
+      <a href="/ursamu/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
+      </a>
+      <a href="/ursamu/mush_compatibility/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        MUSH Compatibility
       </a>
     </div>
 
@@ -150,7 +162,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Configuration</div>
 
-      <a href="/configuration/" class="sidebar-link">
+      <a href="/ursamu/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
         Overview
       </a>
@@ -162,11 +174,11 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">API Reference</div>
 
-      <a href="/api/" class="sidebar-link">
+      <a href="/ursamu/api/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
         Overview
       </a>
-      <a href="/api/core/" class="sidebar-link">
+      <a href="/ursamu/api/core/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
         Core API
       </a>
@@ -178,35 +190,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Plugins</div>
 
-      <a href="/plugins/" class="sidebar-link">
+      <a href="/ursamu/plugins/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
         Overview
       </a>
-      <a href="/plugins/basics/" class="sidebar-link">
+      <a href="/ursamu/plugins/basics/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
         Basics
       </a>
-      <a href="/plugins/first-plugin/" class="sidebar-link">
+      <a href="/ursamu/plugins/first-plugin/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         First Plugin
       </a>
-      <a href="/plugins/commands/" class="sidebar-link">
+      <a href="/ursamu/plugins/commands/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Commands
       </a>
-      <a href="/plugins/hooks/" class="sidebar-link">
+      <a href="/ursamu/plugins/hooks/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
         Hooks
       </a>
-      <a href="/plugins/database/" class="sidebar-link">
+      <a href="/ursamu/plugins/database/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
         Database
       </a>
-      <a href="/plugins/configuration/" class="sidebar-link">
+      <a href="/ursamu/plugins/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
         Configuration
       </a>
-      <a href="/plugins/dependencies/" class="sidebar-link">
+      <a href="/ursamu/plugins/dependencies/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
         Dependencies
       </a>
@@ -218,19 +230,19 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Development</div>
 
-      <a href="/development/" class="sidebar-link">
+      <a href="/ursamu/development/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         Overview
       </a>
-      <a href="/development/contributing/" class="sidebar-link">
+      <a href="/ursamu/development/contributing/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         Contributing
       </a>
-      <a href="/extending/" class="sidebar-link">
+      <a href="/ursamu/extending/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         Extending
       </a>
-      <a href="/child-games/" class="sidebar-link">
+      <a href="/ursamu/child-games/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
         Child Games
       </a>
@@ -259,375 +271,229 @@
       <!-- Breadcrumbs -->
       
       <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="/">Home</a>
+        <a href="/ursamu/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Soft-Coding Guide</span>
+        <span class="breadcrumbs-current">Softcode Guide</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Soft-Coding Guide</h1>
-<h2>Soft-coding is the practice of storing scripts and data directly on in-game<br>
-objects as <strong>attributes</strong>, rather than writing static files. It lets builders<br>
-and players customize room behavior, object interaction, and NPC responses<br>
-entirely from inside the game — no server restart required.</h2>
-<h2>What is Soft-Coding?</h2>
-<p>Every object in UrsaMU (rooms, players, things, exits) has a <code>data.attributes</code><br>
-array. Each entry is an <code>IAttribute</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface IAttribute {
-  name: string;    // e.g. "ONENTER"
-  value: string;   // the script (TypeScript/JS) or plain text
-  setter: string;  // dbref of whoever set it
-  type?: string;
-  hidden?: boolean;
-}
-</code></pre>
-<p>An attribute’s <code>value</code> is a full sandboxed script — the same format as files in<br>
-<code>system/scripts/</code>. When something fires the attribute (a hook, <code>@trigger</code>, or<br>
-<code>u.trigger()</code>), UrsaMU runs the script in a Web Worker with a fresh <code>u</code> object.</p>
-<p><strong>Why use soft-coding instead of a system script?</strong></p>
-<ul>
-<li>Changes take effect immediately — no restart, no redeploy.</li>
-<li>Any builder with edit permission can customize objects they own.</li>
-<li>Behavior stays attached to the object, so copying or moving the object brings<br>
-its behavior with it.</li>
-<li>Inheritance: if an attribute is not found on the object, UrsaMU walks up the<br>
-<code>data.parent</code> chain, allowing shared behavior from parent objects.</li>
-</ul>
+        <h1>Softcode Guide</h1>
+<p>This guide is <strong>only</strong> about TinyMUX-style softcode: the<br>
+expression language builders use in-game with <code>&amp;ATTR</code>,<br>
+<code>think</code>, <code>@trigger</code>, <code>$commands</code>, and <code>^monitors</code>.</p>
+<p>It does <strong>not</strong> cover TypeScript. For TS attributes and<br>
+sandbox scripts, see<br>
+<a href="/ursamu/guides/attribute-scripts/">Attribute Scripts</a> and the<br>
+<a href="/ursamu/guides/scripting/">Scripting Guide</a>. For the full<br>
+function inventory and parity notes, see<br>
+<a href="/ursamu/mush_compatibility/">MUSH Compatibility</a>.</p>
 <hr>
-<h2>Setting Attributes In-Game</h2>
-<p>Use the <code>&amp;</code> command:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">&amp;&lt;ATTR-NAME&gt; &lt;object&gt;=&lt;value&gt;
-</code></pre>
-<p><code>&lt;object&gt;</code> accepts anything the <code>target</code> utility understands: <code>me</code>, <code>here</code>, an<br>
-object name, or a dbref (<code>#42</code>). <code>&lt;ATTR-NAME&gt;</code> is case-insensitive and stored<br>
-as supplied (the lookup is case-insensitive).</p>
-<pre class="language-none" tabindex="0"><code class="language-none">&gt; &amp;ONENTER here=u.send("The door creaks as you enter.");
-Game&gt; Lobby's attribute ONENTER set.
+<h2>What softcode is</h2>
+<p>Softcode is a string expression language. You store it on<br>
+object attributes. When the engine evaluates it, it expands<br>
+substitutions (<code>%N</code>, <code>%#</code>, …), runs functions inside<br>
+<code>[brackets]</code>, and can fire action commands (<code>@pemit</code>,<br>
+<code>@switch</code>, …).</p>
+<pre class="language-none" tabindex="0"><code class="language-none">think [add(2,3)]
+→ 5
 
-&gt; &amp;SHORT-DESC me=A tall woman in a grey cloak.
-Game&gt; Alice's attribute SHORT-DESC set.
+think [name(me)] greets [name(%#)]
+→ Alice greets Alice
 </code></pre>
-<p><strong>Clear an attribute</strong> by omitting the value:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">&gt; &amp;ONENTER here=
-Game&gt; Lobby's attribute ONENTER removed.
-</code></pre>
-<p>Constraints:</p>
-<ul>
-<li>You must be able to <strong>edit</strong> the target (be its owner, or have the <code>admin</code>,<br>
-<code>wizard</code>, or <code>superuser</code> flag).</li>
-<li>Attribute names are arbitrary — there is no enforced schema. Conventions are<br>
-listed in <a href="#common-attribute-names">Common Attribute Names</a>.</li>
-</ul>
-<h3>Alternative: <code>@set</code> attribute syntax</h3>
-<p><code>@set</code> also sets soft attributes using the <code>target/ATTR=value</code> form:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@set &lt;object&gt;/&lt;ATTR&gt;=&lt;value&gt;    -- set attribute
-@set &lt;object&gt;/&lt;ATTR&gt;=           -- clear attribute
-</code></pre>
-<p>This is equivalent to <code>&amp;ATTR obj=value</code> for plain data storage (both write<br>
-to <code>data.ATTR</code>). Use whichever feels natural; <code>&amp;</code> is the traditional MUSH<br>
-syntax, while <code>@set obj/ATTR=value</code> is more explicit.</p>
-<blockquote>
-<p><strong>Note:</strong> <code>@set obj=&lt;FLAG&gt;</code> (without the <code>/</code>) sets or removes a <em>flag</em>, not<br>
-an attribute — see the <a href="/guides/admin-guide#user-roles-and-permissions">Admin Guide</a>.</p>
-</blockquote>
-<hr>
-<h2>Setting Attributes via Scripts</h2>
-<p>From inside any script you can read and write the raw <code>data.attributes</code> array<br>
-directly using <code>u.db.modify</code>. Always spread the existing array to avoid<br>
-clobbering other attributes.</p>
-<h3>Add or replace a single attribute</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
-  const me = u.me;
-  const existing = (me.state.attributes || []) as Array&lt;{ name: string; value: string; setter: string }&gt;;
-
-  // Remove any existing entry with the same name (case-insensitive)
-  const filtered = existing.filter(a =&gt; a.name.toLowerCase() !== "onenter");
-
-  await u.db.modify(me.id, "$set", {
-    data: {
-      ...me.state,
-      attributes: [
-        ...filtered,
-        { name: "ONENTER", value: `u.send("Welcome back!");`, setter: "#" + me.id },
-      ],
-    },
-  });
-  u.send("ONENTER set on yourself.");
-};
-</code></pre>
-<blockquote>
-<p><strong>Important:</strong> <code>u.db.modify</code> with <code>"$set"</code> and a <code>data:</code> key replaces the<br>
-whole data block. Always spread <code>me.state</code> (or the target’s state) so you<br>
-don’t wipe other fields. See the <a href="/guides/scripting">Scripting Guide</a> for<br>
-the full <code>u.db.modify</code> pattern.</p>
-</blockquote>
-<h3>Read the raw array</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const attrs = (u.me.state.attributes || []) as Array&lt;{ name: string; value: string }&gt;;
-const found = attrs.find(a =&gt; a.name.toLowerCase() === "short-desc");
-if (found) u.send(`Your short-desc: ${found.value}`);
-</code></pre>
-<h2>For most use cases, prefer <code>u.attr.get()</code> (see below) — it handles<br>
-case-insensitivity and parent inheritance automatically.</h2>
-<h2>Reading Attributes</h2>
-<h3><code>u.attr.get(id, name): Promise&lt;string | null&gt;</code></h3>
-<p>Reads the value of a named attribute from an object. Returns <code>null</code> if not set.<br>
-The name is <strong>case-insensitive</strong>. If the attribute is not on the object itself,<br>
-UrsaMU walks up the <code>data.parent</code> chain.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
-  const bio = await u.attr.get(u.me.id, "FINGER-INFO");
-  if (bio) {
-    u.send(bio);
-  } else {
-    u.send("No bio set. Use: &amp;finger-info me=&lt;text&gt;");
-  }
-};
-</code></pre>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Read from any object by id
-const sd = await u.attr.get(someObjectId, "SHORT-DESC");
-</code></pre>
-<hr>
-<h2>Running Attributes</h2>
-<h3><code>u.trigger(id, attr, args?): Promise&lt;void&gt;</code></h3>
-<p>Runs the attribute as a script. The script executes in its own sandbox with the<br>
-targeted object as context. The actor who called <code>u.trigger</code> does <strong>not</strong> become<br>
-the script’s <code>u.me</code> — the object itself does. Returns when the script completes.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Fire the USE attribute on a chest the actor is looking at
-await u.trigger(chestId, "USE", [u.me.id]);
-</code></pre>
-<p>Args are available in the triggered script as <code>u.cmd.args</code>.</p>
-<h3><code>u.eval(id, attr, args?): Promise&lt;string&gt;</code></h3>
-<p>Like <code>u.trigger</code>, but captures and returns whatever the script sends as a<br>
-string. Useful for computed values.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const formula = await u.eval(u.me.id, "SCORE-FORMULA", ["str"]);
-u.send(`Your STR score: ${formula}`);
-</code></pre>
-<p>If the attribute is not found, <code>u.eval</code> returns <code>""</code>.</p>
-<h3><code>@trigger &lt;object&gt;/&lt;attr&gt;[=&lt;args&gt;]</code></h3>
-<p>The in-game command version of <code>u.trigger</code>. Fires an attribute on any object the<br>
-actor can see or edit.</p>
-<pre class="language-none" tabindex="0"><code class="language-none">&gt; @trigger chest/USE
-Triggered script on chest/USE.
-
-&gt; @trigger here/ONENTER=Alice
-Triggered script on here/ONENTER.
-</code></pre>
-<p>Arguments after <code>=</code> are split on whitespace and available as <code>u.cmd.args</code> in<br>
-the triggered script.</p>
-<h3>Automatic hooks</h3>
-<p>Some attributes are fired automatically by the engine — no <code>@trigger</code> needed:</p>
+<p>UrsaMU’s evaluator targets <strong>TinyMUX 2.x</strong> behavior (~250<br>
+stdlib functions, standard subs, action queue commands).</p>
+<h3>Softcode vs TypeScript attributes</h3>
 <table>
 <thead>
 <tr>
-<th>Attribute</th>
-<th>Fired on</th>
-<th>Fired by</th>
+<th></th>
+<th>Softcode</th>
+<th>TypeScript attribute</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>ACONNECT</code></td>
-<td>player or master room</td>
-<td>Player connects</td>
+<td>Opt-in</td>
+<td><code>&amp;ATTR/softcode</code> or auto-detect</td>
+<td>default when not softcode</td>
 </tr>
 <tr>
-<td><code>ADISCONNECT</code></td>
-<td>player or master room</td>
-<td>Player disconnects</td>
+<td>Language</td>
+<td>MUX expressions</td>
+<td>TS/JS in a Web Worker</td>
+</tr>
+<tr>
+<td>Test with</td>
+<td><code>think [expr]</code></td>
+<td>write + <code>@trigger</code></td>
+</tr>
+<tr>
+<td>Timeout</td>
+<td>100ms wall clock</td>
+<td>sandbox limits</td>
 </tr>
 </tbody>
 </table>
-<h2><code>ACONNECT</code> and <code>ADISCONNECT</code> fire on the connecting player’s own object first,<br>
-then on the master room (configured as <code>game.masterRoom</code>). The script runs with<br>
-the connected player as <code>u.me</code>.</h2>
-<h2>Common Attribute Names</h2>
-<p>These are conventions — UrsaMU does not enforce them (except <code>ACONNECT</code> and<br>
-<code>ADISCONNECT</code>, which are fired by the hooks system). Use them consistently so<br>
-other builders know what to expect.</p>
+<hr>
+<h2>Your first softcode</h2>
+<h3>1. Live eval with <code>think</code></h3>
+<pre class="language-none" tabindex="0"><code class="language-none">think [add(2,3)]
+think [strlen(hello)]
+think [ifelse(gt(5,2),yes,no)]
+think [center(Hi,20,=)]
+</code></pre>
+<p>Only you see the result. Use this as your REPL.</p>
+<h3>2. Store softcode on an attribute</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;GREET/softcode me=Hello, [name(%#)]!
+@trigger me/GREET
+</code></pre>
+<p>The <code>/softcode</code> switch marks the attribute so every future<br>
+eval uses the softcode engine (not TypeScript).</p>
+<h3>Auto-detect</h3>
+<p>If you omit <code>/softcode</code>, UrsaMU still treats the value as<br>
+softcode when it clearly looks like MUX code:</p>
+<ul>
+<li>value starts with <code>[</code> or <code>@</code>, or</li>
+<li>contains MUX substitution / function syntax and no<br>
+TypeScript keywords</li>
+</ul>
+<p>Prefer an explicit <code>/softcode</code> on anything you care about.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;GREET/softcode me=[name(%#)] waves.
+</code></pre>
+<hr>
+<h2>Expression model</h2>
+<h3>Function calls</h3>
+<p>Functions run inside square brackets:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">[func(arg1,arg2,...)]
+</code></pre>
+<p>Nest freely:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">[add(mul(2,3),4)]
+→ 10
+
+[ifelse(eq(words(a b),2),ok,bad)]
+→ ok
+</code></pre>
+<h3>Literal text and brackets</h3>
+<p>Outside <code>[…]</code>, text is returned as-is (after substitutions).</p>
+<p><code>[</code> and <code>]</code> are <strong>function delimiters</strong>. To emit literal<br>
+brackets in output:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">think [chr(91)]hello[chr(93)]
+→ [hello]
+
+think [lit([not a function])]
+→ [not a function]
+</code></pre>
+<p>Or use the demo’s escaped form where supported:<br>
+<code>%[ … %]</code> for non-eval bracket text in some contexts.</p>
+<p><code>@@</code> is a softcode comment (no output).</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@@ this is ignored
+&amp;NOTE me=@@ builder note only
+</code></pre>
+<h3>Truth values</h3>
+<p>Softcode is stringly-typed. Empty string and <code>0</code> are false;<br>
+anything else is true.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">[t(hello)]   → 1
+[t(0)]       → 0
+[not(0)]     → 1
+[and(1,1)]   → 1
+[or(0,1)]    → 1
+</code></pre>
+<hr>
+<h2>Substitutions</h2>
+<p>Expanded before / during evaluation.</p>
 <table>
 <thead>
 <tr>
-<th>Attribute</th>
-<th>Set on</th>
-<th>Purpose</th>
+<th>Sub</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>ACONNECT</code></td>
-<td>player, master room</td>
-<td>Script to run when the player connects</td>
+<td><code>%#</code></td>
+<td>Enactor dbref (<code>#42</code>)</td>
 </tr>
 <tr>
-<td><code>ADISCONNECT</code></td>
-<td>player, master room</td>
-<td>Script to run when the player disconnects</td>
+<td><code>%!</code></td>
+<td>Executor dbref (object running the code)</td>
 </tr>
 <tr>
-<td><code>ONENTER</code></td>
-<td>room</td>
-<td>Fire when any player enters the room</td>
+<td><code>%@</code></td>
+<td>Caller dbref, or <code>#-1</code></td>
 </tr>
 <tr>
-<td><code>ONEXIT</code></td>
-<td>room</td>
-<td>Fire when any player leaves the room</td>
+<td><code>%N</code> / <code>%n</code></td>
+<td>Enactor name / lowercase name</td>
 </tr>
 <tr>
-<td><code>USE</code></td>
-<td>thing</td>
-<td>Fire when a player uses/activates the object</td>
+<td><code>%L</code></td>
+<td>Enactor location dbref</td>
 </tr>
 <tr>
-<td><code>OPEN</code></td>
-<td>container/exit</td>
-<td>Fire when the object is opened</td>
+<td><code>%0</code>–<code>%9</code></td>
+<td>Positional args (from <code>$</code>/<code>^</code>/<code>u()</code>/<code>@trigger</code>)</td>
 </tr>
 <tr>
-<td><code>CLOSE</code></td>
-<td>container/exit</td>
-<td>Fire when the object is closed</td>
+<td><code>%+</code></td>
+<td>Number of args (where supported)</td>
 </tr>
 <tr>
-<td><code>DROP</code></td>
-<td>thing</td>
-<td>Fire when the object is dropped</td>
+<td><code>%q0</code>–<code>%qz</code></td>
+<td>Register values (see Registers)</td>
 </tr>
 <tr>
-<td><code>GET</code></td>
-<td>thing</td>
-<td>Fire when the object is picked up</td>
+<td><code>%VA</code>–<code>%VZ</code></td>
+<td>Executor attrs <code>VA</code>…<code>VZ</code></td>
 </tr>
 <tr>
-<td><code>SHORT-DESC</code></td>
-<td>player, thing</td>
-<td>One-line description for room display and +finger</td>
+<td><code>%s</code> <code>%S</code> <code>%o</code> <code>%O</code> <code>%p</code> <code>%P</code> <code>%a</code> <code>%A</code></td>
+<td>Pronouns from enactor <code>SEX</code></td>
 </tr>
 <tr>
-<td><code>FINGER-INFO</code></td>
-<td>player</td>
-<td>Free-form bio shown in +finger</td>
+<td><code>%r</code></td>
+<td>Newline</td>
 </tr>
 <tr>
-<td><code>SCORE-EXTRA</code></td>
-<td>player</td>
-<td>Extra stat block appended to score output</td>
+<td><code>%t</code></td>
+<td>Tab</td>
 </tr>
 <tr>
-<td><code>ODESC</code></td>
-<td>thing</td>
-<td>Message broadcast to others when the thing is examined</td>
+<td><code>%b</code></td>
+<td>Space</td>
 </tr>
 <tr>
-<td><code>SCRIPT</code></td>
-<td>any</td>
-<td>Generic script slot — fired by the command parser when an object handles a command</td>
+<td><code>%%</code></td>
+<td>Literal <code>%</code></td>
+</tr>
+<tr>
+<td><code>##</code></td>
+<td>Current <code>@dolist</code> / <code>iter()</code> item</td>
+</tr>
+<tr>
+<td><code>#@</code></td>
+<td>Current <code>@dolist</code> / <code>iter()</code> index</td>
+</tr>
+<tr>
+<td><code>%ch</code> <code>%cr</code> <code>%cg</code> … <code>%cn</code></td>
+<td>ANSI color / bold / reset</td>
+</tr>
+<tr>
+<td><code>%c&lt;#RRGGBB&gt;</code></td>
+<td>Truecolor (where client supports it)</td>
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p><code>ONENTER</code>, <code>ONEXIT</code>, <code>USE</code>, <code>OPEN</code>, <code>CLOSE</code>, <code>DROP</code>, and <code>GET</code> are<br>
-<strong>not</strong> fired automatically by the core engine. They require either<br>
-<code>@trigger</code> from a system script, or your own plugin/script to call<br>
-<code>u.trigger()</code> at the right moment.</p>
-</blockquote>
-<hr>
-<h2>Scripting Inside Attributes</h2>
-<p>Attribute values are full JavaScript/TypeScript scripts. They run inside the<br>
-same Web Worker sandbox as any other UrsaMU script with the full <code>u</code> API<br>
-available.</p>
-<h3>Module format (recommended)</h3>
-<p>Export a default async function. This is the same format used in <code>system/scripts/</code>.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
-  u.send("Hello from an attribute!");
-};
-</code></pre>
-<h3>Legacy block format</h3>
-<p>If the value does not contain an <code>export</code> statement, UrsaMU runs it as a block<br>
-(the code is executed directly, with <code>u</code> in scope).</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.send("Hello from a legacy block!");
-</code></pre>
-<p>Both formats have access to the full <code>u</code> API.</p>
-<h3>The <code>u</code> object in triggered attributes</h3>
-<p>When an attribute is fired via <code>u.trigger(id, attr)</code>:</p>
-<ul>
-<li><code>u.me</code> — the object the attribute is set on (not the actor who called<br>
-<code>u.trigger</code>)</li>
-<li><code>u.here</code> — the room that object is in</li>
-<li><code>u.cmd.name</code> — the attribute name in lowercase</li>
-<li><code>u.cmd.args</code> — the args array passed to <code>u.trigger</code> / <code>@trigger</code></li>
-</ul>
-<h2>When an attribute is fired via <code>u.eval(id, attr, args)</code>, the same rules apply<br>
-and the script’s output (via <code>u.send</code>) is captured as the return value.</h2>
-<h2>Practical Examples</h2>
-<h3>Room that greets players on entry</h3>
-<p>Set this on a room. Call <code>u.trigger(room.id, "ONENTER", [actorId])</code> from a<br>
-movement hook or a custom <code>look</code> script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER The Tavern=#...
-export default async (u) =&gt; {
-  const actorId = u.cmd.args[0];
-  const actor = actorId ? (await u.db.search(actorId))[0] : null;
-  const name = actor ? String(actor.state.moniker || actor.state.name || "Someone") : "Someone";
-  u.here.broadcast(`${name} pushes open the door and steps inside.`);
-  u.send("The warmth of the fire and the smell of roasting meat greet you.");
-};
-</code></pre>
-<h3>Object that does something when used</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;USE Ancient Lever=#...
-export default async (u) =&gt; {
-  const actorId = u.cmd.args[0];
-  u.here.broadcast("The lever grinds against stone with a horrible screech.");
-  await u.teleport("secret-door-id", "open-room-id");
-  u.send("You hear a door grinding open somewhere nearby.");
-};
-</code></pre>
-<h3>Greeting script on player connect</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ACONNECT me=#...  (on a player)
-export default async (u) =&gt; {
-  const unread = (await u.mail.read({ to: { $in: [`#${u.me.id}`] } }))
-    .filter(m =&gt; !m.data?.read).length;
-  if (unread &gt; 0) u.send(`You have ${unread} unread message${unread === 1 ? "" : "s"}.`);
-};
-</code></pre>
-<h3>NPC that responds to being examined</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ODESC Town Guard=#...  (plain text — broadcast when examined)
-// "snaps to attention and eyes you warily."
-// The look script broadcasts: "&lt;actor&gt; snaps to attention and eyes you warily."
-</code></pre>
-<h3>Computed score field</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;SCORE-FORMULA me=#...
-export default (u) =&gt; {
-  const str = Number(u.me.state.str) || 0;
-  const bonus = Math.floor((str - 10) / 2);
-  u.send(`${str} (${bonus &gt;= 0 ? "+" : ""}${bonus})`);
-};
-</code></pre>
-<p>Then from your score script or a <code>+sheet</code> command:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const strDisplay = await u.eval(u.me.id, "SCORE-FORMULA");
-u.send(`STR: ${strDisplay}`);
-</code></pre>
-<h3>Per-object data storage</h3>
-<p>Attributes don’t have to hold scripts — they can hold plain data strings that<br>
-other scripts read with <code>u.attr.get</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;PRICE Healing Potion=#...  (value: "50")
-// &amp;USES Healing Potion=#...   (value: "3")
-
-export default async (u) =&gt; {
-  const price = await u.attr.get(u.target!.id, "PRICE") || "0";
-  const uses  = await u.attr.get(u.target!.id, "USES")  || "1";
-  u.send(`Price: ${price} credits  (${uses} use${uses === "1" ? "" : "s"} remaining)`);
-};
+<p>Pronouns read the enactor’s <code>SEX</code> attribute (<code>male</code> /<br>
+<code>female</code> / <code>plural</code> / default neutral).</p>
+<pre class="language-none" tabindex="0"><code class="language-none">think %N (%#) is in %L
+think %ch%crRed%cn then normal
 </code></pre>
 <hr>
-<h2>Softcode Evaluator (TinyMUX Compatible)</h2>
-<p>As of v2.0.0, UrsaMU ships a full TinyMUX 2.x-compatible softcode evaluator. Any attribute flagged <code>/softcode</code> is run through the evaluator rather than executed as TypeScript.</p>
-<h3>Enabling softcode on an attribute</h3>
-<pre class="language-none" tabindex="0"><code class="language-none">&amp;GREET/softcode me=[name(%#)] greets you!
-</code></pre>
-<p>The <code>/softcode</code> switch tells the engine to evaluate the value as MUSH softcode rather than TypeScript. It persists on the attribute — you only need to specify it when first setting the attribute.</p>
-<p>Attributes that contain MUX substitution syntax (<code>%N</code>, <code>[func()]</code>) and no TypeScript keywords are also auto-detected as softcode.</p>
-<h3>Action commands</h3>
+<h2>Action commands</h2>
+<p>These run as commands (often from attributes or queues),<br>
+not as pure expression returns.</p>
 <table>
 <thead>
 <tr>
@@ -637,45 +503,293 @@ export default async (u) =&gt; {
 </thead>
 <tbody>
 <tr>
-<td><code>@switch &lt;expr&gt;=&lt;case&gt;,&lt;action&gt;[,&lt;default&gt;]</code></td>
-<td>Branch on value</td>
-</tr>
-<tr>
-<td><code>@dolist &lt;list&gt;=&lt;action&gt;</code></td>
-<td>Iterate over space-delimited list (<code>##</code> = item, <code>#@</code> = index)</td>
+<td><code>@switch &lt;expr&gt;=&lt;case&gt;,&lt;action&gt;[,…]</code></td>
+<td>Branch on value / wildcards</td>
 </tr>
 <tr>
 <td><code>@if &lt;expr&gt;=&lt;true&gt;[,&lt;false&gt;]</code></td>
-<td>Conditional execution</td>
+<td>Conditional action</td>
+</tr>
+<tr>
+<td><code>@dolist &lt;list&gt;=&lt;action&gt;</code></td>
+<td>Iterate; <code>##</code> item, <code>#@</code> index</td>
 </tr>
 <tr>
 <td><code>@while &lt;expr&gt;=&lt;action&gt;</code></td>
-<td>Loop while true (100ms wall-clock timeout enforced)</td>
+<td>Loop while true (timeout enforced)</td>
 </tr>
 <tr>
 <td><code>@break</code></td>
-<td>Exit the current <code>@dolist</code> or <code>@while</code></td>
+<td>Leave current <code>@dolist</code> / <code>@while</code></td>
 </tr>
 <tr>
 <td><code>@trigger &lt;obj&gt;/&lt;attr&gt;[=&lt;args&gt;]</code></td>
-<td>Fire an attribute as a trigger</td>
+<td>Fire an attribute</td>
 </tr>
 <tr>
 <td><code>@wait &lt;seconds&gt;=&lt;action&gt;</code></td>
 <td>Delay an action</td>
 </tr>
+<tr>
+<td><code>@ps</code></td>
+<td>List pending <code>@wait</code> jobs</td>
+</tr>
+<tr>
+<td><code>@drain &lt;obj&gt;</code></td>
+<td>Cancel waits on an object</td>
+</tr>
+<tr>
+<td><code>@notify &lt;obj&gt;[/&lt;sem&gt;][=&lt;n&gt;]</code></td>
+<td>Signal a semaphore</td>
+</tr>
+<tr>
+<td><code>@pemit &lt;player&gt;=&lt;msg&gt;</code></td>
+<td>Private message</td>
+</tr>
+<tr>
+<td><code>@remit &lt;room&gt;=&lt;msg&gt;</code></td>
+<td>Message everyone in a room</td>
+</tr>
+<tr>
+<td><code>@emit &lt;msg&gt;</code></td>
+<td>Message current room</td>
+</tr>
+<tr>
+<td><code>@function &lt;name&gt;=…</code></td>
+<td>Global UDF (see below)</td>
+</tr>
 </tbody>
 </table>
-<h3>$-pattern dispatch</h3>
-<pre class="language-none" tabindex="0"><code class="language-none">&amp;CMD_GREET object=$greet *:@pemit %#=Hello, %0!
+<h3><code>@switch</code> patterns</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">@switch [get(me/COLOR)]=red,@pemit %#=Warm,blue,@pemit %#=Cool,@pemit %#=Other
+@switch [add(2,5)]=&lt;5,small,&gt;5,big,mid
 </code></pre>
-<p>Attributes beginning with <code>$</code> fire when their glob pattern matches a typed command. <code>%0</code>–<code>%9</code> are capture groups. Objects in the same room as the player, or in the master room, or in the player’s zone master are checked.</p>
-<h3>^-pattern listeners (monitors)</h3>
-<pre class="language-none" tabindex="0"><code class="language-none">&amp;LISTEN_HELLO object=^*hello*:@pemit %#=I heard a hello!
+<p>Patterns support <code>*</code>, <code>?</code>, and numeric <code>&lt;n</code> / <code>&gt;n</code>.</p>
+<h3><code>@dolist</code></h3>
+<pre class="language-none" tabindex="0"><code class="language-none">@dolist one two three=@pemit %#=Item ## (#@)
 </code></pre>
-<p>Attributes beginning with <code>^</code> fire when their pattern matches anything broadcast in the room. The object must have the <code>MONITOR</code> flag set.</p>
-<h3>Softcode function reference</h3>
-<p>See <a href="/mush_compatibility/">MUSH Compatibility</a> for the full list of ~250 supported functions, substitutions, and compatibility stubs.</p>
+<h3>Chaining with <code>;</code></h3>
+<p>Multiple actions in one attribute:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;BOOT_MSG/softcode me=@pemit %#=Welcome!; @pemit %#=Type +help
+</code></pre>
+<hr>
+<h2>Essential functions</h2>
+<p>Not exhaustive — see<br>
+<a href="/ursamu/mush_compatibility/#supported-functions-250-total">MUSH Compatibility</a><br>
+for the full catalog. Favorites:</p>
+<h3>Math</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">[add(2,3,4)]     [sub(10,3)]    [mul(3,4)]
+[div(10,3)]      [mod(10,3)]    [abs(-7)]
+[max(1,5,3)]     [min(1,5,3)]   [power(2,10)]
+[eq(3,3)]        [gt(5,2)]      [lt(2,5)]
+[rand(100)]      [isnum(42)]
+</code></pre>
+<h3>String</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">[strlen(hello)]           [upcase(hi)] / [ucstr(hi)]
+[lowcase(HI)] / [lcstr]   [capstr(fOO)]
+[left(abcdef,3)]          [right(abcdef,3)]
+[mid(abcdef,2,3)]         [trim(  z  )]
+[cat(a,b,c)] → a b c      [strcat(a,b,c)] → abc
+[before(a:b,:),]          [after(a:b,:)]
+[edit(a-b-c,-,/)]         [repeat(*,5)]
+[space(3)]                [reverse(abc)]
+[center(Hi,10,=)]         [ljust(Hi,10,.)]  [rjust(Hi,10,.)]
+[ansi(hr,ERROR)]          [stripansi(...)]
+</code></pre>
+<h3>List</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">[words(a b c)]            [first(a b c)]  [rest(a b c)]
+[last(a b c)]             [extract(a b c,2)]
+[member(a b c,b)]         [lnum(1,5)]
+[sort(b a c)]             [revwords(a b c)]
+[setunion(a b,b c)]       [setinter(a b,b c)]
+[grab(foo bar,b*)]        [match(foo bar,b*)]
+[iter(1 2 3,mul(##,##))]  [parse(...)]  (alias of iter)
+</code></pre>
+<h3>Logic</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">[if(1,yes)]               [ifelse(0,yes,no)]
+[switch(cat,dog,woof,cat,meow,other)]
+[case(b,a,alpha,b,beta,other)]
+[and(1,1)]  [or(0,1)]  [not(0)]  [xor(1,0)]
+[lit(raw text)]           [null(whatever)]
+</code></pre>
+<p><code>if(cond,then)</code> returns empty when false. Use <code>ifelse</code> for<br>
+an else branch. <code>switch()</code> is the <strong>function</strong>; <code>@switch</code><br>
+is the <strong>command</strong>.</p>
+<h3>Object / world</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">[name(me)]       [dbref(me)]      [type(me)]
+[flags(me)]      [hasflag(me,wizard)]
+[loc(me)]        [where(me)]      [home(me)]
+[lcon(here)]     [lexits(here)]   [lwho()]
+[pmatch(Alice)]  [nearby(me,obj)]
+[money(me)]      [idle(me)]       [conn(me)]
+[mudname()]      [version()]      [secs()] [time()]
+</code></pre>
+<h3>Attributes from softcode</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">[get(obj/ATTR)]           [v(ATTR)]          (on executor)
+[default(obj/ATTR,fb)]    [hasattr(obj,ATTR)]
+[lattr(obj,GLOB*)]        [xget(obj,ATTR)]
+</code></pre>
+<p>Set attributes with the usual <code>&amp;</code> command (including from<br>
+inside action lists):</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;COUNTER/softcode Demo=0
+&amp;COUNTER Demo=[add([get(Demo/COUNTER)],1)]
+</code></pre>
+<h3>User calls</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">[u(obj/ATTR,arg0,arg1,…)]      call attr; args → %0 %1 …
+[ulocal(obj/ATTR,…)]           like u(), registers restored
+[map(obj/ATTR,list)]           call attr per list word
+[filter(obj/ATTR,list)]        keep words where attr → true
+[fold(obj/ATTR,list,acc)]      reduce
+</code></pre>
+<h3>Output functions</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">[pemit(%#,Hello)]   [remit(here,Boom)]
+[emit(Hi room)]     [oemit(%#,others see this)]
+[trigger(obj/ATTR,args)]
+</code></pre>
+<p>Prefer <code>@pemit</code> / <code>@emit</code> as commands in action attributes;<br>
+functions are useful inside expressions.</p>
+<h3>Registers</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">[setq(0,hello)][r(0)]     setq returns empty; r/getq reads
+[setr(1,world)]           set and return value
+[localize([setq(0,x)]…)]  snapshot/restore registers
+</code></pre>
+<p>Also: <code>%q0</code> … <code>%qz</code> after <code>setq</code>.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">think [setq(0,10)][setq(1,20)][add(%q0,%q1)]
+→ 30
+</code></pre>
+<hr>
+<h2><code>$</code>-commands (input patterns)</h2>
+<p>Attributes whose values start with <code>$</code> register a command<br>
+pattern on that object:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;CMD_GREET/softcode ball=$greet *:@pemit %#=Hello, %0!
+</code></pre>
+<p>When a player types <code>greet Alice</code>, matching objects run the<br>
+action. Captures fill <code>%0</code>–<code>%9</code>.</p>
+<p><strong>Search order:</strong> objects in the same room, master room,<br>
+and the player’s zone master (<code>@zone</code>).</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;CMD_LOOKIN/softcode box=$look in me:@pemit %#=[get(me/INSIDE-DESC)]
+</code></pre>
+<hr>
+<h2><code>^</code>-monitors (listen patterns)</h2>
+<p>Attributes starting with <code>^</code> fire when room text matches.<br>
+The object needs the <strong>MONITOR</strong> flag.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@set listener=MONITOR
+&amp;HEARD/softcode listener=^*hello*:@pemit %#=I heard a hello from %N.
+</code></pre>
+<p>Captures map to <code>%0</code>–<code>%9</code> like <code>$</code> patterns.</p>
+<hr>
+<h2>User-defined functions</h2>
+<h3>On an object (<code>u()</code>)</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;DOUBLE/softcode me=[mul(%0,2)]
+think [u(me/DOUBLE,21)]
+→ 42
+
+&amp;FACT/softcode me=[ifelse(lte(%0,1),1,mul(%0,u(me/FACT,dec(%0))))]
+think [u(me/FACT,5)]
+→ 120
+</code></pre>
+<h3>Global (<code>@function</code>)</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">@function double=[mul(%0,2)]
+think [double(21)]
+→ 42
+
+@function/list
+@function/remove double
+</code></pre>
+<p>Globals are shared; keep names unique and document them.</p>
+<hr>
+<h2>Format attributes</h2>
+<p>Display slots can be softcode templates on the object<br>
+(priority over plugin handlers):</p>
+<p><code>NAMEFORMAT</code>, <code>DESCFORMAT</code>, <code>CONFORMAT</code>, <code>EXITFORMAT</code>,<br>
+<code>WHOFORMAT</code>, <code>WHOROWFORMAT</code>, <code>PSFORMAT</code>, <code>PSROWFORMAT</code></p>
+<p>Plugins may add more uppercase slots. In templates, <code>%0</code> is<br>
+the default rendering payload for that slot.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;WHOFORMAT/softcode #0=[center(Who,78,=)]%r%0
+</code></pre>
+<hr>
+<h2>Tags (<code>@tag</code> / <code>@ltag</code>)</h2>
+<p>Named dbrefs for softcode (Rhost-style):</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@tag citygate=here
+think [tag(citygate)]
+think [name(#citygate)]
+
+@ltag home=here
+think [ltag(home)]
+</code></pre>
+<p><code>#tagname</code> works anywhere an object ref is accepted<br>
+(personal <code>@ltag</code> shadows global <code>@tag</code>).</p>
+<hr>
+<h2>Worked examples</h2>
+<h3>Private greeting attribute</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;HI/softcode me=@pemit %#=%chHi%cn, %N. You are %# in [name(%L)].
+@trigger me/HI
+</code></pre>
+<h3>Room speech reaction</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">@create Echo
+@set Echo=MONITOR
+@tel Echo=here
+&amp;LISTEN/softcode Echo=^*said*:@pemit %#=Echo heard %N.
+</code></pre>
+<h3>Simple <code>$</code> command object</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">@create Greeter
+@tel Greeter=here
+&amp;CMD/softcode Greeter=$hello *:@pemit %#=Hello, %0! — from [name(me)]
+</code></pre>
+<p>Type: <code>hello Bob</code></p>
+<h3>Queue delay</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;LATER/softcode me=@wait 3=@pemit %#=Three seconds later.
+@trigger me/LATER
+</code></pre>
+<h3>Parent inheritance</h3>
+<p>Softcode attrs resolve up <code>data.parent</code> like other<br>
+attributes. Put shared <code>$</code> commands or UDFs on a parent<br>
+prototype and <code>@parent</code> children to it.</p>
+<hr>
+<h2>Limits and safety</h2>
+<ul>
+<li>Softcode eval has a <strong>100ms</strong> wall-clock timeout.</li>
+<li><code>@while</code> / long <code>@dolist</code> work is capped; prefer finite<br>
+lists.</li>
+<li><code>sql()</code>, some terminal probes, etc. are stubs — see<br>
+<a href="/ursamu/mush_compatibility/#tinymux-compatibility-stubs">compatibility stubs</a>.</li>
+<li>Do not put secrets in publicly readable attributes.</li>
+<li><code>think</code> is private; <code>@emit</code> / <code>@remit</code> are not.</li>
+</ul>
+<hr>
+<h2>Installer demo</h2>
+<p>A full walkthrough object lives in the repo:</p>
+<p><a href="https://github.com/UrsaMU/ursamu/blob/main/docs/softcode-demo.mush"><code>docs/softcode-demo.mush</code></a></p>
+<p>Paste sections in-game (or load via your preferred<br>
+installer flow), then:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@trigger Demo/DEMO_RUN
+</code></pre>
+<p>Covers subs, strings, math, logic, lists, iter/map/filter,<br>
+objects, registers, UDFs, format helpers, and attr get/set.</p>
+<hr>
+<h2>Quick reference</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">think [expr]                     live eval (you only)
+&amp;ATTR/softcode obj=&lt;code&gt;        store softcode
+@trigger obj/ATTR[=args]         run attribute
+$pattern:action                  command on object
+^pattern:action                  room listen (MONITOR)
+[u(obj/ATTR,args)]               call softcode attr
+@function name=[code]            global UDF
+@switch / @if / @dolist / @wait  flow + queue
+@pemit %#=msg                    private output
+</code></pre>
+<hr>
+<h2>See also</h2>
+<ul>
+<li><a href="/ursamu/mush_compatibility/">MUSH Compatibility</a> — full function<br>
+tables, stubs, format slots, tags</li>
+<li><a href="/ursamu/guides/commands/">Command Reference</a> — builder/admin verbs</li>
+<li><a href="/ursamu/guides/lock-expressions/">Lock Expressions</a> — lockfuncs</li>
+<li><a href="/ursamu/guides/attribute-scripts/">Attribute Scripts</a> —<br>
+TypeScript on attributes (not softcode)</li>
+<li><a href="/ursamu/guides/scripting/">Scripting Guide</a> — file-based TS<br>
+sandbox commands</li>
+</ul>
 
       </article>
 
@@ -685,6 +799,10 @@ export default async (u) =&gt; {
       
       
       
+      
+        
+          
+        
       
         
           
@@ -837,14 +955,14 @@ export default async (u) =&gt; {
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/sdk-cookbook/" class="page-nav-btn prev">
+          <a href="/ursamu/guides/sdk-cookbook/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
             <span class="page-nav-title">SDK Cookbook</span>
           </a>
         
 
         
-          <a href="/guides/user-guide/" class="page-nav-btn next">
+          <a href="/ursamu/guides/user-guide/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
             <span class="page-nav-title">User Guide</span>
           </a>
@@ -861,9 +979,9 @@ export default async (u) =&gt; {
         &nbsp;—&nbsp;MIT License • © 2025
       </div>
       <div class="footer-links">
-        <a href="/guides/installation/">Installation</a>
-        <a href="/api/">API</a>
-        <a href="/plugins/">Plugins</a>
+        <a href="/ursamu/guides/installation/">Installation</a>
+        <a href="/ursamu/api/">API</a>
+        <a href="/ursamu/plugins/">Plugins</a>
         <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
       </div>
     </footer>

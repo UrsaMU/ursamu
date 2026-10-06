@@ -16,7 +16,7 @@ export const GAME_PROJECT_TASKS: Record<string, string> = {
   "status": "bash ./scripts/status.sh",
   "logs": "tail -f logs/main.log logs/telnet.log",
   "update":
-    "deno run -A --minimum-dependency-age=0 jsr:@ursamu/cli@0.1.5/update",
+    "deno run -A --minimum-dependency-age=0 jsr:@ursamu/cli@0.1.6/update",
   "safe-update": "bash ./scripts/safe-update.sh",
   "safe-update:reboot": "bash ./scripts/safe-update.sh --reboot",
   "server": `${DENO_RUN} --watch ./src/main.ts`,

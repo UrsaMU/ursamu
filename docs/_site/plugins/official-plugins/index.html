@@ -3,11 +3,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Official Plugins | UrsaMU Documentation</title>
-  <meta name="description" content="The official UrsaMU plugin ecosystem — what each plugin provides, install requirements, and links to their documentation.">
-  <link rel="stylesheet" href="/styles.css">
+  <meta name="description" content="The official UrsaMU plugin ecosystem — every published @ursamu/* package, what it provides, and how to add it to a game.">
+  <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3001/plugins/official-plugins/">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/plugins/official-plugins/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -19,7 +19,7 @@
 <header class="site-header">
 
   <!-- Wordmark -->
-  <a href="/" class="site-logo">
+  <a href="/ursamu/" class="site-logo">
     <span class="site-logo-name">UrsaMU</span>
     <span class="site-logo-tag">docs</span>
   </a>
@@ -33,25 +33,25 @@
     
     
     
-    <a href="/guides/" class="header-nav-link">
+    <a href="/ursamu/guides/" class="header-nav-link">
       Guides
     </a>
     
     
     
-    <a href="/api/" class="header-nav-link">
+    <a href="/ursamu/api/" class="header-nav-link">
       API
     </a>
     
     
     
-    <a href="/plugins/" class="header-nav-link active">
+    <a href="/ursamu/plugins/" class="header-nav-link active">
       Plugins
     </a>
     
     
     
-    <a href="/development/" class="header-nav-link">
+    <a href="/ursamu/development/" class="header-nav-link">
       Development
     </a>
     
@@ -98,7 +98,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/about/" class="sidebar-link">
+      <a href="/ursamu/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -110,37 +110,49 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Getting Started</div>
 
-      <a href="/guides/installation/" class="sidebar-link">
+      <a href="/ursamu/guides/installation/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
         Installation
       </a>
-      <a href="/guides/user-guide/" class="sidebar-link">
+      <a href="/ursamu/guides/user-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Player Guide
       </a>
-      <a href="/guides/admin-guide/" class="sidebar-link">
+      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         Admin Guide
       </a>
-      <a href="/guides/customization/" class="sidebar-link">
+      <a href="/ursamu/guides/customization/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
         Customization
       </a>
-      <a href="/guides/scripting/" class="sidebar-link">
-        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
-        Scripting Guide
+      <a href="/ursamu/guides/softcoding/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M8 7h8M8 11h6"></path></svg>
+        Softcode (TinyMUX)
       </a>
-      <a href="/guides/first-script/" class="sidebar-link">
+      <a href="/ursamu/guides/attribute-scripts/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        Attribute Scripts
+      </a>
+      <a href="/ursamu/guides/scripting/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        Scripting (TypeScript)
+      </a>
+      <a href="/ursamu/guides/first-script/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         Your First Script
       </a>
-      <a href="/guides/sdk-cookbook/" class="sidebar-link">
+      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link">
+      <a href="/ursamu/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
+      </a>
+      <a href="/ursamu/mush_compatibility/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        MUSH Compatibility
       </a>
     </div>
 
@@ -150,7 +162,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Configuration</div>
 
-      <a href="/configuration/" class="sidebar-link">
+      <a href="/ursamu/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
         Overview
       </a>
@@ -162,11 +174,11 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">API Reference</div>
 
-      <a href="/api/" class="sidebar-link">
+      <a href="/ursamu/api/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
         Overview
       </a>
-      <a href="/api/core/" class="sidebar-link">
+      <a href="/ursamu/api/core/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
         Core API
       </a>
@@ -178,35 +190,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Plugins</div>
 
-      <a href="/plugins/" class="sidebar-link">
+      <a href="/ursamu/plugins/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
         Overview
       </a>
-      <a href="/plugins/basics/" class="sidebar-link">
+      <a href="/ursamu/plugins/basics/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
         Basics
       </a>
-      <a href="/plugins/first-plugin/" class="sidebar-link">
+      <a href="/ursamu/plugins/first-plugin/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         First Plugin
       </a>
-      <a href="/plugins/commands/" class="sidebar-link">
+      <a href="/ursamu/plugins/commands/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Commands
       </a>
-      <a href="/plugins/hooks/" class="sidebar-link">
+      <a href="/ursamu/plugins/hooks/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
         Hooks
       </a>
-      <a href="/plugins/database/" class="sidebar-link">
+      <a href="/ursamu/plugins/database/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
         Database
       </a>
-      <a href="/plugins/configuration/" class="sidebar-link">
+      <a href="/ursamu/plugins/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
         Configuration
       </a>
-      <a href="/plugins/dependencies/" class="sidebar-link">
+      <a href="/ursamu/plugins/dependencies/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
         Dependencies
       </a>
@@ -218,19 +230,19 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Development</div>
 
-      <a href="/development/" class="sidebar-link">
+      <a href="/ursamu/development/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         Overview
       </a>
-      <a href="/development/contributing/" class="sidebar-link">
+      <a href="/ursamu/development/contributing/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         Contributing
       </a>
-      <a href="/extending/" class="sidebar-link">
+      <a href="/ursamu/extending/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         Extending
       </a>
-      <a href="/child-games/" class="sidebar-link">
+      <a href="/ursamu/child-games/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
         Child Games
       </a>
@@ -259,7 +271,7 @@
       <!-- Breadcrumbs -->
       
       <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="/">Home</a>
+        <a href="/ursamu/">Home</a>
         <span class="breadcrumbs-sep">›</span>
         <span class="breadcrumbs-current">Official Plugins</span>
       </nav>
@@ -268,108 +280,192 @@
       <!-- Page content -->
       <article class="prose">
         <h1>Official Plugins</h1>
-<h2>UrsaMU’s official plugins live in the <a href="https://github.com/UrsaMU">UrsaMU GitHub organization</a>.<br>
-They are listed in <code>src/plugins/plugins.manifest.json</code> and installed automatically on first run via <code>ensurePlugins</code>.</h2>
-<h2>Auto-installation</h2>
-<p>On startup, the engine reads <code>plugins.manifest.json</code> and fetches any plugin whose <code>ref</code> differs from the installed copy. No manual install step is required.</p>
-<p>The install run is <strong>atomic across the whole manifest</strong>: if any plugin or transitive dep fails to clone, has an unsafe name/URL, or violates a <code>version</code> semver range from its requester, the entire run aborts and rolls back. Disk and <code>src/plugins/.registry.json</code> are left exactly as they were — previously installed plugins are not touched.</p>
-<h2>To disable auto-install for a specific plugin, remove its entry from the manifest.</h2>
-<h2>Plugin Registry</h2>
+<p>UrsaMU ships as a set of <strong>JSR packages</strong> under the<br>
+<a href="https://jsr.io/@ursamu"><code>@ursamu</code> scope</a>. The engine and its plugins<br>
+are published from the<br>
+<a href="https://github.com/UrsaMU/ursamu">UrsaMU monorepo</a> and installed by<br>
+adding them to a game project’s <code>deno.json</code>.</p>
+<p>Games created with the CLI already declare the default set (help,<br>
+channels, builder, bbs, mail, wiki, staff web, and the public site).<br>
+Add or pin more by editing <code>deno.json</code> <code>imports</code> and the plugin list<br>
+your game loads.</p>
+<hr>
+<h2>Installing a package</h2>
+<p>Add the package to your game’s imports (pinning a version is<br>
+recommended):</p>
+<pre class="language-json" tabindex="0"><code class="language-json">// deno.json
+{
+  "imports": {
+    "@ursamu/mush": "jsr:@ursamu/mush@1.0.40",
+    "@ursamu/wod20th": "jsr:@ursamu/wod20th@1.1.0"
+  }
+}
+</code></pre>
+<p>Then register the plugin in your game’s startup (<code>src/main.ts</code>).<br>
+Plugin packages export their registration from their entry point;<br>
+consult each package’s docs for the exact call.</p>
+<hr>
+<h2>Engine &amp; platform</h2>
+<p>These are the core packages every game builds on.</p>
 <table>
 <thead>
 <tr>
-<th>Plugin</th>
-<th>Repo</th>
-<th>Min Engine</th>
+<th>Package</th>
+<th>Version</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>channel</strong></td>
-<td><a href="https://github.com/UrsaMU/channel-plugin">UrsaMU/channel-plugin</a></td>
-<td><code>&gt;=1.9.27</code></td>
-<td>Channel system — alias dispatch, auto-join, <code>@chancreate</code>/<code>@chandestroy</code>/<code>@chanset</code>, message history</td>
+<td><a href="https://jsr.io/@ursamu/core"><code>@ursamu/core</code></a></td>
+<td>1.0.6</td>
+<td>Transports, database, and the plugin loader.</td>
 </tr>
 <tr>
-<td><strong>discord</strong></td>
-<td><a href="https://github.com/UrsaMU/discord-plugin">UrsaMU/discord-plugin</a></td>
-<td><code>&gt;=1.9.0</code></td>
-<td>Webhook-based Discord integration — channel bridging, presence, chargen events</td>
+<td><a href="https://jsr.io/@ursamu/mush"><code>@ursamu/mush</code></a></td>
+<td>1.0.40</td>
+<td>The engine — world objects, commands, TinyMUX-style softcode.</td>
 </tr>
 <tr>
-<td><strong>jobs</strong></td>
-<td><a href="https://github.com/UrsaMU/jobs-plugin">UrsaMU/jobs-plugin</a></td>
-<td><code>&gt;=1.9.0</code></td>
-<td>Jobs and request system — player requests, staff commands, REST API</td>
+<td><a href="https://jsr.io/@ursamu/cli"><code>@ursamu/cli</code></a></td>
+<td>0.1.6</td>
+<td><code>create</code> / <code>plugin</code> / <code>update</code> — scaffold and manage a game.</td>
 </tr>
 <tr>
-<td><strong>events</strong></td>
-<td><a href="https://github.com/UrsaMU/events-plugin">UrsaMU/events-plugin</a></td>
-<td><code>&gt;=1.9.2</code></td>
-<td>In-game event calendar with RSVP tracking and REST API</td>
+<td><a href="https://jsr.io/@ursamu/mushcode"><code>@ursamu/mushcode</code></a></td>
+<td>0.7.0</td>
+<td>Softcode parser, evaluator, linter, and printer.</td>
 </tr>
 <tr>
-<td><strong>bbs</strong></td>
-<td><a href="https://github.com/UrsaMU/bbs-plugin">UrsaMU/bbs-plugin</a></td>
-<td><code>&gt;=1.9.0</code></td>
-<td>Myrddin-style bulletin boards — threading, categories, sticky posts, Discord webhooks</td>
+<td><a href="https://jsr.io/@ursamu/site"><code>@ursamu/site</code></a></td>
+<td>0.1.96</td>
+<td>Public front-end shell — layout framing, design tokens, swappable skins, <code>/play</code>.</td>
 </tr>
 <tr>
-<td><strong>wiki</strong></td>
-<td><a href="https://github.com/UrsaMU/wiki-plugin">UrsaMU/wiki-plugin</a></td>
-<td><code>&gt;=1.9.0</code></td>
-<td>File-based markdown wiki — pages, search, history, backlinks</td>
-</tr>
-<tr>
-<td><strong>mail</strong></td>
-<td><a href="https://github.com/UrsaMU/mail-plugin">UrsaMU/mail-plugin</a></td>
-<td><code>&gt;=1.9.3</code></td>
-<td>In-game mail — drafts, reply/forward, folders, attachments, quota, REST API</td>
-</tr>
-<tr>
-<td><strong>builder</strong></td>
-<td><a href="https://github.com/UrsaMU/builder-plugin">UrsaMU/builder-plugin</a></td>
-<td><code>&gt;=1.9.5</code></td>
-<td>World-building commands — <code>@dig</code>, <code>@open</code>, <code>@link</code>, <code>@describe</code>, <code>@examine</code>, REST API</td>
-</tr>
-<tr>
-<td><strong>chargen</strong></td>
-<td>Bundled — <code>src/plugins/chargen/</code></td>
-<td><code>&gt;=1.8.0</code></td>
-<td>Character generation scaffolding — hooks into the connection flow to guide new players through stat selection</td>
-</tr>
-<tr>
-<td><strong>help</strong></td>
-<td><a href="https://github.com/UrsaMU/help-plugin">UrsaMU/help-plugin</a></td>
-<td><code>&gt;=1.9.0</code></td>
-<td>API-first help system — file + DB + command providers, <code>+help/set</code>/<code>+help/del</code>, REST API, per-plugin help dirs</td>
+<td><a href="https://jsr.io/@ursamu/web"><code>@ursamu/web</code></a></td>
+<td>0.2.82</td>
+<td>Staff web console at <code>/admin/</code> — wiki, database, and more.</td>
 </tr>
 </tbody>
 </table>
+<h2>Services</h2>
+<p>Features that add capabilities to any game.</p>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Version</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://jsr.io/@ursamu/help"><code>@ursamu/help</code></a></td>
+<td>1.3.1</td>
+<td>API-first <code>+help</code> — file, DB, and command providers; per-plugin help dirs.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/channels"><code>@ursamu/channels</code></a></td>
+<td>1.2.4</td>
+<td>Channel system — alias dispatch, auto-join, web hub.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/builder"><code>@ursamu/builder</code></a></td>
+<td>1.3.10</td>
+<td>World-building — <code>@dig</code>, <code>@open</code>, <code>@link</code>, <code>@describe</code>, <code>@examine</code>.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/bbs"><code>@ursamu/bbs</code></a></td>
+<td>1.2.1</td>
+<td>Bulletin boards — threading, categories, sticky posts, Discord webhooks.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/mail"><code>@ursamu/mail</code></a></td>
+<td>2.9.5</td>
+<td>In-game mail — drafts, folders, attachments, quota, expiry.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/jobs"><code>@ursamu/jobs</code></a></td>
+<td>1.2.0</td>
+<td>Jobs and request system — player requests, staff commands.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/discord"><code>@ursamu/discord</code></a></td>
+<td>1.0.5</td>
+<td>Webhook-based Discord integration — channel bridging, presence.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/wiki"><code>@ursamu/wiki</code></a></td>
+<td>0.2.9</td>
+<td>File-based markdown wiki — pages, search, history, backlinks.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/combat"><code>@ursamu/combat</code></a></td>
+<td>0.8.1</td>
+<td>System-agnostic combat engine — turn helpers, adapter kit, walker, JSON AI.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/lang-plugin"><code>@ursamu/lang-plugin</code></a></td>
+<td>3.1.1</td>
+<td>Per-listener language garbling with configurable phoneme-based fake speech.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/map-plugin"><code>@ursamu/map-plugin</code></a></td>
+<td>3.2.1</td>
+<td>Procedural sector maps — vehicles, fog, overlays, realms, builder tools.</td>
+</tr>
+</tbody>
+</table>
+<h2>Game systems</h2>
+<p>TTRPG systems and genre plugins.</p>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Version</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://jsr.io/@ursamu/wod20th"><code>@ursamu/wod20th</code></a></td>
+<td>1.1.0</td>
+<td>World of Darkness 20th — VtM, WtA, Mortal, Kinfolk templates.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/cinematic-plugin"><code>@ursamu/cinematic-plugin</code></a></td>
+<td>1.0.0</td>
+<td>Cinematic Unisystem — chargen, D10 rolls, Drama Points, gear.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/cofd-plugin"><code>@ursamu/cofd-plugin</code></a></td>
+<td>1.4.1</td>
+<td>Chronicles of Darkness 2e — sheets, chargen, d10 dice, CtL overlay.</td>
+</tr>
+<tr>
+<td><a href="https://jsr.io/@ursamu/sprawl-plugin"><code>@ursamu/sprawl-plugin</code></a></td>
+<td>1.0.4</td>
+<td>Sprawl Goons 2d6 — chargen, combat, net, chrome, city.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Monorepo-only (not on JSR yet):</strong> <code>ai-gm</code>, <code>events</code>, <code>cyberpunk</code>,<br>
+<code>dnd</code>, <code>scene</code>, <code>vendor</code>, <code>sw5e</code>. Use from a checkout.</p>
+<p><strong>Source under <code>unfinished/packages/</code>:</strong> <code>cofd</code>, <code>sprawl</code>, <code>mekton</code>,<br>
+<code>utopia</code>, <code>cities</code>, <code>theme-studio</code>. Older JSR builds of<br>
+<code>cofd-plugin</code> / <code>sprawl-plugin</code> remain installable; active<br>
+development is unfinished.</p>
+</blockquote>
 <hr>
-<h2>Adding a Plugin</h2>
-<p>Any GitHub repo can be added to the manifest:</p>
-<pre class="language-json" tabindex="0"><code class="language-json">{
-  "plugins": [
-    {
-      "name": "my-plugin",
-      "url": "https://github.com/example/my-plugin",
-      "ref": "v1.0.0",
-      "description": "What this plugin does.",
-      "ursamu": "&gt;=1.9.27",
-      "deps": [
-        { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" }
-      ]
-    }
-  ]
-}
-</code></pre>
-<p>Each <code>deps[]</code> entry may include an optional <code>version</code> semver range (e.g. <code>"^1.2.0"</code>, <code>"&gt;=1.0.0 &lt;2.0.0"</code>) — the installer cross-checks it against the dep’s own manifest <code>version</code> and aborts the run on mismatch. Omit <code>version</code> for backwards-compatible behavior.</p>
-<p>Or use the CLI:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/plugin install https://github.com/example/my-plugin
-</code></pre>
-<p>See <a href="/plugins/first-plugin/">Building a Plugin</a> to publish your own.</p>
+<h2>Adding your own plugin</h2>
+<p>Publish a plugin as an <code>@ursamu/*</code> package from the monorepo, or<br>
+distribute it as its own JSR scope and document its registration<br>
+call. See <a href="/ursamu/plugins/first-plugin/">Building a Plugin</a> and the<br>
+<a href="/ursamu/plugins/basics/">plugin authoring guide</a> for the full contract.</p>
+<p>For the git-based community plugin manager<br>
+(<code>ursamu plugin install</code>), see<br>
+<a href="/ursamu/plugins/#installing-community-plugins">Installing Community Plugins</a>.</p>
 
       </article>
 
@@ -550,6 +646,10 @@ They are listed in <code>src/plugins/plugins.manifest.json</code> and installed 
       
         
           
+        
+      
+        
+          
           
         
       
@@ -557,7 +657,7 @@ They are listed in <code>src/plugins/plugins.manifest.json</code> and installed 
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/plugins/hooks/" class="page-nav-btn prev">
+          <a href="/ursamu/plugins/hooks/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
             <span class="page-nav-title"></span>
           </a>
@@ -576,9 +676,9 @@ They are listed in <code>src/plugins/plugins.manifest.json</code> and installed 
         &nbsp;—&nbsp;MIT License • © 2025
       </div>
       <div class="footer-links">
-        <a href="/guides/installation/">Installation</a>
-        <a href="/api/">API</a>
-        <a href="/plugins/">Plugins</a>
+        <a href="/ursamu/guides/installation/">Installation</a>
+        <a href="/ursamu/api/">API</a>
+        <a href="/ursamu/plugins/">Plugins</a>
         <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
       </div>
     </footer>
