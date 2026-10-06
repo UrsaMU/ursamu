@@ -1,0 +1,21 @@
+{
+  "key": "sense",
+  "label": "Power sensing and masking (rules supplement)",
+  "steps": [
+    { "cmd": "+chargen/start" },
+    { "cmd": "+chargen/type hero" },
+    { "cmd": "+quality sorcery=1", "note": "Sorcery 1 (5 pts)" },
+    { "cmd": "+quality mask=1", "note": "Mask 1 (2 pts)" },
+    { "cmd": "+quality vampire", "note": "vampire template autofills" },
+    { "cmd": "+mask", "note": "state before activation" },
+    { "cmd": "+mask/on" },
+    { "cmd": "+mask/master", "note": "needs Master Vampire — rejected" },
+    { "cmd": "+mask/set=an ordinary young vampire" },
+    { "cmd": "+sense Riley", "note": "self contest, mask active" },
+    { "cmd": "+mask/off" },
+    { "cmd": "+sense Riley", "note": "unmasked — signatures show" },
+    { "cmd": "+sense", "note": "scene ambience" },
+    { "cmd": "+sense undead", "note": "needs Necromancer — rejected" },
+    { "cmd": "+sheet", "note": "template bonuses on final sheet" }
+  ]
+}

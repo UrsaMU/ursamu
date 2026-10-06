@@ -1,0 +1,114 @@
+{
+  "key": "staff",
+  "label": "Submit, approve/reject, XP, damage bookkeeping",
+  "steps": [
+    {
+      "cmd": "+chargen/approve Riley",
+      "note": "nothing submitted yet"
+    },
+    {
+      "cmd": "+cg/concept=Watchers-cache courier"
+    },
+    {
+      "cmd": "+cg/tier=mortal"
+    },
+    {
+      "cmd": "+cg/template=Mortal"
+    },
+    {
+      "cmd": "+cg/next"
+    },
+    {
+      "cmd": "+cg/attr Strength=2"
+    },
+    {
+      "cmd": "+cg/attr Dexterity=3"
+    },
+    {
+      "cmd": "+cg/attr Constitution=2"
+    },
+    {
+      "cmd": "+cg/attr Intelligence=4"
+    },
+    {
+      "cmd": "+cg/attr Perception=3"
+    },
+    {
+      "cmd": "+cg/attr Willpower=1"
+    },
+    {
+      "cmd": "+cg/next"
+    },
+    {
+      "cmd": "+cg/skill knowledge=3"
+    },
+    {
+      "cmd": "+cg/skill notice=2"
+    },
+    {
+      "cmd": "+cg/skill computers=2"
+    },
+    {
+      "cmd": "+cg/next"
+    },
+    {
+      "cmd": "+cg/next"
+    },
+    {
+      "cmd": "+cg/next"
+    },
+    {
+      "cmd": "+cg/next"
+    },
+    {
+      "cmd": "+cg/next"
+    },
+    {
+      "cmd": "+cg/next"
+    },
+    {
+      "cmd": "+cg/next"
+    },
+    {
+      "cmd": "+cg/background=Runs the occult bookshop on 5th. Knows every Watcher contact on the west coast."
+    },
+    {
+      "cmd": "+cg/next"
+    },
+    {
+      "cmd": "+cg/submit",
+      "note": "submit for approval"
+    },
+    {
+      "cmd": "+chargen/approve Riley",
+      "note": "staff approves"
+    },
+    {
+      "cmd": "+chargen/approve Riley",
+      "note": "already approved \u2014 locked"
+    },
+    {
+      "cmd": "+chargen/reject Riley=nope",
+      "note": "locked \u2014 cannot reject"
+    },
+    {
+      "cmd": "+xp Riley=5",
+      "note": "grant XP"
+    },
+    {
+      "cmd": "+xp Riley=-2",
+      "note": "revoke XP"
+    },
+    {
+      "cmd": "+xp Ghost=3",
+      "note": "unknown player"
+    },
+    {
+      "cmd": "+damage 15",
+      "note": "approved chars can still take damage"
+    },
+    {
+      "cmd": "+sheet"
+    }
+  ]
+}

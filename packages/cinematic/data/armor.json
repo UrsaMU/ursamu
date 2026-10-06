@@ -1,0 +1,8 @@
+[
+  { "slug": "leather-jacket", "name": "Leather or Tweed Jacket", "protection": { "bash": 2, "slash": 2, "bullet": 2 }, "coverage": "Torso" },
+  { "slug": "leather-armor", "name": "Leather Armor", "protection": { "bash": 3, "slash": 3, "bullet": 3 }, "coverage": "Torso" },
+  { "slug": "chain-mail", "name": "Chain Mail", "protection": { "bash": 8, "slash": 8, "bullet": 4 }, "coverage": "Torso" },
+  { "slug": "plate-armor", "name": "Plate Armor", "protection": { "bash": 12, "slash": 12, "bullet": 6 }, "coverage": "Torso, limbs" },
+  { "slug": "bulletproof-vest", "name": "Bulletproof Vest", "protection": { "bash": 10, "slash": 5, "bullet": 10 }, "coverage": "Torso" },
+  { "slug": "combat-armor", "name": "Combat Armor", "protection": { "bash": 12, "slash": 12, "bullet": 12 }, "coverage": "Torso, limbs" }
+]

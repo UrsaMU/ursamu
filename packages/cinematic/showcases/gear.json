@@ -1,0 +1,18 @@
+{
+  "key": "gear",
+  "label": "Weapons, armor, &key=value minting",
+  "steps": [
+    { "cmd": "+gear", "note": "weapons catalog" },
+    { "cmd": "+gear/armor", "note": "armor catalog" },
+    { "cmd": "+gear/info axe" },
+    { "cmd": "+gear/info quarterstaff" },
+    { "cmd": "+gear/info chain-mail" },
+    { "cmd": "+gear/info phaser", "note": "unknown — not found" },
+    { "cmd": "+gear/give Riley=sword", "note": "mints &dmg/&type/&skill/&range/&hands" },
+    { "cmd": "+gear/give Riley=chain-mail", "note": "mints &bash/&slash/&bullet/&coverage" },
+    { "cmd": "+gear/give Riley=phaser", "note": "unknown — rejected" },
+    { "cmd": "+gear/wield sword" },
+    { "cmd": "+gear/wear chain-mail" },
+    { "cmd": "+gear/wield bow", "note": "unknown — rejected" }
+  ]
+}

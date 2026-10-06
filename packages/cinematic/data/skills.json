@@ -1,0 +1,20 @@
+[
+  { "slug": "acrobatics", "name": "Acrobatics", "attr": "dexterity" },
+  { "slug": "art", "name": "Art", "attr": "intelligence" },
+  { "slug": "computers", "name": "Computers", "attr": "intelligence" },
+  { "slug": "crime", "name": "Crime", "attr": "dexterity" },
+  { "slug": "doctor", "name": "Doctor", "attr": "intelligence" },
+  { "slug": "driving", "name": "Driving", "attr": "dexterity" },
+  { "slug": "getting-medieval", "name": "Getting Medieval", "attr": "dexterity" },
+  { "slug": "gun-fu", "name": "Gun Fu", "attr": "dexterity" },
+  { "slug": "influence", "name": "Influence", "attr": "intelligence" },
+  { "slug": "knowledge", "name": "Knowledge", "attr": "intelligence" },
+  { "slug": "kung-fu", "name": "Kung Fu", "attr": "dexterity" },
+  { "slug": "languages", "name": "Languages", "attr": "intelligence" },
+  { "slug": "mr-fix-it", "name": "Mr. Fix-It", "attr": "perception" },
+  { "slug": "notice", "name": "Notice", "attr": "perception" },
+  { "slug": "occultism", "name": "Occultism", "attr": "intelligence" },
+  { "slug": "science", "name": "Science", "attr": "intelligence" },
+  { "slug": "sports", "name": "Sports", "attr": "dexterity" },
+  { "slug": "wild-card", "name": "Wild Card", "attr": "intelligence" }
+]
