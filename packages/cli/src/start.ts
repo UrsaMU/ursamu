@@ -13,9 +13,9 @@ import { join } from "@std/path";
 
 const sleep = (ms: number) =>
   new Promise<void>((r) => setTimeout(r, ms));
-import { checkAndCreateSuperuser } from "@ursamu/mush";
-import { initConfig } from "@ursamu/core";
-import { DBO } from "@ursamu/core";
+import { checkAndCreateSuperuser } from "jsr:@ursamu/mush@^1.0.40";
+import { initConfig } from "jsr:@ursamu/core@^1.0.6";
+import { DBO } from "jsr:@ursamu/core@^1.0.6";
 
 /**
  * Orchestrator script to start UrsaMU
