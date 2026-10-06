@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Testing | UrsaMU Documentation</title>
-  <meta name="description" content="How to run the UrsaMU test suite and write tests for commands, scripts, and plugins.">
+  <title>Attribute Scripts | UrsaMU Documentation</title>
+  <meta name="description" content="Store TypeScript/JavaScript on object attributes and run them with @trigger, u.trigger, and u.eval.">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/development/testing/">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/attribute-scripts/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -33,7 +33,7 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link">
+    <a href="/ursamu/guides/" class="header-nav-link active">
       Guides
     </a>
     
@@ -51,7 +51,7 @@
     
     
     
-    <a href="/ursamu/development/" class="header-nav-link active">
+    <a href="/ursamu/development/" class="header-nav-link">
       Development
     </a>
     
@@ -130,7 +130,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M8 7h8M8 11h6"></path></svg>
         Softcode (TinyMUX)
       </a>
-      <a href="/ursamu/guides/attribute-scripts/" class="sidebar-link">
+      <a href="/ursamu/guides/attribute-scripts/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
         Attribute Scripts
       </a>
@@ -273,267 +273,293 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/ursamu/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Testing</span>
+        <span class="breadcrumbs-current">Attribute Scripts</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Testing</h1>
-<h2>UrsaMU uses <a href="https://docs.deno.com/runtime/fundamentals/testing/">Deno’s built-in test runner</a>.<br>
-The v2.6.0 suite is <strong>1464 passing, 0 failing</strong> across 480 lint-clean files —<br>
-covering authentication, command parsing, sandbox scripting, softcode evaluation,<br>
-plugin lifecycle, WebSocket rate limiting, scene export, format handlers,<br>
-plugin install atomicity, and security regression tests.</h2>
-<h2>Running Tests</h2>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Full test suite
-deno task test
-
-# With LCOV coverage report
-deno task test:coverage
-
-# Single file
-deno test --allow-all --unstable-kv --no-check tests/auth.test.ts
-
-# Filter by test name
-deno test --allow-all --unstable-kv --no-check --filter "auth login"
-</code></pre>
-<blockquote>
-<p>Always use <code>--no-check</code> — the suite is large and type-checking adds significant overhead<br>
-with no benefit for test runs.</p>
-</blockquote>
-<h3>Running package tests</h3>
-<p>The monorepo packages each have their own test directories. Run them directly<br>
-to isolate failures to a specific layer:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># core infrastructure tests (includes 12 security tests)
-deno test packages/core/tests/ --allow-all --unstable-kv --no-check
-
-# MUSH engine tests
-deno test packages/mush/tests/ --allow-all --unstable-kv --no-check
-
-# both together
-deno test packages/core/tests/ packages/mush/tests/ --allow-all --unstable-kv --no-check
-</code></pre>
-<h3>Checking package boundaries</h3>
-<p>The <code>tools/check-boundaries.ts</code> script verifies that <code>@ursamu/core</code> does not<br>
-import from <code>@ursamu/mush</code> (enforcing the one-way dependency):</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A tools/check-boundaries.ts
-</code></pre>
-<p>Run this before committing changes that touch <code>packages/</code>.</p>
+        <h1>Attribute Scripts</h1>
+<p><strong>Attribute scripts</strong> are TypeScript/JavaScript stored on<br>
+in-game objects as attributes, then fired with <code>@trigger</code>,<br>
+hooks, or <code>u.trigger</code> / <code>u.eval</code>. Same sandbox SDK as<br>
+<code>system/scripts/</code> — no server restart to change behavior.</p>
+<p>This is <strong>not</strong> TinyMUX softcode. For MUX expressions<br>
+(<code>[add(1,2)]</code>, <code>%N</code>, <code>$greet *</code>), see the<br>
+<a href="/ursamu/guides/softcoding/">Softcode Guide</a>.</p>
+<p>For file-based commands, see the<br>
+<a href="/ursamu/guides/scripting/">Scripting Guide</a>.</p>
 <hr>
-<h2>Test Structure</h2>
-<pre class="language-none" tabindex="0"><code class="language-none">tests/
-├── auth.test.ts               # JWT auth, login, rate limiting
-├── gameclock.test.ts          # In-game calendar &amp; time
-├── plugin_deps.test.ts        # Plugin loading &amp; manifest
-├── queue_scene_discord.test.ts# Async queue, scenes, Discord hooks
-├── scripts_attrs.test.ts      # @set, @examine, @describe, @flags, @name
-├── scripts_comms.test.ts      # say, pose, who, score
-├── scripts_identity.test.ts   # connect, create, quit
-├── scripts_interaction.test.ts# drop, give, get, trigger
-├── scripts_world.test.ts      # look, dig, go (exit matching)
-├── websocket_e2e.test.ts      # Lifecycle, rate limit, broadcast, disconnect
-└── …
-</code></pre>
-<hr>
-<h2>Required Test Options</h2>
-<p>When a test imports anything from the service layer (e.g. <code>cmdParser</code>, <code>DBO</code>, <code>sandboxService</code>),<br>
-use these options to suppress Deno’s resource-leak and pending-op warnings:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const OPTS = {
-  sanitizeResources: false,
-  sanitizeOps: false,
-};
-
-Deno.test({ name: "my test", ...OPTS, fn: async () =&gt; { … } });
-</code></pre>
-<p><code>cmdParser</code> triggers async file reads at init and never fully closes them, which would<br>
-otherwise cause every test that imports it to fail sanitization.</p>
-<hr>
-<h2>Testing System Scripts</h2>
-<p>System scripts (<code>system/scripts/*.ts</code>) are TypeScript files that default-export an<br>
-async function <code>(u: IUrsamuSDK) =&gt; void</code>. They can be tested directly by importing<br>
-them and calling them with a mock SDK object.</p>
-<h3>Basic pattern</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import script from "../system/scripts/say.ts";
-
-Deno.test({ name: "say", ...OPTS, fn: async () =&gt; {
-  let sent = "";
-  let broadcast = "";
-
-  const u = {
-    me: { id: "p1", name: "Alice", flags: new Set(["connected"]), state: {}, contents: [] },
-    cmd: { args: ["Hello world"], switches: [] },
-    send: (msg: string) =&gt; { sent += msg; },
-    emit: (msg: string) =&gt; { broadcast += msg; },
-    // … add other stubs as needed
-  } as any;
-
-  await script(u);
-
-  if (!sent.includes("You say")) throw new Error("Missing 'You say' echo");
-  if (!broadcast.includes("Alice says")) throw new Error("Missing broadcast");
-}});
-</code></pre>
-<h3>wrapScript — running scripts as legacy blocks</h3>
-<p>When a script needs access to the full Sandbox (e.g. scripts that call <code>u.db.*</code><br>
-or <code>u.ui.layout()</code>), use <code>wrapScript</code> to strip the <code>import</code>/<code>export</code> declarations<br>
-and run the script as a legacy block inside the Sandbox service:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
-
-function wrapScript(content: string): string {
-  return content
-    .replace(/^import\s.*?;?\s*$/gm, "")
-    .replace(/^export\s+default\s+/m, "const _main = ")
-    .replace(/^export\s+const\s+/gm, "const ")
-    + "\nawait _main(u);";
+<h2>What is an attribute script?</h2>
+<p>Every object has a <code>data.attributes</code> array. Each entry:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface IAttribute {
+  name: string;    // e.g. "ONENTER"
+  value: string;   // TS/JS script or plain text
+  setter: string;  // dbref of whoever set it
+  type?: string;
+  hidden?: boolean;
 }
-
-const raw = await Deno.readTextFile("system/scripts/look.ts");
-const result = await sandboxService.runScript(wrapScript(raw), {
-  id: "actor1",
-  me: { id: "actor1", name: "Bob", flags: new Set(["connected"]), state: {}, contents: [] },
-  here: { id: "room1", name: "Lobby", flags: new Set(["room"]), state: {}, contents: [] },
-  location: "room1",
-  state: {},
-  socketId: "sock1",
-});
 </code></pre>
-<h3>Scripts that emit <code>u.ui.layout()</code></h3>
-<p>Scripts like <code>who</code> and <code>score</code> call <code>u.ui.layout()</code> which posts a <code>type: "result"</code> message<br>
-that resolves the sandbox early. Use an extended stub that captures both <code>_sent</code> and<br>
-<code>_broadcast</code> and stubs <code>u.ui.layout</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const extra = `
-  const _sent = [];
-  const _broadcast = [];
-  u.send = (msg) =&gt; { _sent.push(msg); };
-  u.emit = (msg) =&gt; { _broadcast.push(msg); };
-  u.ui = { layout: (data) =&gt; { postMessage({ type: "result", data }); } };
-`;
-</code></pre>
+<p>When something fires the attribute (<code>@trigger</code>, a hook, or<br>
+<code>u.trigger()</code>), UrsaMU runs the value in a Web Worker with<br>
+a fresh <code>u</code> object — unless the attribute is flagged or<br>
+detected as <strong>softcode</strong>, in which case the MUX evaluator<br>
+runs instead.</p>
+<p><strong>Why use attribute scripts instead of a system file?</strong></p>
+<ul>
+<li>Changes apply immediately — no restart, no redeploy.</li>
+<li>Builders with edit permission can customize objects they<br>
+own.</li>
+<li>Behavior stays on the object (copy/move keeps it).</li>
+<li>Inheritance: missing attrs walk <code>data.parent</code>.</li>
+</ul>
 <hr>
-<h2>Testing Commands Registered with addCmd()</h2>
-<p>For commands registered via <code>addCmd()</code>, import the command module directly,<br>
-call the <code>exec</code> function, and inspect the mock SDK:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd, cmds } from "../src/services/commands/cmdParser.ts";
+<h2>Setting attributes in-game</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;&lt;ATTR-NAME&gt; &lt;object&gt;=&lt;value&gt;
+</code></pre>
+<p><code>&lt;object&gt;</code>: <code>me</code>, <code>here</code>, name, or <code>#dbref</code>. Names are<br>
+case-insensitive on lookup.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&gt; &amp;ONENTER here=u.send("The door creaks as you enter.");
+Game&gt; Lobby's attribute ONENTER set.
 
-Deno.test({ name: "greet command", ...OPTS, fn: async () =&gt; {
-  // Register the command
-  addCmd({
-    name: "greet",
-    pattern: /^greet\s+(.+)/i,
-    exec: async (u) =&gt; {
-      u.send(`You wave at ${u.cmd.args[0]}.`);
+&gt; &amp;SHORT-DESC me=A tall woman in a grey cloak.
+Game&gt; Alice's attribute SHORT-DESC set.
+</code></pre>
+<p>Clear by omitting the value:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&gt; &amp;ONENTER here=
+Game&gt; Lobby's attribute ONENTER removed.
+</code></pre>
+<p>You must be able to <strong>edit</strong> the target (owner, or<br>
+<code>admin</code> / <code>wizard</code> / <code>superuser</code>).</p>
+<h3><code>@set</code> attribute form</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">@set &lt;object&gt;/&lt;ATTR&gt;=&lt;value&gt;
+@set &lt;object&gt;/&lt;ATTR&gt;=
+</code></pre>
+<p>Equivalent to <code>&amp;ATTR obj=value</code> for data storage.<br>
+<code>@set obj=&lt;FLAG&gt;</code> (no <code>/</code>) sets a <strong>flag</strong>, not an<br>
+attribute.</p>
+<hr>
+<h2>Setting attributes from scripts</h2>
+<p>Spread existing data so you do not wipe sibling fields:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
+  const me = u.me;
+  const existing = (me.state.attributes || []) as Array&lt;{
+    name: string; value: string; setter: string;
+  }&gt;;
+  const filtered = existing.filter(
+    (a) =&gt; a.name.toLowerCase() !== "onenter",
+  );
+
+  await u.db.modify(me.id, "$set", {
+    data: {
+      ...me.state,
+      attributes: [
+        ...filtered,
+        {
+          name: "ONENTER",
+          value: `u.send("Welcome back!");`,
+          setter: "#" + me.id,
+        },
+      ],
     },
   });
-
-  let output = "";
-  const u = {
-    me: { id: "p1", name: "Alice", flags: new Set(["connected"]), state: {}, contents: [] },
-    cmd: { args: ["Bob"], switches: [], original: "greet Bob" },
-    send: (msg: string) =&gt; { output += msg; },
-    emit: () =&gt; {},
-  } as any;
-
-  const cmd = cmds.find(c =&gt; c.name === "greet")!;
-  await cmd.exec(u);
-
-  if (!output.includes("wave at Bob")) throw new Error(output);
-}});
+  u.send("ONENTER set on yourself.");
+};
+</code></pre>
+<p>Prefer <code>u.attr.get()</code> for reads (inheritance + case fold).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const bio = await u.attr.get(u.me.id, "FINGER-INFO");
 </code></pre>
 <hr>
-<h2>Testing Plugins</h2>
-<p>Test a plugin’s <code>init()</code> and <code>remove()</code> in isolation by calling them directly.<br>
-Use a shared DB prefix that won’t collide with other tests.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import myPlugin from "../src/plugins/my-feature/index.ts";
-import { DBO } from "../src/services/Database/index.ts";
-
-const OPTS = { sanitizeResources: false, sanitizeOps: false };
-const db = new DBO&lt;{ title: string }&gt;("test.my-feature");
-
-Deno.test({ name: "my-feature plugin", ...OPTS, fn: async (t) =&gt; {
-  await myPlugin.init();
-
-  await t.step("creates a record", async () =&gt; {
-    await db.create({ title: "hello" });
-    const result = await db.queryOne({ title: "hello" });
-    if (!result || result.title !== "hello") throw new Error("Record not found");
-  });
-
-  // Always clean up
-  await myPlugin.remove?.();
-  await db.deleteAll({});
-}});
+<h2>Running attributes</h2>
+<h3><code>u.trigger(id, attr, args?)</code></h3>
+<p>Runs the attribute as a script. The <strong>object</strong> is <code>u.me</code><br>
+in the child run (not the caller). Args → <code>u.cmd.args</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.trigger(chestId, "USE", [u.me.id]);
+</code></pre>
+<h3><code>u.eval(id, attr, args?)</code></h3>
+<p>Like trigger, but returns captured <code>u.send</code> output as a<br>
+string. Missing attr → <code>""</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const formula = await u.eval(u.me.id, "SCORE-FORMULA", ["str"]);
+u.send(`Your STR score: ${formula}`);
+</code></pre>
+<h3><code>@trigger &lt;object&gt;/&lt;attr&gt;[=&lt;args&gt;]</code></h3>
+<pre class="language-none" tabindex="0"><code class="language-none">&gt; @trigger chest/USE
+&gt; @trigger here/ONENTER=Alice
+</code></pre>
+<h3>Automatic hooks</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Fired on</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ACONNECT</code></td>
+<td>player, then master room</td>
+<td>connect</td>
+</tr>
+<tr>
+<td><code>ADISCONNECT</code></td>
+<td>player, then master room</td>
+<td>disconnect</td>
+</tr>
+</tbody>
+</table>
+<p>Script runs with the connecting player as <code>u.me</code>.</p>
+<hr>
+<h2>Common attribute names</h2>
+<p>Conventions only (except <code>ACONNECT</code> / <code>ADISCONNECT</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Set on</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ACONNECT</code></td>
+<td>player, master room</td>
+<td>on connect</td>
+</tr>
+<tr>
+<td><code>ADISCONNECT</code></td>
+<td>player, master room</td>
+<td>on disconnect</td>
+</tr>
+<tr>
+<td><code>ONENTER</code> / <code>ONEXIT</code></td>
+<td>room</td>
+<td>enter/leave (manual trigger)</td>
+</tr>
+<tr>
+<td><code>USE</code> / <code>OPEN</code> / <code>CLOSE</code></td>
+<td>thing</td>
+<td>activation (manual)</td>
+</tr>
+<tr>
+<td><code>DROP</code> / <code>GET</code></td>
+<td>thing</td>
+<td>inventory events (manual)</td>
+</tr>
+<tr>
+<td><code>SHORT-DESC</code></td>
+<td>player, thing</td>
+<td>one-line desc</td>
+</tr>
+<tr>
+<td><code>FINGER-INFO</code></td>
+<td>player</td>
+<td>+finger bio</td>
+</tr>
+<tr>
+<td><code>ODESC</code></td>
+<td>thing</td>
+<td>others see on examine</td>
+</tr>
+<tr>
+<td><code>SCRIPT</code></td>
+<td>any</td>
+<td>generic command slot</td>
+</tr>
+</tbody>
+</table>
+<p><code>ONENTER</code>, <code>USE</code>, etc. are <strong>not</strong> auto-fired by core<br>
+unless a plugin or script calls <code>u.trigger</code>.</p>
+<hr>
+<h2>Script formats inside attributes</h2>
+<h3>Module (recommended)</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
+  u.send("Hello from an attribute!");
+};
+</code></pre>
+<h3>Legacy block</h3>
+<p>No <code>export</code> — executed with <code>u</code> in scope:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.send("Hello from a legacy block!");
+</code></pre>
+<h3>Context when triggered</h3>
+<ul>
+<li><code>u.me</code> — object holding the attribute</li>
+<li><code>u.here</code> — that object’s room</li>
+<li><code>u.cmd.name</code> — attribute name (lowercase)</li>
+<li><code>u.cmd.args</code> — args from <code>@trigger</code> / <code>u.trigger</code></li>
+</ul>
+<hr>
+<h2>Practical examples</h2>
+<h3>Room greet (call from a move hook)</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER The Tavern=...
+export default async (u) =&gt; {
+  const actorId = u.cmd.args[0];
+  const actor = actorId
+    ? (await u.db.search(actorId))[0]
+    : null;
+  const name = actor
+    ? String(actor.state.moniker || actor.state.name || "Someone")
+    : "Someone";
+  u.here.broadcast(
+    `${name} pushes open the door and steps inside.`,
+  );
+  u.send(
+    "The warmth of the fire and the smell of roasting meat greet you.",
+  );
+};
+</code></pre>
+<h3>Object USE</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
+  u.here.broadcast(
+    "The lever grinds against stone with a horrible screech.",
+  );
+  await u.teleport("secret-door-id", "open-room-id");
+  u.send("You hear a door grinding open somewhere nearby.");
+};
+</code></pre>
+<h3>ACONNECT mail ping</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
+  const unread = (
+    await u.mail.read({ to: { $in: [`#${u.me.id}`] } })
+  ).filter((m) =&gt; !m.data?.read).length;
+  if (unread &gt; 0) {
+    u.send(
+      `You have ${unread} unread message${unread === 1 ? "" : "s"}.`,
+    );
+  }
+};
+</code></pre>
+<h3>Computed field via <code>u.eval</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;SCORE-FORMULA me=...
+export default (u) =&gt; {
+  const str = Number(u.me.state.str) || 0;
+  const bonus = Math.floor((str - 10) / 2);
+  u.send(`${str} (${bonus &gt;= 0 ? "+" : ""}${bonus})`);
+};
+</code></pre>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const strDisplay = await u.eval(u.me.id, "SCORE-FORMULA");
+u.send(`STR: ${strDisplay}`);
+</code></pre>
+<h3>Plain data attributes</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const price = await u.attr.get(u.target!.id, "PRICE") || "0";
+const uses = await u.attr.get(u.target!.id, "USES") || "1";
+u.send(`Price: ${price} credits (${uses} uses left)`);
 </code></pre>
 <hr>
-<h2>Database IDs</h2>
-<p>Prefix DB IDs in tests to avoid collisions between test files that run in parallel:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Good — unique prefix per test file
-const actor = { id: "sa_actor1", … };  // "sa_" = scripts_attrs
-const room   = { id: "sa_room1",  … };
-
-// Bad — generic IDs collide across test files
-const actor = { id: "actor1", … };
+<h2>Softcode on the same object</h2>
+<p>You can mix TS attributes and softcode attributes. Mark<br>
+MUX code explicitly:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;GREET/softcode me=[name(%#)] greets you!
 </code></pre>
-<p>Close the DB in the last test of the file:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { DBO as _DBO } from "../src/services/Database/index.ts";
-
-// Last test in the file:
-Deno.test({ name: "cleanup", ...OPTS, fn: async () =&gt; {
-  await _DBO.close();
-}});
-</code></pre>
+<p>Details: <a href="/ursamu/guides/softcoding/">Softcode Guide</a>.</p>
 <hr>
-<h2>Stubbing the Sandbox</h2>
-<p>Scripts that reference in-game objects (exits, inventory, rooms) need the sandbox<br>
-stubs set up with inline JavaScript object literals — <strong>not <code>JSON.stringify</code></strong>, which<br>
-breaks <code>Set</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const jsExit = `{ id: "x1", name: "North", flags: new Set(["exit"]), state: {}, contents: [] }`;
-
-// Counter must be defined INSIDE the extra string so it's scoped to the worker:
-const extra = `
-  let _callCount = 0;
-  u.db = {
-    ...u.db,
-    search: async () =&gt; ++_callCount === 1 ? [${jsExit}] : [],
-  };
-`;
-</code></pre>
-<hr>
-<h2>Coverage</h2>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task test:coverage
-</code></pre>
-<p>This runs the full suite, then outputs:</p>
-<ol>
-<li>An LCOV file at <code>coverage/lcov.info</code> — compatible with most CI coverage dashboards</li>
-<li>A summary table in the terminal</li>
-</ol>
-<p>To view HTML coverage (requires <code>genhtml</code> from <code>lcov</code>):</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">genhtml coverage/lcov.info -o coverage/html
-open coverage/html/index.html
-</code></pre>
-<hr>
-<h2>CI</h2>
-<p>The project uses GitHub Actions. The workflow is at<br>
-<code>.github/workflows/ci.yml</code>. Tests run on every push and<br>
-pull request:</p>
-<pre class="language-yaml" tabindex="0"><code class="language-yaml">- name: Unit tests
-  run: deno test tests/ --allow-all --unstable-kv --no-check
-</code></pre>
-<p>Package suites live under <code>packages/*/tests/</code> and run via<br>
-<code>deno task packages:test</code>. They are not the merge gate.<br>
-Playwright / e2e files stay out of CI until they have a<br>
-dedicated job.</p>
-<p>Tests must pass before a PR can be merged.</p>
-<hr>
-<h2>Pre-Commit Gauntlet</h2>
-<p>These four steps mirror CI and must pass before every commit:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno check --unstable-kv mod.ts
-deno lint
-deno test tests/ --allow-all --unstable-kv --no-check
-deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check
-</code></pre>
-<p>The full suite is green on <code>main</code> — there are no expected failures. If a test<br>
-fails on your branch, fix it before submitting a PR.</p>
+<h2>See also</h2>
+<ul>
+<li><a href="/ursamu/guides/softcoding/">Softcode Guide</a> — pure TinyMUX</li>
+<li><a href="/ursamu/guides/scripting/">Scripting Guide</a> — file sandbox</li>
+<li><a href="/ursamu/guides/sdk-cookbook/">SDK Cookbook</a> — <code>u.*</code> reference</li>
+<li><a href="/ursamu/guides/recipes/">Recipes</a> — copy-paste patterns</li>
+</ul>
 
       </article>
 
@@ -578,6 +604,13 @@ fails on your branch, fix it before submitting a PR.</p>
       
         
           
+        
+      
+        
+          
+        
+      
+        
           
         
       
@@ -586,11 +619,12 @@ fails on your branch, fix it before submitting a PR.</p>
         
       
         
-      
+          
+          
         
       
         
-      
+          
         
       
         
@@ -657,16 +691,16 @@ fails on your branch, fix it before submitting a PR.</p>
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/development/contributing/" class="page-nav-btn prev">
+          <a href="/ursamu/guides/admin-guide/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">Admin Guide</span>
           </a>
         
 
         
-          <a href="/ursamu/extending/" class="page-nav-btn next">
+          <a href="/ursamu/guides/cli/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">CLI Reference</span>
           </a>
         
       </nav>

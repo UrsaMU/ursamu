@@ -231,73 +231,51 @@ Operators override values in `config/config.json` under the same key path.
 
 ## The Manifest File
 
-Every plugin that will be shared or installed from GitHub **must** include an
-`ursamu.plugin.json` at the plugin root. The install command reads this file to
-display details and populate the local registry.
+Every plugin that will be shared or installed from GitHub **should**
+include an `ursamu.plugin.json` at the plugin root. The community
+plugin installer reads this file for display and the local registry.
+JSR packages declare the same metadata in `deno.json` and their
+`IPlugin` export.
 
 ```json
 {
   "name": "my-plugin",
   "version": "1.0.0",
   "description": "Does something useful",
-  "ursamu": ">=1.0.0",
+  "ursamu": ">=2.6.0",
   "author": "Your Name",
   "license": "MIT",
   "main": "index.ts",
-  "deps": [
-    { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" }
+  "dependencies": [
+    { "name": "jobs", "version": ">=1.0.0" }
   ]
 }
 ```
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `name` | yes | Directory-safe slug — becomes the install folder name |
+| `name` | yes | Directory-safe slug — install folder / loader name |
 | `version` | yes | Semver string |
 | `description` | yes | Short human-readable description |
-| `ursamu` | yes | Semver range of compatible UrsaMU versions |
+| `ursamu` | yes | Semver range of compatible engine versions |
 | `author` | no | Author name or contact |
 | `license` | no | SPDX license identifier, e.g. `"MIT"` |
 | `main` | no | Entry-point file, defaults to `"index.ts"` |
-| `deps` | no | Array of transitive plugin dependencies — see below |
+| `dependencies` | no | Load-order deps — see [dependencies](./dependencies.md) |
 
-### `deps[]` entries
+### `dependencies` entries
 
-Each entry declares a plugin this one needs at runtime. The installer
-resolves the full graph before writing anything.
+Runtime load order is declared on the `IPlugin` (and mirrored in the
+manifest). Each entry needs `name` and a `version` semver range. The
+loader topologically sorts plugins, checks that each declared dep is
+present and in range, and aborts on mismatch.
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `name` | yes | Plugin slug — install folder name |
-| `url` | yes | Git URL the installer will clone |
-| `ref` | no | Git ref (tag, branch, commit) |
-| `version` | no | Semver range (e.g. `"^1.2.0"`, `">=1.0.0 <2.0.0"`) checked against the dep's own manifest `version` |
+Community git installs may still list `url` / `ref` on manifest
+entries so `ursamu plugin install` can clone transitive deps. Prefer
+JSR imports for official packages.
 
-The `version` field is optional and opt-in. When omitted, the dep installs
-as before with no version check. When present, the installer reads the
-dep's `ursamu.plugin.json` after clone and aborts if its `version` does
-not satisfy the range — or if two requesters ask for incompatible ranges.
-
-### Atomic installs
-
-`ensurePlugins` (and the bulk install path used on first startup) is
-fail-fast across the entire manifest. If any plugin or transitive dep
-fails for any of these reasons, the whole run aborts and rolls back:
-
-- Clone failure or rename failure
-- Unsafe plugin name (path traversal, reserved characters)
-- Unsafe or unsupported clone URL
-- Manifest version does not satisfy a requested `version:` range
-- Two requesters declare incompatible `version:` ranges for the same dep
-- Malformed semver in any range or manifest version
-
-On abort, nothing from the failed run is left on disk or in
-`.registry.json`. Plugins installed in previous successful runs are not
-touched. The installer throws a `PluginInstallError` (or one of its
-subclasses) describing which entry failed and why.
-
-The `ursamu create plugin <name> --standalone` command generates this file
-automatically when scaffolding a new publishable plugin project.
+The `ursamu create plugin <name> --standalone` command generates this
+file when scaffolding a new publishable plugin project.
 ---
 
 ## Installing Community Plugins
@@ -356,7 +334,7 @@ The bundled plugins demonstrate every capability:
 | [database.md](./database.md) | `DBO<T>` collections, queries, namespacing rules |
 | [configuration.md](./configuration.md) | Default config values, `getConfig`, env vars for secrets |
 | [hooks.md](./hooks.md) | `gameHooks` event bus, scene/wiki/event/chargen hooks, `EventsService` |
-| [dependencies.md](./dependencies.md) | Sharing code between plugins, `deps[]` manifest entries |
-| [official-plugins.md](./official-plugins.md) | Plugin registry — channel, discord, jobs, events, bbs, wiki, mail, builder, chargen, help |
+| [dependencies.md](./dependencies.md) | Sharing code between plugins, `dependencies` load order |
+| [official-plugins.md](./official-plugins.md) | JSR package catalog — engine, services, game systems |
 | [chargen.md](./chargen.md) | Bundled chargen plugin — commands, hooks, REST API |
 | [events.md](./events.md) | Bundled events plugin — calendar, RSVPs, REST API |

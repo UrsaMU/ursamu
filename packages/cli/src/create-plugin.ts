@@ -364,7 +364,7 @@ Plugin '${name}' scaffolded at src/plugins/${name}/
   commands/${name}.ts         — addCmd() registrations for the ${name} family
   router.ts                   — REST handler for /api/v1/${name}
   db/schemas.ts               — type definitions (DBO instances go in command files)
-  help/${name}.md             — in-game help text (served by help-plugin)
+  help/${name}.md             — in-game help text (served by @ursamu/help)
   tests/plugin.test.ts        — Deno unit tests
   showcases/${name}.json      — showcase / demo steps
 ${uiLines.length ? uiLines.join("\n") + "\n" : ""}

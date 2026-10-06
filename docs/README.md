@@ -4,8 +4,8 @@ Welcome to the UrsaMU documentation. All pages are written in Markdown and
 rendered by the Lume static-site generator — they also read cleanly directly
 on GitHub.
 
-**Current pins (docs):** engine `@ursamu/mush@1.0.30`, CLI
-`@ursamu/cli@0.1.4`, public FE `@ursamu/site`, staff FE `@ursamu/web`.
+**Current pins (docs):** engine `@ursamu/mush@1.0.40`, CLI
+`@ursamu/cli@0.1.6`, public FE `@ursamu/site`, staff FE `@ursamu/web`.
 
 Visual system matches the product FE contracts:
 

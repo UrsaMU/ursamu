@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ursamu.dev/schema/theme-draft-1.0.0.json",
+  "$id": "https://ursamu.github.io/ursamu/schema/theme-draft-1.0.0.json",
   "title": "UrsaMU Theme Draft",
   "description": "In-memory / API payload for Theme Studio (specVersion 1.0.0)",
   "type": "object",

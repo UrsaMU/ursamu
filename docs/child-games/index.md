@@ -16,7 +16,7 @@ project, including daemon scripts, telnet sidecar, and a `.env` with a
 fresh JWT secret (v2.4.0):
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.5/create my-game
+deno run -A jsr:@ursamu/cli@0.1.6/create my-game
 cd my-game
 ```
 
@@ -74,10 +74,10 @@ startup by `ensurePlugins`. Each entry:
 
 ```json
 {
-  "name": "@ursamu/help-plugin",
-  "url": "https://github.com/UrsaMU/help-plugin",
-  "ref": "v1.0.0",
-  "version": "^1.0.0"
+  "name": "@ursamu/help",
+  "url": "https://github.com/UrsaMU/ursamu/tree/main/packages/help",
+  "ref": "v1.3.1",
+  "version": "^1.3.0"
 }
 ```
 
@@ -91,9 +91,9 @@ remain legacy-compatible.
 Install or update from the CLI:
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.5/plugin install <url> [--ref <ref>]
-deno run -A jsr:@ursamu/cli@0.1.5/plugin update
-deno run -A jsr:@ursamu/cli@0.1.5/plugin list
+deno run -A jsr:@ursamu/cli@0.1.6/plugin install <url> [--ref <ref>]
+deno run -A jsr:@ursamu/cli@0.1.6/plugin update
+deno run -A jsr:@ursamu/cli@0.1.6/plugin list
 ```
 
 ## Local script overrides
@@ -122,8 +122,8 @@ project-specific mechanics as their own.
 ## Updating the engine
 
 ```bash
-deno run -A jsr:@ursamu/cli@0.1.5/update         # latest stable
-deno run -A jsr:@ursamu/cli@0.1.5/update main    # specific branch
+deno run -A jsr:@ursamu/cli@0.1.6/update         # latest stable
+deno run -A jsr:@ursamu/cli@0.1.6/update main    # specific branch
 ```
 
 The updater rewrites the import map and re-runs `ensurePlugins`. Restart

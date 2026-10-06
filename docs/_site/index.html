@@ -86,7 +86,7 @@
 <main class="animate-in">
   <!-- ── HERO ───────────────────────────────────────────────────────── -->
 <div class="home-hero animate-in">
-  <p class="home-hero__chip">mush 1.0.30 · cli 0.1.2 · MIT</p>
+  <p class="home-hero__chip">mush 1.0.40 · cli 0.1.6 · MIT</p>
   <h1>A Modern MUSH Server</h1>
   <p class="home-hero__lede">
     High-performance MU* engine in <strong>TypeScript</strong> and
@@ -108,7 +108,7 @@
   <div class="home-stack__code">
     <div class="home-stack__code-bar">Terminal</div>
     <pre class="home-stack__pre"><span class="cmt"># Scaffold a game (engine + portal stack)</span>
-<span class="cmd">deno run -A jsr:@ursamu/cli@0.1.2/create my-game</span>
+<span class="cmd">deno run -A jsr:@ursamu/cli@0.1.6/create my-game</span>
 <span class="cmd">cd my-game</span>
 <span class="cmd">deno task start</span>
 <span class="cmt"># http://localhost:4203/  ·  /play  ·  /admin/</span></pre>
@@ -142,8 +142,8 @@
       <dd>TypeGraph/PGlite by default, Deno KV fallback — query by flags, owner, data</dd>
     </div>
     <div class="home-stack__row">
-      <dt>Softcode</dt>
-      <dd>TinyMUX 2.x evaluator — 250+ functions, ANSI, format handler pipeline</dd>
+      <dt><a href="/ursamu/guides/softcoding/">Softcode</a></dt>
+      <dd>TinyMUX 2.x evaluator — 250+ functions, attributes, @trigger, $-patterns</dd>
     </div>
     <div class="home-stack__row">
       <dt>Events</dt>
@@ -191,6 +191,15 @@
           <span class="home-stack__desc">Staff tools, security, channels</span>
         </span>
         <span class="home-stack__path">/guides/admin-guide/</span>
+      </a>
+    </li>
+    <li>
+      <a href="/ursamu/guides/softcoding/" class="home-stack__link">
+        <span class="home-stack__meta">
+          <span class="home-stack__label">Softcode</span>
+          <span class="home-stack__desc">TinyMUX: think, %, $, @switch, UDFs</span>
+        </span>
+        <span class="home-stack__path">/guides/softcoding/</span>
       </a>
     </li>
     <li>

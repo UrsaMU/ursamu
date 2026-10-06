@@ -1233,7 +1233,7 @@ import type { IPlugin, IUrsamuSDK, IDBObj, SessionEvent } from "ursamu/types";`;
 ├── db/
 │   └── schemas.ts         Types only — DBO instances live in the command files that own them
 ├── help/
-│   └── ${name}.md         In-game help text (served by help-plugin FileProvider)
+│   └── ${name}.md         In-game help text (served by @ursamu/help FileProvider)
 ├── tests/
 │   └── plugin.test.ts     Deno unit tests
 └── showcases/${name}.json demo steps  →  deno task showcase ${name}-basic`;
@@ -1517,9 +1517,9 @@ Rules:
 
 ---
 
-## Help file conventions (help-plugin FileProvider)
+## Help file conventions (@ursamu/help FileProvider)
 
-Help is served by [help-plugin](https://github.com/UrsaMU/help-plugin). The FileProvider
+Help is served by [@ursamu/help](https://jsr.io/@ursamu/help). The FileProvider
 scans every registered \`help/\` directory and derives topics from filenames.
 
 ### Hidden files
@@ -1554,7 +1554,7 @@ Use \`index.md\` for the overview page of a multi-file topic.
 Call \`registerHelpDir\` inside your plugin's \`init()\` so the FileProvider scans your folder:
 
 \`\`\`typescript
-import { registerHelpDir } from "jsr:@ursamu/help-plugin";
+import { registerHelpDir } from "jsr:@ursamu/help/register";
 
 export const plugin: IPlugin = {
   init: async () => {
@@ -1567,8 +1567,8 @@ export const plugin: IPlugin = {
 };
 \`\`\`
 
-For full games (not standalone plugins) install help-plugin from
-[github.com/UrsaMU/help-plugin](https://github.com/UrsaMU/help-plugin) and add it to
+For full games (not standalone plugins) install @ursamu/help from
+[@ursamu/help](https://jsr.io/@ursamu/help) and add it to
 \`plugins.manifest.json\`.
 
 ---

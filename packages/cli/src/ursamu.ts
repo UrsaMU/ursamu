@@ -33,7 +33,7 @@ const args = parse(Deno.args, {
 });
 
 if (args.version) {
-  console.log("UrsaMU CLI v0.1.4");
+  console.log("UrsaMU CLI v0.1.6");
   Deno.exit(0);
 }
 

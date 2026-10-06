@@ -7,15 +7,15 @@ description: Sharing code and utilities between UrsaMU plugins
 
 ## Overview
 
-UrsaMU resolves plugin **install order** through the `deps[]` array in
-`ursamu.plugin.json` (see [ursamu.plugin.json Dependencies](#ursamuplug-injson-dependencies)
+UrsaMU resolves plugin **load order** through the `dependencies` array in
+the plugin definition (see [Dependencies](#ursamuplug-injson-dependencies)
 below), but there is no `app.plugins.get()` API for cross-plugin code
 access at runtime. Plugins share code the same way any TypeScript modules
 do: **direct imports**.
 
 This keeps things simple and type-safe. If plugin B needs something from
-plugin A, it declares plugin A in `deps[]` so the installer fetches it,
-then imports from it directly.
+plugin A, it declares plugin A in `dependencies` so the loader orders them
+correctly, then imports from it directly.
 ---
 
 ## Sharing Utilities
@@ -124,32 +124,29 @@ This pattern is preferred when the dependency is optional or when you want
 Plugin B to work even if Plugin A is not installed.
 ---
 
-## ursamu.plugin.json Dependencies
+## Dependencies
 
-Declare transitive plugin dependencies in the `deps[]` array of your
-`ursamu.plugin.json`. `ensurePlugins` resolves and installs the graph on
-startup:
+Declare transitive plugin dependencies in the `dependencies` array of your
+plugin's `IPlugin`. The loader (`loadPlugins`) topologically sorts plugins
+and calls `init()` in dependency order:
 
-```json
-{
-  "name": "jobs-reporter",
-  "version": "1.0.0",
-  "description": "Generates reports from the jobs plugin",
-  "ursamu": ">=1.0.0",
-  "author": "Your Name",
-  "license": "MIT",
-  "deps": [
-    { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" }
-  ]
-}
+```typescript
+import { registerPlugin } from "@ursamu/mush";
+
+registerPlugin({
+  name: "jobs-reporter",
+  version: "1.0.0",
+  description: "Generates reports from the jobs plugin",
+  dependencies: [
+    { name: "jobs", version: ">=1.0.0" },
+  ],
+  async init() { /* ... */ },
+  async remove() { /* ... */ },
+});
 ```
 
-Each entry needs `name` and `url`. The `ref` (git ref) and `version`
-(semver range checked against the dep's manifest) fields are optional.
-Omit `version` to install the dep without a check — backwards compatible
-with manifests written before the range feature shipped.
+Each entry needs `name` and a `version` semver range (e.g. `">=1.0.0"`).
+At load time the loader checks that the declared dependency is installed and
+that its `version` satisfies the range, aborting with an error if not.
 
-If any dep fails to clone, fails its `version` range, or has incompatible
-ranges across requesters, the entire install run aborts and rolls back —
-disk and `.registry.json` are left exactly as they were before the run.
-See the [`deps[]` reference](./index.md#deps-entries) for full semantics.
+See [dependencies](./index.md#dependencies) for full load-order semantics.

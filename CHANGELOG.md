@@ -4,6 +4,28 @@ All notable changes to UrsaMU are documented here.
 
 ## [Unreleased]
 
+## [3.1.4] — 2026-10-05
+
+### Added
+
+- **`@ursamu/cinematic-plugin` 1.0.0** — Cinematic Unisystem
+  chargen, D10 rolls, Drama Points, gear, sensing, and staff
+  commands (#232). Published to JSR with Packages CI.
+
+### Changed
+
+- **CLI 0.1.6** pins `@ursamu/mush@1.0.40` /
+  `@ursamu/core@1.0.6` on create.
+- Docs catalog rewritten around JSR packages (drop stale
+  `*-plugin` GitHub org links and auto-install as the primary
+  path).
+- Schema `$id` URLs point at
+  `ursamu.github.io/ursamu` (expired domain removed).
+
+### Housekeeping
+
+- Unfinished packages/games live under `unfinished/` (#231).
+
 ## [3.1.3] — 2026-10-05
 
 ### Added

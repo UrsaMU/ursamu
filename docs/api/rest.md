@@ -395,13 +395,13 @@ Official plugins:
 
 | Plugin | Base path | Repo |
 |--------|-----------|------|
-| jobs   | `/api/v1/jobs`   | [UrsaMU/jobs-plugin](https://github.com/UrsaMU/jobs-plugin) |
-| events | `/api/v1/events` | [UrsaMU/events-plugin](https://github.com/UrsaMU/events-plugin) |
-| bbs    | `/api/v1/bbs`    | [UrsaMU/bbs-plugin](https://github.com/UrsaMU/bbs-plugin) |
-| mail   | `/api/v1/mail`   | [UrsaMU/mail-plugin](https://github.com/UrsaMU/mail-plugin) |
-| help   | `/api/v1/help`   | [UrsaMU/help-plugin](https://github.com/UrsaMU/help-plugin) |
-| wiki   | `/api/v1/wiki`   | [UrsaMU/wiki-plugin](https://github.com/UrsaMU/wiki-plugin) |
-| builder| `/api/v1/building` | [UrsaMU/builder-plugin](https://github.com/UrsaMU/builder-plugin) |
+| jobs   | `/api/v1/jobs`   | [@ursamu/jobs](https://jsr.io/@ursamu/jobs) |
+| events | `/api/v1/events` | [events](/child-games/) (in-repo, not yet published) |
+| bbs    | `/api/v1/bbs`    | [@ursamu/bbs](https://jsr.io/@ursamu/bbs) |
+| mail   | `/api/v1/mail`   | [@ursamu/mail](https://jsr.io/@ursamu/mail) |
+| help   | `/api/v1/help`   | [@ursamu/help](https://jsr.io/@ursamu/help) |
+| wiki   | `/api/v1/wiki`   | [@ursamu/wiki](https://jsr.io/@ursamu/wiki) |
+| builder| `/api/v1/building` | [@ursamu/builder](https://jsr.io/@ursamu/builder) |
 
 Custom plugins register their own routes — see
 [Plugin Development](../plugins/index.md).

@@ -38,12 +38,12 @@ All built-in commands available in UrsaMU. Commands marked **admin+** require th
 | `quit` | Disconnect from the server |
 | `@version` | Show the engine version |
 | `@poll` | Show the current poll, if any |
-| `help [<topic>]` | Display help text (provided by [help-plugin](https://github.com/UrsaMU/help-plugin)) |
+| `help [<topic>]` | Display help text (provided by [@ursamu/help](https://jsr.io/@ursamu/help)) |
 ---
 
 ## Channel Commands
 
-Channels are provided by the [channel-plugin](https://github.com/UrsaMU/channel-plugin).
+Channels are provided by [@ursamu/channels](https://jsr.io/@ursamu/channels).
 Players join channels and get a short alias to speak with.
 
 | Command | Description |
@@ -64,7 +64,7 @@ Players join channels and get a short alias to speak with.
 
 ## Mail Commands
 
-Mail is provided by the [mail-plugin](https://github.com/UrsaMU/mail-plugin).
+Mail is provided by [@ursamu/mail](https://jsr.io/@ursamu/mail).
 
 | Command | Description |
 |---------|-------------|
@@ -84,7 +84,7 @@ Mail is provided by the [mail-plugin](https://github.com/UrsaMU/mail-plugin).
 
 ## Bulletin Board Commands
 
-Bulletin boards are provided by the [bbs-plugin](https://github.com/UrsaMU/bbs-plugin).
+Bulletin boards are provided by [@ursamu/bbs](https://jsr.io/@ursamu/bbs).
 
 | Command | Description |
 |---------|-------------|
@@ -98,7 +98,7 @@ Bulletin boards are provided by the [bbs-plugin](https://github.com/UrsaMU/bbs-p
 
 ## Building Commands
 
-Building commands are provided by the [builder-plugin](https://github.com/UrsaMU/builder-plugin). Requires `builder+` flag unless noted.
+Building commands are provided by [@ursamu/builder](https://jsr.io/@ursamu/builder). Requires `builder+` flag unless noted.
 
 | Command | Description |
 |---------|-------------|
@@ -185,10 +185,10 @@ Requires `admin` or `wizard` flag unless noted.
 
 ## Plugin Commands
 
-Commands provided by official plugins are documented in their respective repos.
+Commands provided by official plugins are documented in their respective packages.
 
 | Plugin | Commands | Docs |
 |--------|----------|------|
-| **jobs** | `+job`, `+jobs`, `+job/create`, etc. | [UrsaMU/jobs-plugin](https://github.com/UrsaMU/jobs-plugin#commands) |
-| **events** | `+event`, `+events` | [UrsaMU/events-plugin](https://github.com/UrsaMU/events-plugin#commands) |
-| **discord** | Bridge only — no in-game commands | [UrsaMU/discord-plugin](https://github.com/UrsaMU/discord-plugin) |
+| **jobs** | `+job`, `+jobs`, `+job/create`, etc. | [@ursamu/jobs](https://jsr.io/@ursamu/jobs) |
+| **events** | `+event`, `+events` | [events](/child-games/) (in-repo, not yet published) |
+| **discord** | Bridge only — no in-game commands | [@ursamu/discord](https://jsr.io/@ursamu/discord) |
