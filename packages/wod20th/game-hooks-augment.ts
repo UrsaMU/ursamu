@@ -48,9 +48,3 @@ declare module "@ursamu/mush" {
     "wod20th:vote-cast":          (e: VoteCastEvent)          => void;
   }
 }
-
-
-declare module "@ursamu/ursamu" {
-  // re-export same map under legacy alias if used
-  interface GameHookMap {}
-}
