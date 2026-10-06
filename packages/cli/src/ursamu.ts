@@ -14,7 +14,7 @@ import { join, dirname, fromFileUrl } from "@std/path";
 // Lazy-import parser only when the interactive menu is actually needed.
 // Top-level import would pull in @ursamu/mush (KV + QuickJS) before --version/--help can exit.
 async function getParser() {
-  const { parser } = await import("@ursamu/mush");
+  const { parser } = await import("jsr:@ursamu/mush@^1.0.40");
   return parser;
 }
 
