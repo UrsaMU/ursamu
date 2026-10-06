@@ -21,10 +21,7 @@
     "packages/cyberpunk",
     "packages/cinematic",
     "packages/vendor",
-    "games/roses",
-    "games/cpr",
-    "packages/site",
-    "games/bridgetown"
+    "packages/site"
   ],
   "nodeModulesDir": "auto",
   "tasks": {
