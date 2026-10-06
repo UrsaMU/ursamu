@@ -1,0 +1,340 @@
+[
+  {
+    "slug": "blood-sense",
+    "name": "Blood Sense",
+    "cost": 1
+  },
+  {
+    "slug": "gaze",
+    "name": "Gaze",
+    "cost": 2
+  },
+  {
+    "slug": "voice",
+    "name": "Voice",
+    "cost": 2
+  },
+  {
+    "slug": "deep-mesmerism",
+    "name": "Deep Mesmerism",
+    "cost": 3,
+    "prereq": {
+      "any": [
+        {
+          "q": "gaze"
+        },
+        {
+          "q": "voice"
+        }
+      ]
+    }
+  },
+  {
+    "slug": "animal-to-call",
+    "name": "Animal to Call",
+    "cost": 3
+  },
+  {
+    "slug": "dream-walker",
+    "name": "Dream Walker",
+    "cost": 3
+  },
+  {
+    "slug": "psychic-feeding",
+    "name": "Psychic Feeding",
+    "cost": 3,
+    "approval": "Staff approval required (vampire power catalog)."
+  },
+  {
+    "slug": "master-vampire",
+    "name": "Master Vampire",
+    "cost": 5,
+    "attrBonus": {
+      "willpower": 1
+    },
+    "prereq": {
+      "q": "vampire",
+      "attr": [
+        "willpower",
+        5
+      ]
+    },
+    "approval": "Age 100+, two Vampire Powers, and staff approval."
+  },
+  {
+    "slug": "blood-bond",
+    "name": "Blood Bond",
+    "cost": 2,
+    "prereq": {
+      "q": "master-vampire"
+    }
+  },
+  {
+    "slug": "mass-mesmerism",
+    "name": "Mass Mesmerism",
+    "cost": 3,
+    "prereq": {
+      "q": "master-vampire",
+      "any": [
+        {
+          "q": "gaze"
+        },
+        {
+          "q": "voice"
+        }
+      ]
+    }
+  },
+  {
+    "slug": "advanced-animal-call",
+    "name": "Advanced Animal Call",
+    "cost": 3,
+    "prereq": {
+      "q": "master-vampire",
+      "any": [
+        {
+          "q": "animal-to-call"
+        }
+      ]
+    }
+  },
+  {
+    "slug": "territorial-presence",
+    "name": "Territorial Presence",
+    "cost": 2,
+    "prereq": {
+      "q": "master-vampire"
+    }
+  },
+  {
+    "slug": "alpha-i",
+    "name": "Alpha I",
+    "cost": 4,
+    "attrBonus": {
+      "willpower": 1
+    },
+    "prereq": {
+      "q": "werewolf",
+      "attr": [
+        "willpower",
+        4
+      ]
+    }
+  },
+  {
+    "slug": "alpha-ii",
+    "name": "Alpha II",
+    "cost": 6,
+    "prereq": {
+      "q": "alpha-i"
+    }
+  },
+  {
+    "slug": "alpha-iii",
+    "name": "Alpha III",
+    "cost": 8,
+    "prereq": {
+      "q": "alpha-ii"
+    }
+  },
+  {
+    "slug": "pack-bond",
+    "name": "Pack Bond",
+    "cost": 2,
+    "prereq": {
+      "any": [
+        {
+          "q": "alpha-i"
+        },
+        {
+          "q": "alpha-ii"
+        },
+        {
+          "q": "alpha-iii"
+        }
+      ]
+    }
+  },
+  {
+    "slug": "animator",
+    "name": "Animator",
+    "cost": 5
+  },
+  {
+    "slug": "animation",
+    "name": "Animation",
+    "cost": 2,
+    "perLevel": true,
+    "max": 5,
+    "prereq": {
+      "q": "animator"
+    }
+  },
+  {
+    "slug": "necromancer",
+    "name": "Necromancer",
+    "cost": 5,
+    "prereq": {
+      "q": "animator",
+      "qLevel": [
+        "animation",
+        3
+      ],
+      "attr": [
+        "willpower",
+        4
+      ],
+      "skill": [
+        "occultism",
+        3
+      ]
+    }
+  },
+  {
+    "slug": "sorcery",
+    "name": "Sorcery",
+    "cost": 5,
+    "perLevel": true,
+    "max": 5,
+    "approval": "Sorcery 4-5 requires Veteran status or Drawback expenditure, plus approval."
+  },
+  {
+    "slug": "telekinesis-p",
+    "name": "Telekinesis",
+    "cost": 3,
+    "perLevel": true
+  },
+  {
+    "slug": "telepathy",
+    "name": "Telepathy",
+    "cost": 3,
+    "perLevel": true
+  },
+  {
+    "slug": "empathy",
+    "name": "Empathy",
+    "cost": 2,
+    "perLevel": true,
+    "approval": "Rated model (MUSH adaptation); do not combine with fixed Empathy."
+  },
+  {
+    "slug": "psychometry-p",
+    "name": "Psychometry",
+    "cost": 2,
+    "perLevel": true
+  },
+  {
+    "slug": "clairvoyance",
+    "name": "Clairvoyance",
+    "cost": 3,
+    "perLevel": true
+  },
+  {
+    "slug": "precognition",
+    "name": "Precognition",
+    "cost": 4,
+    "perLevel": true
+  },
+  {
+    "slug": "spirit-medium",
+    "name": "Spirit Medium",
+    "cost": 2
+  },
+  {
+    "slug": "psychic-shield",
+    "name": "Psychic Shield",
+    "cost": 2,
+    "perLevel": true
+  },
+  {
+    "slug": "supernatural-sense",
+    "name": "Supernatural Sense",
+    "cost": 1
+  },
+  {
+    "slug": "the-sight",
+    "name": "The Sight",
+    "cost": 3
+  },
+  {
+    "slug": "insight",
+    "name": "Insight",
+    "cost": 5
+  },
+  {
+    "slug": "mask",
+    "name": "Mask",
+    "cost": 2,
+    "perLevel": true,
+    "max": 3
+  },
+  {
+    "slug": "suppress-presence",
+    "name": "Suppress Presence",
+    "cost": 1
+  },
+  {
+    "slug": "false-mask",
+    "name": "False Mask",
+    "cost": 3,
+    "prereq": {
+      "qLevel": [
+        "mask",
+        2
+      ]
+    }
+  },
+  {
+    "slug": "veil-the-master",
+    "name": "Veil the Master",
+    "cost": 2,
+    "prereq": {
+      "q": "master-vampire",
+      "qLevel": [
+        "mask",
+        1
+      ]
+    }
+  },
+  {
+    "slug": "quiet-beast",
+    "name": "Quiet Beast",
+    "cost": 2,
+    "prereq": {
+      "any": [
+        {
+          "q": "alpha-i"
+        },
+        {
+          "q": "alpha-ii"
+        },
+        {
+          "q": "alpha-iii"
+        }
+      ]
+    }
+  },
+  {
+    "slug": "human-servant-bond",
+    "name": "Human Servant Bond",
+    "cost": 2,
+    "perLevel": true,
+    "max": 4,
+    "prereq": {
+      "q": "master-vampire"
+    },
+    "approval": "Starting characters capped at Mark II; III-IV need play and approval."
+  },
+  {
+    "slug": "animal-servant",
+    "name": "Animal Servant",
+    "cost": 0,
+    "approval": "Cost not recovered — staff-set."
+  },
+  {
+    "slug": "triumvirate",
+    "name": "Triumvirate",
+    "cost": 0,
+    "approval": "Cost not recovered — staff-set."
+  }
+]

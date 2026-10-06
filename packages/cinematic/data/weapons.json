@@ -1,0 +1,17 @@
+[
+  { "slug": "baton", "name": "Baton", "dmg": { "mult": 3, "plus": 0 }, "type": "Bash", "skill": "getting-medieval", "range": "Melee", "hands": 1 },
+  { "slug": "baseball-bat", "name": "Baseball Bat", "dmg": { "mult": 4, "plus": 0 }, "type": "Bash", "skill": "getting-medieval", "range": "Melee", "hands": 1 },
+  { "slug": "knife", "name": "Knife", "dmg": { "mult": 2, "plus": 0 }, "type": "Slash/stab", "skill": "getting-medieval", "range": "Melee", "hands": 1 },
+  { "slug": "large-knife", "name": "Large Knife", "dmg": { "mult": 3, "plus": 0 }, "type": "Slash/stab", "skill": "getting-medieval", "range": "Melee", "hands": 1 },
+  { "slug": "sword", "name": "Sword", "dmg": { "mult": 4, "plus": 0 }, "type": "Slash/stab", "skill": "getting-medieval", "range": "Melee", "hands": 1 },
+  { "slug": "axe", "name": "Axe", "dmg": { "mult": 5, "plus": 0 }, "type": "Slash/stab", "skill": "getting-medieval", "range": "Melee", "hands": 1 },
+  { "slug": "quarterstaff", "name": "Quarterstaff", "dmg": { "mult": 3, "plus": 1 }, "type": "Bash", "skill": "getting-medieval", "range": "Melee", "hands": 2, "special": "Two-handed" },
+  { "slug": "stake", "name": "Stake", "dmg": { "mult": 2, "plus": 0 }, "type": "Slash/stab", "skill": "getting-medieval", "range": "Melee", "hands": 1, "special": "Through the Heart vs vampires" },
+  { "slug": "small-caliber-pistol", "name": "Small-Caliber Pistol", "dmg": { "fixed": 9 }, "type": "Bullet", "skill": "gun-fu", "range": "Pistol", "hands": 1 },
+  { "slug": "pistol", "name": "Pistol", "dmg": { "fixed": 12 }, "type": "Bullet", "skill": "gun-fu", "range": "Pistol", "hands": 1 },
+  { "slug": "heavy-pistol", "name": "Heavy Pistol", "dmg": { "fixed": 15 }, "type": "Bullet", "skill": "gun-fu", "range": "Pistol", "hands": 1 },
+  { "slug": "magnum-pistol", "name": "Magnum Pistol", "dmg": { "fixed": 18 }, "type": "Bullet", "skill": "gun-fu", "range": "Pistol", "hands": 1 },
+  { "slug": "hunting-rifle", "name": "Hunting Rifle", "dmg": { "fixed": 20 }, "type": "Bullet", "skill": "gun-fu", "range": "Rifle", "hands": 2 },
+  { "slug": "assault-rifle", "name": "Assault Rifle", "dmg": { "fixed": 16 }, "type": "Bullet", "skill": "gun-fu", "range": "Rifle", "hands": 2 },
+  { "slug": "shotgun", "name": "Shotgun", "dmg": { "fixed": 20 }, "type": "Bullet", "skill": "gun-fu", "range": "Pistol", "hands": 2 }
+]

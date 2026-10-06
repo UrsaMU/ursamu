@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "whitehat",
+    "name": "White Hat",
+    "attrPoints": 15,
+    "qualityPoints": 10,
+    "drawbackPoints": 10,
+    "skillPoints": 15,
+    "dramaPoints": 20
+  },
+  {
+    "slug": "hero",
+    "name": "Hero",
+    "attrPoints": 20,
+    "qualityPoints": 20,
+    "drawbackPoints": 10,
+    "skillPoints": 20,
+    "dramaPoints": 10
+  },
+  {
+    "slug": "experienced",
+    "name": "Experienced Hero",
+    "attrPoints": 25,
+    "qualityPoints": 25,
+    "drawbackPoints": 10,
+    "skillPoints": 40,
+    "dramaPoints": 20
+  }
+]

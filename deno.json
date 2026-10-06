@@ -19,10 +19,12 @@
     "packages/combat",
     "packages/dnd",
     "packages/cyberpunk",
+    "packages/cinematic",
     "packages/vendor",
     "games/roses",
     "games/cpr",
-    "packages/site"
+    "packages/site",
+    "games/bridgetown"
   ],
   "nodeModulesDir": "auto",
   "tasks": {

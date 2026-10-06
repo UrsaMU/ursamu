@@ -1,0 +1,143 @@
+{
+  "key": "chargen",
+  "label": "Full chargen walkthrough (10 steps)",
+  "steps": [
+    {
+      "cmd": "+cg",
+      "note": "STEP 1 \u2014 Concept & Archetype"
+    },
+    {
+      "cmd": "+cg/concept=Newest Slayer in town"
+    },
+    {
+      "cmd": "+cg/tier=hero"
+    },
+    {
+      "cmd": "+cg/next",
+      "note": "STEP 2 \u2014 Attributes"
+    },
+    {
+      "cmd": "+cg/attr dex=5"
+    },
+    {
+      "cmd": "+cg/attr str=3"
+    },
+    {
+      "cmd": "+cg/attr con=3"
+    },
+    {
+      "cmd": "+cg/attr int=3"
+    },
+    {
+      "cmd": "+cg/attr per=3"
+    },
+    {
+      "cmd": "+cg/attr wil=3"
+    },
+    {
+      "cmd": "+cg/attr str=6",
+      "note": "over budget \u2014 rejected"
+    },
+    {
+      "cmd": "+cg/next",
+      "note": "STEP 3 \u2014 Supernatural Type"
+    },
+    {
+      "cmd": "+cg/template=Vampire",
+      "note": "buys the 12-pt package"
+    },
+    {
+      "cmd": "+cg/next",
+      "note": "STEP 4 \u2014 Qualities"
+    },
+    {
+      "cmd": "+cg/quality hard-to-kill=2",
+      "note": "granted by template \u2014 dup rejected"
+    },
+    {
+      "cmd": "+cg/quality contacts=2:RIPD"
+    },
+    {
+      "cmd": "+cg/quality status=1:Sunnydale High"
+    },
+    {
+      "cmd": "+cg/next",
+      "note": "STEP 5 \u2014 Drawbacks"
+    },
+    {
+      "cmd": "+cg/drawback covetous=2:Conquests"
+    },
+    {
+      "cmd": "+cg/next",
+      "note": "STEP 6 \u2014 Skills"
+    },
+    {
+      "cmd": "+cg/skill kung=4"
+    },
+    {
+      "cmd": "+cg/skill acro=3"
+    },
+    {
+      "cmd": "+cg/skill gun=2"
+    },
+    {
+      "cmd": "+cg/skill c=2",
+      "note": "ambiguous \u2014 rejected"
+    },
+    {
+      "cmd": "+powers",
+      "note": "browse before buying"
+    },
+    {
+      "cmd": "+cg/next",
+      "note": "STEP 7 \u2014 Powers"
+    },
+    {
+      "cmd": "+cg/power master-vampire=5",
+      "note": "prereq fails: willpower 3 < 5"
+    },
+    {
+      "cmd": "+cg/power blood-sense=1"
+    },
+    {
+      "cmd": "+cg/power gaze=1",
+      "note": "Gaze costs 2 \u2014 over?"
+    },
+    {
+      "cmd": "+cg/next",
+      "note": "STEP 8 \u2014 Status & Contacts"
+    },
+    {
+      "cmd": "+cg/status=Sunnydale=1"
+    },
+    {
+      "cmd": "+cg/contact=RPIT=2"
+    },
+    {
+      "cmd": "+cg/next",
+      "note": "STEP 9 \u2014 Background"
+    },
+    {
+      "cmd": "+cg/background=Came to Portland hunting the thing that killed her sister. Trains at the downtown dojo; the cops owe her one."
+    },
+    {
+      "cmd": "+cg/next",
+      "note": "STEP 10 \u2014 Review"
+    },
+    {
+      "cmd": "+cg/sheet",
+      "note": "sheet preview (bonus applied)"
+    },
+    {
+      "cmd": "+cg/submit"
+    },
+    {
+      "cmd": "+chargen/approve Riley",
+      "note": "staff approval"
+    },
+    {
+      "cmd": "+sheet",
+      "note": "final locked sheet"
+    }
+  ]
+}

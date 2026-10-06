@@ -1,0 +1,30 @@
+{
+  "key": "rolls",
+  "label": "D10 rolls, Success Levels, maneuvers, Drama Points",
+  "steps": [
+    { "cmd": "+roll", "note": "usage hint" },
+    { "cmd": "+roll dexterity kung-fu", "note": "attr + skill (untrained, 0s)" },
+    { "cmd": "+chargen/start" },
+    { "cmd": "+chargen/type hero" },
+    { "cmd": "+stat dexterity=5" },
+    { "cmd": "+stat strength=3" },
+    { "cmd": "+stat constitution=3" },
+    { "cmd": "+stat intelligence=3" },
+    { "cmd": "+stat perception=3" },
+    { "cmd": "+stat willpower=3" },
+    { "cmd": "+skill kung-fu=4" },
+    { "cmd": "+skill acrobatics=3" },
+    { "cmd": "+skill occultism=2" },
+    { "cmd": "+roll dexterity kung-fu", "note": "Dex 5 + KF 4" },
+    { "cmd": "+roll intelligence occultism +2", "note": "with modifier" },
+    { "cmd": "+roll strength", "note": "attribute only" },
+    { "cmd": "+roll willpower karate", "note": "unknown skill silently adds 0" },
+    { "cmd": "+maneuvers", "note": "maneuver reference" },
+    { "cmd": "+drama", "note": "points remaining" },
+    { "cmd": "+damage 30", "note": "take a beating" },
+    { "cmd": "+drama/okay", "note": "I Think I'm Okay — halve damage" },
+    { "cmd": "+drama/heroic", "note": "Heroic Feat +10" },
+    { "cmd": "+drama/fake", "note": "unknown use — rejected" },
+    { "cmd": "+damage -99", "note": "overheal clamps at 0" }
+  ]
+}

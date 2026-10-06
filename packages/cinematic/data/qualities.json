@@ -1,0 +1,455 @@
+[
+  {
+    "slug": "acute-impaired-sense",
+    "name": "Acute/Impaired Sense",
+    "kind": "either",
+    "cost": 2
+  },
+  {
+    "slug": "artist",
+    "name": "Artist",
+    "kind": "quality",
+    "cost": 2
+  },
+  {
+    "slug": "athlete",
+    "name": "Athlete",
+    "kind": "quality",
+    "cost": 4
+  },
+  {
+    "slug": "attractiveness",
+    "name": "Attractiveness",
+    "kind": "either",
+    "cost": 1,
+    "perLevel": true
+  },
+  {
+    "slug": "brainiac",
+    "name": "Brainiac",
+    "kind": "quality",
+    "cost": 4
+  },
+  {
+    "slug": "clown",
+    "name": "Clown",
+    "kind": "drawback",
+    "cost": 1
+  },
+  {
+    "slug": "covetous",
+    "name": "Covetous",
+    "kind": "drawback",
+    "cost": 1,
+    "max": 3
+  },
+  {
+    "slug": "eidetic-memory",
+    "name": "Eidetic Memory",
+    "kind": "quality",
+    "cost": 1,
+    "max": 2
+  },
+  {
+    "slug": "emotional-problems",
+    "name": "Emotional Problems",
+    "kind": "drawback",
+    "cost": 1,
+    "max": 2
+  },
+  {
+    "slug": "fast-reaction-time",
+    "name": "Fast Reaction Time",
+    "kind": "quality",
+    "cost": 2
+  },
+  {
+    "slug": "good-bad-luck",
+    "name": "Good/Bad Luck",
+    "kind": "either",
+    "cost": 1,
+    "perLevel": true
+  },
+  {
+    "slug": "hard-to-kill",
+    "name": "Hard to Kill",
+    "kind": "quality",
+    "cost": 1,
+    "max": 5,
+    "perLevel": true
+  },
+  {
+    "slug": "hero",
+    "name": "Hero/Big Damn Hero",
+    "kind": "quality",
+    "cost": 1,
+    "max": 3
+  },
+  {
+    "slug": "honorable",
+    "name": "Honorable",
+    "kind": "drawback",
+    "cost": 1,
+    "max": 3
+  },
+  {
+    "slug": "humorless",
+    "name": "Humorless",
+    "kind": "drawback",
+    "cost": 1
+  },
+  {
+    "slug": "love-tragic-love",
+    "name": "Love/Tragic Love",
+    "kind": "drawback",
+    "cost": 2,
+    "max": 4
+  },
+  {
+    "slug": "mental-problems",
+    "name": "Mental Problems",
+    "kind": "drawback",
+    "cost": 1,
+    "max": 3
+  },
+  {
+    "slug": "minority",
+    "name": "Minority",
+    "kind": "drawback",
+    "cost": 1
+  },
+  {
+    "slug": "misfit",
+    "name": "Misfit",
+    "kind": "drawback",
+    "cost": 2
+  },
+  {
+    "slug": "natural-toughness",
+    "name": "Natural Toughness",
+    "kind": "quality",
+    "cost": 2
+  },
+  {
+    "slug": "nerves-of-steel",
+    "name": "Nerves of Steel",
+    "kind": "quality",
+    "cost": 3
+  },
+  {
+    "slug": "outcast",
+    "name": "Outcast",
+    "kind": "drawback",
+    "cost": 2,
+    "max": 5
+  },
+  {
+    "slug": "rank",
+    "name": "Rank",
+    "kind": "either",
+    "cost": 1,
+    "perLevel": true
+  },
+  {
+    "slug": "recurring-nightmares",
+    "name": "Recurring Nightmares",
+    "kind": "drawback",
+    "cost": 1
+  },
+  {
+    "slug": "resistance",
+    "name": "Resistance",
+    "kind": "quality",
+    "cost": 1,
+    "perLevel": true
+  },
+  {
+    "slug": "resources",
+    "name": "Resources",
+    "kind": "either",
+    "cost": 2,
+    "perLevel": true
+  },
+  {
+    "slug": "schmuck",
+    "name": "Schmuck",
+    "kind": "drawback",
+    "cost": 2
+  },
+  {
+    "slug": "situational-awareness",
+    "name": "Situational Awareness",
+    "kind": "quality",
+    "cost": 2
+  },
+  {
+    "slug": "status",
+    "name": "Status",
+    "kind": "either",
+    "cost": 1,
+    "perLevel": true
+  },
+  {
+    "slug": "contacts",
+    "name": "Contacts",
+    "kind": "quality",
+    "cost": 1,
+    "perLevel": true
+  },
+  {
+    "slug": "talentless",
+    "name": "Talentless",
+    "kind": "drawback",
+    "cost": 2
+  },
+  {
+    "slug": "teenager",
+    "name": "Teenager/Youth",
+    "kind": "drawback",
+    "cost": 2
+  },
+  {
+    "slug": "tool-man",
+    "name": "Tool Man",
+    "kind": "quality",
+    "cost": 3
+  },
+  {
+    "slug": "commando",
+    "name": "Commando",
+    "kind": "quality",
+    "cost": 4
+  },
+  {
+    "slug": "cop-detective",
+    "name": "Cop/Detective",
+    "kind": "quality",
+    "cost": 5,
+    "max": 8
+  },
+  {
+    "slug": "criminal-wise-guy",
+    "name": "Criminal/Wise Guy",
+    "kind": "quality",
+    "cost": 2,
+    "max": 3
+  },
+  {
+    "slug": "demon-hunter",
+    "name": "Demon Hunter",
+    "kind": "quality",
+    "cost": 4
+  },
+  {
+    "slug": "nosy-reporter",
+    "name": "Nosy Reporter",
+    "kind": "quality",
+    "cost": 5
+  },
+  {
+    "slug": "chosen-one",
+    "name": "Chosen One",
+    "kind": "quality",
+    "cost": 16
+  },
+  {
+    "slug": "robot",
+    "name": "Robot",
+    "kind": "quality",
+    "cost": 5
+  },
+  {
+    "slug": "totem-warrior",
+    "name": "Totem Warrior",
+    "kind": "quality",
+    "cost": 12
+  },
+  {
+    "slug": "age",
+    "name": "Age",
+    "kind": "quality",
+    "cost": 2,
+    "perLevel": true
+  },
+  {
+    "slug": "blindsight",
+    "name": "Blindsight",
+    "kind": "quality",
+    "cost": 8
+  },
+  {
+    "slug": "demonic-tutor",
+    "name": "Demonic Tutor",
+    "kind": "drawback",
+    "cost": 2
+  },
+  {
+    "slug": "enchanted-item",
+    "name": "Enchanted/Super-Science Item",
+    "kind": "quality",
+    "cost": 2,
+    "perLevel": true
+  },
+  {
+    "slug": "enchanter",
+    "name": "Enchanter/Super-Scientist",
+    "kind": "quality",
+    "cost": 5,
+    "perLevel": true
+  },
+  {
+    "slug": "hypnosis",
+    "name": "Hypnosis",
+    "kind": "quality",
+    "cost": 5,
+    "max": 20
+  },
+  {
+    "slug": "immortal",
+    "name": "Immortal",
+    "kind": "quality",
+    "cost": 0
+  },
+  {
+    "slug": "increased-life-points",
+    "name": "Increased Life Points",
+    "kind": "quality",
+    "cost": 1,
+    "perLevel": true
+  },
+  {
+    "slug": "invisible",
+    "name": "Invisible",
+    "kind": "quality",
+    "cost": 20
+  },
+  {
+    "slug": "iron-mind",
+    "name": "Iron Mind",
+    "kind": "quality",
+    "cost": 3
+  },
+  {
+    "slug": "limited-use",
+    "name": "Limited Use",
+    "kind": "drawback",
+    "cost": 1,
+    "max": 2
+  },
+  {
+    "slug": "magic-magnet",
+    "name": "Magic Magnet",
+    "kind": "drawback",
+    "cost": 2
+  },
+  {
+    "slug": "magical-family",
+    "name": "Magical Family",
+    "kind": "either",
+    "cost": 0,
+    "max": 2
+  },
+  {
+    "slug": "natural-armor",
+    "name": "Natural Armor",
+    "kind": "quality",
+    "cost": 1,
+    "perLevel": true
+  },
+  {
+    "slug": "natural-weapon",
+    "name": "Natural Weapon",
+    "kind": "quality",
+    "cost": 1,
+    "max": 8
+  },
+  {
+    "slug": "psychic-visions",
+    "name": "Psychic Visions",
+    "kind": "either",
+    "cost": 0
+  },
+  {
+    "slug": "psychometry",
+    "name": "Psychometry",
+    "kind": "quality",
+    "cost": 4
+  },
+  {
+    "slug": "pyrokinesis",
+    "name": "Pyrokinesis",
+    "kind": "quality",
+    "cost": 3,
+    "perLevel": true
+  },
+  {
+    "slug": "regeneration",
+    "name": "Regeneration",
+    "kind": "quality",
+    "cost": 1,
+    "max": 6
+  },
+  {
+    "slug": "sorcery",
+    "name": "Sorcery",
+    "kind": "quality",
+    "cost": 5,
+    "perLevel": true
+  },
+  {
+    "slug": "spirit-medium",
+    "name": "Spirit Medium",
+    "kind": "quality",
+    "cost": 2
+  },
+  {
+    "slug": "supernatural-form",
+    "name": "Supernatural Form",
+    "kind": "drawback",
+    "cost": 1,
+    "max": 2
+  },
+  {
+    "slug": "telekinesis",
+    "name": "Telekinesis",
+    "kind": "quality",
+    "cost": 3,
+    "perLevel": true
+  },
+  {
+    "slug": "telepathy",
+    "name": "Telepathy",
+    "kind": "quality",
+    "cost": 5
+  },
+  {
+    "slug": "uncontrollable-power",
+    "name": "Uncontrollable Power",
+    "kind": "drawback",
+    "cost": 5
+  },
+  {
+    "slug": "unique-kill",
+    "name": "Unique Kill",
+    "kind": "quality",
+    "cost": 5
+  },
+  {
+    "slug": "revenant",
+    "name": "Revenant",
+    "kind": "quality",
+    "cost": 17
+  },
+  {
+    "slug": "vampire",
+    "name": "Vampire",
+    "kind": "quality",
+    "cost": 12
+  },
+  {
+    "slug": "werewolf",
+    "name": "Werewolf",
+    "kind": "quality",
+    "cost": 10
+  }
+]

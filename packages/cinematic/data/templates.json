@@ -1,0 +1,30 @@
+[
+  {
+    "slug": "mortal",
+    "name": "Mortal",
+    "attrBonus": {},
+    "weaknesses": "",
+    "includes": []
+  },
+  {
+    "slug": "vampire",
+    "name": "Vampire",
+    "attrBonus": { "strength": 3, "dexterity": 2, "constitution": 2 },
+    "weaknesses": "Blood, daylight, undead",
+    "includes": [{ "slug": "hard-to-kill", "level": 2 }]
+  },
+  {
+    "slug": "lycanthrope",
+    "name": "Lycanthrope",
+    "attrBonus": { "strength": 2, "constitution": 2 },
+    "weaknesses": "Silver Vulnerability, Beast Instinct, Full-Moon Compulsion",
+    "includes": [{ "slug": "regeneration", "level": 2 }]
+  },
+  {
+    "slug": "animator",
+    "name": "Animator",
+    "attrBonus": {},
+    "weaknesses": "",
+    "includes": []
+  }
+]
