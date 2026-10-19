@@ -60,8 +60,9 @@ if (!imports) {
   Deno.exit(1);
 }
 
-// Accept any of: "jsr:@ursamu/mush", "jsr:@ursamu/mush@x.y.z", local paths (../ursamu/mod.ts)
-const URSAMU_RE = /^jsr:@ursamu\/ursamu(@[^\s]*)?$/;
+// Accept any of: "jsr:@ursamu/mush", "jsr:@ursamu/mush@x.y.z", the legacy
+// "jsr:@ursamu/ursamu@x.y.z" (migrated to mush), local paths (../ursamu/mod.ts)
+const URSAMU_RE = /^jsr:@ursamu\/(mush|ursamu)(@[^\s]*)?$/;
 const importKey = Object.keys(imports).find((k) => k === "ursamu" || k === "@ursamu/mush");
 
 if (!importKey) {
