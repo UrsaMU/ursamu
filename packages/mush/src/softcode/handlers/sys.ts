@@ -57,7 +57,7 @@ function respond(worker: Worker, msgId: unknown, data: unknown): void {
 
 const ALLOWED_CONFIG_KEYS = new Set([
   "server.name", "server.description", "server.banner",
-  "server.corsOrigins", "server.maxConnections",
+  "server.corsOrigins", "server.maxConnections", "server.apiRateLimit", "server.apiRateWindowMs",
   "game.maxPlayers", "game.description", "game.loginMessage", "game.welcomeMessage",
 ]);
 

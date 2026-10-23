@@ -7,6 +7,9 @@ const _defaults: Record<string, unknown> = {
     jwtSecret:      "",
     maxConnections: 1000,
     rateLimit:      10,
+    // REST requests per IP per window on handleRequest; 0 disables. Plugin routes sit outside it.
+    apiRateLimit:   120,
+    apiRateWindowMs: 60_000,
   },
 };
 

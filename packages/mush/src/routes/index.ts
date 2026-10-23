@@ -29,9 +29,10 @@ export { sceneHandler }                    from "./scenes.ts";
 export { objectsHandler, flagsHandler, functionsHandler } from "./objects.ts";
 export { authenticate } from "./authMiddleware.ts";
 
-import { registerRoute, registerFallback } from "@ursamu/core";
+import { registerRoute, registerFallback, getConfig } from "@ursamu/core";
 import {
   dispatchPluginRoute,
+  isPluginRoutePath,
   hasPluginPrefix,
 } from "./plugin.ts";
 import { authHandler }    from "./auth.ts";
@@ -145,10 +146,21 @@ export function registerMushRoutes(authenticate: Authenticator): void {
 // Used by src/app.ts for test compatibility and as the registerFallback target.
 
 const MAX_API_TRACKED_IPS = 5_000;
-/** Max REST requests per IP per sliding window (handleRequest path). */
+/** Default max REST requests per IP per window (handleRequest path); `server.apiRateLimit` overrides it, 0 disables. */
 export const API_RATE_LIMIT = 120;
-const API_RATE_WINDOW_MS = 60_000;
+/** Default window; `server.apiRateWindowMs` overrides it. */
+export const API_RATE_WINDOW_MS = 60_000;
 export { MAX_API_TRACKED_IPS };
+
+/** The limit and window in force: config first, the defaults otherwise. */
+function apiRateSettings(): { limit: number; windowMs: number } {
+  const limit = Number(getConfig<number>("server.apiRateLimit", API_RATE_LIMIT));
+  const windowMs = Number(getConfig<number>("server.apiRateWindowMs", API_RATE_WINDOW_MS));
+  return {
+    limit: Number.isFinite(limit) && limit >= 0 ? limit : API_RATE_LIMIT,
+    windowMs: Number.isFinite(windowMs) && windowMs > 0 ? windowMs : API_RATE_WINDOW_MS,
+  };
+}
 
 const apiRateLimits = new Map<string, { count: number; resetAt: number }>();
 
@@ -157,7 +169,10 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
   const path   = url.pathname;
   const method = req.method.toUpperCase();
 
-  // Per-IP API rate limiting
+  // Per-IP API rate limiting. Pages a plugin serves (and their images,
+  // scripts and styles) are not API calls and sit outside it; a limit of 0
+  // turns it off.
+  const { limit, windowMs } = apiRateSettings();
   const now = Date.now();
   let entry = apiRateLimits.get(remoteAddr);
   if (!entry || now >= entry.resetAt) {
@@ -165,12 +180,12 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
       const oldest = apiRateLimits.keys().next().value;
       if (oldest) apiRateLimits.delete(oldest);
     }
-    entry = { count: 1, resetAt: now + API_RATE_WINDOW_MS };
+    entry = { count: 0, resetAt: now + windowMs };
     apiRateLimits.set(remoteAddr, entry);
-  } else {
-    entry.count++;
   }
-  if (entry.count > API_RATE_LIMIT) {
+  const counted = limit > 0 && !isPluginRoutePath(path);
+  if (counted) entry.count++;
+  if (counted && entry.count > limit) {
     const retryAfter = Math.max(
       1,
       Math.ceil((entry.resetAt - now) / 1000),

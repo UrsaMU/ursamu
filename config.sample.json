@@ -11,7 +11,9 @@
     "corsOrigins": "http://localhost:3000,http://127.0.0.1:3000",
     "maxConnectionsPerIp": 20,
     "maxLoginAttempts": 10,
-    "loginWindowMs": 60000
+    "loginWindowMs": 60000,
+    "apiRateLimit": 120,
+    "apiRateWindowMs": 60000
   },
   "game": {
     "name": "Ursamu",

@@ -4,6 +4,16 @@ All notable changes to UrsaMU are documented here.
 
 ## [Unreleased]
 
+### Changed
+
+- **API rate limit is configurable and leaves plugin pages alone.**
+  `server.apiRateLimit` (default 120) and `server.apiRateWindowMs`
+  (default 60000) set the per-IP REST limit on `handleRequest`; 0 turns
+  it off. Requests to routes registered with `registerPluginRoute` are
+  no longer counted, so a plugin page of a hundred thumbnails is one
+  visit rather than a hundred API calls. Both keys can be set with
+  `@config`.
+
 ## [3.1.4] — 2026-10-05
 
 ### Added

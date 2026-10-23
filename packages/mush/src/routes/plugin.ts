@@ -102,6 +102,21 @@ export async function dispatchPluginRoute(
   return null;
 }
 
+/**
+ * Whether a registered plugin route covers this path. Plugin routes serve
+ * pages and their assets, so handleRequest keeps them out of the REST API
+ * rate limit (a page of a hundred thumbnails is one visit, not a hundred
+ * API calls); each plugin handler guards its own cost.
+ */
+export function isPluginRoutePath(pathname: string): boolean {
+  const path = pathname || "/";
+  for (const prefix of pluginRoutes().keys()) {
+    if (prefix === "/") continue;
+    if (pluginPrefixMatches(path, prefix)) return true;
+  }
+  return false;
+}
+
 /** Whether any plugin claimed the public site mount. */
 export function hasPluginPrefix(prefix: string): boolean {
   const key = normalizePluginPrefix(prefix);

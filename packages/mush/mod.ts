@@ -146,7 +146,7 @@ export {
   authHandler, dbObjHandler, configHandler, sceneHandler,
   objectsHandler, flagsHandler, functionsHandler,
   registerMushRoutes, handleRequest as mushHandleRequest, setAuthenticator,
-  avatarServe, MAX_API_TRACKED_IPS, API_RATE_LIMIT, authenticate,
+  avatarServe, MAX_API_TRACKED_IPS, API_RATE_LIMIT, API_RATE_WINDOW_MS, authenticate,
 } from "./src/routes/index.ts";
 export { objectImageServe } from "./src/media/object-image.ts";
 export {

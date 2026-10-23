@@ -76,7 +76,7 @@ export async function execResetToken(u: IUrsamuSDK): Promise<void> {
 
 const ALLOWED_SITE_CONFIGS = new Set([
   "server.name", "server.motd", "server.description", "server.banner",
-  "server.corsOrigins", "server.maxConnections",
+  "server.corsOrigins", "server.maxConnections", "server.apiRateLimit", "server.apiRateWindowMs",
   "game.maxPlayers", "game.description", "game.loginMessage", "game.welcomeMessage",
 ]);
 
